@@ -1,6 +1,6 @@
-1.etcd 5个节点 IP 下载etcd
+1.etcd 5个节点下载etcd
 wget https://github.com/coreos/etcd/releases/download/v3.3.12/etcd-v3.3.12-linux-amd64.tar.gz
-10.204.80.6/7/8/9/10 版本为3.3.1
+ IP 10.204.80.6/7/8/9/10 版本为3.3.1
 2.新建目录
 mkdir -p /etcd/{bin,conf,data}
 将etcdctl和etcd程序拷贝到/etcd/bin下 并修改为可执行
@@ -22,6 +22,7 @@ INITCLUSTER="--initial-advertise-peer-urls https://10.204.80.6:2380 \
 --initial-cluster-state new"
 TUNNING="--initial-cluster-state new --heartbeat-interval=300 --election-timeout=3000 --snapshot-count=10000 --metrics=basic --quota-backend-bytes=8589934592"
 ETCDDATA="--data-dir=/etcd/data/"
+###
 说明
 NAME:为etcd节点名字 每个节点必须不同
 SSL:为etcd认证证书
@@ -29,6 +30,13 @@ MEMBER:为所有节点信息
 INITCLUSTER:为etcd集群通用配置
 TUNNING:为调优参数 根据实际网络情况调整
 ETCDDATA：为etcd数据目录（初次搭建etcd集群过程中,建议清空目录）
+###
+参数说明
+--heartbeat-interval：心跳间隔时间
+--election-timeout：超时选举时间
+--snapshot-count：snapshot间隔
+--metrics=basic: metrics接口 默认是开启的，可以取消掉
+--quota-backend-bytes：etcd DB最大大小，默认是2G，这里改为8
 #####
 4.修改etcd.service 
 cat /usr/lib/systemd/system/etcd.service 
@@ -71,6 +79,7 @@ host-gw 模式node 必须在同一个二层，性能比vxlan好，也可以采�
 3.集群的选举时间一般为成员之间TTL最大值的10倍,此处成员之间TTL最大值 再乘以10,选举时间必须大于心跳时间5倍，否则会报错，选举时间上限不能超过50s
 4.etcd 集群默认是v2版本
 5.其他参数保持默认
+6.etcd节点对服务器的时间同步有要求，一定要配置ntp时间同步
 官方文档
 https://etcd.io
 调优
