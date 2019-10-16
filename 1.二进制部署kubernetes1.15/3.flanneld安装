@@ -1,0 +1,41 @@
+先yum install flannel ，然后将flannel执行程序替换成0.10
+wget https://github.com/coreos/flannel/releases/download/v0.10.0/flanneld-amd64 && chmod +x flanneld-amd64
+mv flanneld-amd64 /usr/bin/ && chmod +x /usr/bin/flanneld-amd64
+cat /etc/sysconfig/flanneld
+# Flanneld configuration options  
+# etcd url location.  Point this to the server where etcd runs
+FLANNEL_ETCD_ENDPOINTS="https://10.204.80.6:2379,https://10.204.80.7:2379,https://10.204.80.8:2379,https://10.204.80.9:2379,https://10.204.80.10:2379"
+
+# etcd config key.  This is the configuration key that flannel queries
+# For address range assignment
+FLANNEL_ETCD_PREFIX="/coreos.com/network"
+FLANNEL_OPTIONS="-etcd-cafile=/app/kubernetes/ssl/ca.pem -etcd-certfile=/app/kubernetes/ssl/kubernetes.pem -etcd-keyfile=/app/kubernetes/ssl/kubernetes-key.pem --ip-masq --iface=10.204.81.51 --subnet-file=/run/flannel/subnet.env --subnet-lease-renew-margin=1439 --ip-masq"
+
+
+
+
+vi /usr/lib/systemd/system/flanneld.service 
+[Unit]
+Description=Flanneld overlay address etcd agent
+After=network.target
+After=network-online.target
+Wants=network-online.target
+After=etcd.service
+Before=docker.service
+
+[Service]
+Type=notify
+EnvironmentFile=/etc/sysconfig/flanneld
+ExecStart=/usr/bin/flanneld-amd64 $FLANNEL_OPTIONS -etcd-endpoints=${FLANNEL_ETCD_ENDPOINTS}  -etcd-prefix=${FLANNEL_ETCD_PREFIX}
+ExecStartPost=/usr/libexec/flannel/mk-docker-opts.sh -k DOCKER_NETWORK_OPTIONS -d /run/flannel/docker
+Restart=on-failure
+
+查看版本
+flanneld-amd64 --version
+systemctl start flanneld && systemctl enable flanneld
+
+注意：
+1./run/flannel/docker里面需要有内容，不然flanneld无法绑定docker0网桥
+2.如果没有/usr/libexec/flannel/mk-docker-opts.sh，请下载并给与执行权限，否则flannled无法启动
+3.flanneld必须先docker启动
+4.所有主机都需要安装flanneld
