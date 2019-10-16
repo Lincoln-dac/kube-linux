@@ -1,0 +1,180 @@
+1：配置TLS证书
+组件：           需要的证书
+ etcd           ca.pem kubernetes.pem kubernetes-key.pem
+ kube-apiserver ca.pem kubernetes.pem kubernetes-key.pem
+ kubelet        ca.pem ca-key.pem
+ kube-proxy     ca.pem kube-proxy.pem kube-proxy-key.pem
+ kubectl        ca.pem admin.pem admin-key.pem
+2:安装证书生成工具
+wget  http://pkg.cfssl.org/R1.2/cfssl_linux-amd64
+wget  http://pkg.cfssl.org/R1.2/cfssljson_linux-amd64
+wget  http://pkg.cfssl.org/R1.2/cfssl-certinfo_linux-amd64
+chmod +x cfssl*
+mv cfssl-certinfo_linux-amd64 /usr/local/bin/cfssl-certinfo
+mv cfssljson_linux-amd64 /usr/local/bin/cfssljson
+mv cfssl_linux-amd64 /usr/local/bin/cfssl
+mkdir /root/ssl
+cd /root/ssl
+3:生成ca证书
+[root@k8s-master01 ssl]# cat ca-config.json 
+cat  >  ca-config.json << EOF
+{
+  "signing": {
+    "default": {
+      "expiry": "876000h"
+    },
+    "profiles": {
+      "kubernetes": {
+        "usages": [
+            "signing",
+            "key encipherment",
+            "server auth",
+            "client auth"
+        ],
+        "expiry": "876000h"
+      }
+    }
+  }
+}
+EOF
+cat  > ca-csr.json << EOF
+{
+  "CN": "kubernetes",
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "CN",
+      "ST": "Shenzhen",
+      "L": "Shenzhen",
+      "O": "k8s",
+      "OU": "System"
+    }
+  ],
+    "ca": {
+       "expiry": "876000h"
+    }
+}
+ EOF
+cfssl gencert -initca ca-csr.json | cfssljson -bare ca -
+4:生成server证书
+cat > kubernetes-csr.json << EOF
+{
+    "CN": "kubernetes",
+    "hosts": [
+      "127.0.0.1",
+      "10.204.80.1",
+      "10.204.80.2",
+      "10.204.80.3",
+      "10.204.80.4",
+      "10.204.80.5",
+      "10.204.80.6",
+      "10.204.80.7",
+      "10.204.80.8",
+      "10.204.80.9",
+      "10.204.80.10",
+      "10.204.80.11",
+      "10.204.80.12",
+      "10.204.80.13",
+      "10.204.80.14",
+      "10.204.80.15",
+      "172.201.0.1",
+      "kubernetes",
+      "kubernetes.default",
+      "kubernetes.default.svc",
+      "kubernetes.default.svc.cluster",
+      "kubernetes.default.svc.cluster.local"
+    ],
+    "key": {
+        "algo": "rsa",
+        "size": 2048
+    },
+    "names": [
+        {
+            "C": "CN",
+            "ST": "Shenzhen",
+            "L": "Shenzhen",
+            "O": "k8s",
+            "OU": "System"
+        }
+    ]
+}
+EOF
+cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=kubernetes  kubernetes-csr.json | cfssljson -bare kubernetes  
+5:生成admin证书
+[root@k8s-master01 ssl]# cat admin-csr.json 
+cat > admin-csr.json << EOF
+{
+    "CN": "admin",
+    "hosts": [],
+    "key": {
+        "algo": "rsa",
+        "size": 2048
+    },
+    "names": [
+        {
+            "C": "CN",
+            "L": "Shenzhen",
+            "ST": "Shenzhen",
+            "O": "System:masters",
+            "OU": "System"
+        }
+    ]
+}
+EOF
+ 
+cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=kubernetes  admin-csr.json  | cfssljson -bare admin
+6:生成kube-proxy证书
+[root@k8s-master01 ssl]# cat kube-proxy-csr.json 
+cat > kube-proxy-csr.json  << EOF
+    {
+        "CN": "system:kube-proxy",
+        "hosts": [],
+        "key": {
+            "algo": "rsa",
+            "size": 2048
+        },
+        "names": [
+            {
+                "C": "CN",
+                "L": "Shenzhen",
+                "ST": "Shenzhen",
+                "O": "k8s",
+                "OU": "System"
+            }
+        ]
+    }
+EOF
+ 
+cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=kubernetes  kube-proxy-csr.json  | cfssljson -bare kube-proxy
+
+创建访问 metrics-server 使用的证书
+cat > proxy-client-csr.json <<EOF
+{
+  "CN": "aggregator",
+  "hosts": [],
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "CN",
+      "ST": "Shenzhen",
+      "L": "Shenzhen",
+      "O": "k8s",
+      "OU": "System"
+    }
+  ]
+}
+EOF
+CN 名称需要位于 kube-apiserver 的 --requestheader-allowed-names 参数中，否则后续访问 metrics 时会提示权限不足。
+
+cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=kubernetes proxy-client-csr.json | cfssljson -bare proxy-client
+
+   坑1：注意生成的证书要每个服务器同步一下
+   坑2：如果 etcd服务器上配置有多个IP ，要把对应的IP 都写到证书里去
+   坑3：证书时间写长点，不要挖坑埋自己
+   坑4 :kubernetes-csr.json IP 记得把master的 VIP 写进去，考虑到etcd和 master迁移 请多写几个IP
