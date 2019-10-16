@@ -1,4 +1,5 @@
-1.etcd 5个节点 IP
+1.etcd 5个节点 IP 下载etcd
+wget https://github.com/coreos/etcd/releases/download/v3.3.12/etcd-v3.3.12-linux-amd64.tar.gz
 10.204.80.6/7/8/9/10 版本为3.3.1
 2.新建目录
 mkdir -p /etcd/{bin,conf,data}
@@ -52,6 +53,8 @@ systemctl daemon-reload && systemctl start etcd && systemctl enable etcd
 /etcd/bin/etcdctl   --ca-file=/app/kubernetes/ssl/ca.pem   --cert-file=/app/kubernetes/ssl/kubernetes.pem   --key-file=/app/kubernetes/ssl/kubernetes-key.pem member list
 6.调整etcd磁盘优先级
 ionice -c2 -n0 -p `pgrep etcd`
+###可以将此项写入到/etc/rc.d/rc.local 文件中去，让开机生效
+echo systemctl restart ecd && ionice -c2 -n0 -p `pgrep etcd` >> /etc/rc.d/rc.local 
 
 7.设置POD CIDR
 在etcd集群中的一个节点上执行
@@ -60,13 +63,12 @@ ionice -c2 -n0 -p `pgrep etcd`
 Network 为pod16位地址
 backend 模式  host-gw
 ####
-host-gw 模式node 必须在同一个二层，性能比vxlan好，也可以采用 vxlan + DirectRouting
+host-gw 模式node 必须在同一个二层，性能比vxlan好，也可以采用 vxlan + DirectRouting(这个版本要求flanneld 0.9以上）
 
 注意：
 1.etcd对磁盘要求比较高，默认磁盘同步时间超过100ms就会报警
-2.etcd心跳时间一般为成员间TTL 时间的的 0.5到1.5倍,此处成员之间TTL最大值 再乘以1.5
-3.集群的选举时间一般为成员之间TTL最大值的10倍,此处成员之间TTL最大值 再乘以10,选举时间必须大于心跳时间5倍，否则会报错
-选举时间上限不能超过50s
+2.etcd心跳时间一般为成员间TTL 时间的的 0.5到1.5倍,此处设置成员之间TTL最大值 再乘以1.5
+3.集群的选举时间一般为成员之间TTL最大值的10倍,此处成员之间TTL最大值 再乘以10,选举时间必须大于心跳时间5倍，否则会报错，选举时间上限不能超过50s
 4.etcd 集群默认是v2版本
 5.其他参数保持默认
 官方文档
