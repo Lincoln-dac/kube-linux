@@ -1,3 +1,5 @@
-
+内核版本:4.14.15
+docker版本：18.03
+kubernetes版本：1.15
 etcdctl version: 3.3.12
 API version: 2
