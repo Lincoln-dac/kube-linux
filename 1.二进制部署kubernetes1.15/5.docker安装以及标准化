@@ -1,0 +1,90 @@
+1.安装配置Docker
+sudo yum-config-manager \
+    --add-repo \
+    https://download.docker.com/linux/centos/docker-ce.repo
+yum-config-manager --enable docker-ce-nightly
+yum-config-manager --disable docker-ce-nightly
+yum install -y yum-utils device-mapper-persistent-data lvm2 perl  conntrack-tools
+yum install docker-ce-18.03.0.ce-1.el7.centos -y containerd.io  -y
+2.配置docker
+ cat /etc/docker/daemon.json 
+{
+  "exec-opts": ["native.cgroupdriver=systemd"],
+  "insecure-registries": ["harbor.aaa.com"], 
+  "storage-driver": "overlay2",
+  "data-root": "/data/dockerdata",
+  "live-restore": true,
+  "max-concurrent-downloads": 10,
+  "max-concurrent-uploads": 5,
+  "default-shm-size": "64M",
+  "log-driver": "json-file",
+  "log-opts": {
+      "max-size": "100m",
+      "max-file": "5"
+  },
+  "default-ulimits": {
+      "nofile": {
+          "Name": "nofile",
+          "Hard": 64000,
+          "Soft": 64000
+           }
+  }
+}
+3. 配置docker.service
+[Unit]
+Description=Docker Application Container Engine
+Documentation=https://docs.docker.com
+After=network.target
+#Wants=docker-storage-setup.service
+
+[Service]
+Type=notify
+# the default is not to use systemd for cgroups because the delegate issues still
+# exists and systemd currently does not support the cgroup feature set required
+# for containers run by docker
+EnvironmentFile=-/run/flannel/docker
+EnvironmentFile=-/run/docker_opts.env
+EnvironmentFile=-/run/flannel/subnet.env
+EnvironmentFile=-/etc/sysconfig/docker
+EnvironmentFile=-/etc/sysconfig/docker-storage
+EnvironmentFile=-/etc/sysconfig/docker-network
+EnvironmentFile=-/run/docker_opts.env
+Environment=GOTRACEBACK=crash
+Environment=DOCKER_HTTP_HOST_COMPAT=1
+Environment=PATH=/usr/libexec/docker:/usr/bin:/usr/sbin
+ExecStartPost=/usr/sbin/iptables -P FORWARD ACCEPT
+ExecStart=/usr/bin/dockerd \
+          $DOCKER_OPT_BIP \
+          $DOCKER_OPT_IPMASQ \
+          $DOCKER_OPT_MTU  
+ExecReload=/bin/kill -s HUP $MAINPID
+LimitNOFILE=1048576
+LimitNPROC=1048576
+LimitCORE=infinity
+TimeoutStartSec=0
+Restart=on-abnormal
+MountFlags=slave
+
+[Install]
+WantedBy=multi-user.target
+
+设置开启启动
+systemctl enable docker
+查看路由表
+route -n 
+本地网关绑定docker0,去其他节点绑定eth0出口
+
+全部启动后 ping 下各个节点的第一个IP 如
+ping 172.101.103.1
+
+所有节点执行
+docker login -u admin -p 1qaz@WSX harbor.aaa.com
+####
+此处为harbor查看的密码
+cp /root/.docker/config.json /app/kubernetes/data/kubelet/
+/app/kubernetes/data/kubelet/为kubelet工作目录
+
+在所有机节点的/etc/rc.d/rc.local 加入
+echo "systemctl restart flanneld && systemctl restart docker" >> /etc/rc.d/rc.local
+chmod +x /etc/rc.d/rc.local
+确保flanneld先于 docker启动
