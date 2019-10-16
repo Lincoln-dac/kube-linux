@@ -1,1 +1,98 @@
 
+1.升级内核
+export Kernel_Version=4.14.15-1
+wget http://mirror.rc.usf.edu/compute_lock/elrepo/kernel/el7/x86_64/RPMS/kernel-ml{,-devel}-${Kernel_Version}.el7.elrepo.x86_64.rpm
+rpm -ivh kernel-ml-$Kernel_Version.el7.elrepo.x86_64.rpm
+rpm -ivh kernel-devel-$Kernel_Version.el7.elrepo.x86_64.rpm
+grub2-mkconfig -o /boot/grub2/grub.cfg
+grub2-set-default 0 && grub2-mkconfig -o /etc/grub2.cfg
+grubby --default-kernel
+#确保内核切换成功
+2.重启服务器
+#关闭防火墙，swap,selinux
+systemctl disable firewalld NetworkManager
+setenforce 0
+sed -ri '/^[^#]*SELINUX=/s#=.+$#=disabled#' /etc/selinux/config
+sed -ri '/^[^#]*swap/s@^@#@' /etc/fstab
+cat /etc/fstab
+cat /etc/selinux/config
+确保虚拟内存关闭 seliunx关闭
+3.关闭dnsmasq
+systemctl disable --now dnsmasq
+4.安装软件
+yum install epel-release -y
+yum install -y keepalived mtr telnet ipvsadm ipset wget keepalived  nfs-utils systemd ceph-common  yum-plugin-ovl jq psmisc socat perl 
+yum install ipvsadm ipset sysstat conntrack libseccomp -y
+
+5修改打开文件数
+cat /etc/security/limits.conf
+*    soft    nproc    65536
+*    hard    nproc    65536
+*    soft    nofile    131072
+*    hard    nofile    131072
+6.cat /etc/security/limits.d/20-nproc.conf
+新增
+*             soft    nproc     409600
+7.#参数优化 cat /etc/sysctl.conf
+vm.swappiness = 0
+vm.panic_on_oom=0
+vm.overcommit_memory=1
+user.max_user_namespaces=15000 
+net.ipv6.conf.lo.disable_ipv6 = 1
+net.ipv6.conf.default.disable_ipv6 = 1
+net.ipv6.conf.all.disable_ipv6 = 1
+net.ipv4.tcp_tw_reuse = 1
+net.ipv4.tcp_syncookies = 1
+net.ipv4.tcp_synack_retries = 2
+net.ipv4.tcp_retries2 = 5
+net.ipv4.tcp_max_tw_buckets = 5000
+net.ipv4.tcp_max_syn_backlog = 10240
+net.ipv4.tcp_keepalive_time = 600
+net.ipv4.tcp_keepalive_probes = 10
+net.ipv4.tcp_keepalive_intvl = 30
+net.ipv4.tcp_fin_timeout = 30
+net.ipv4.neigh.default.gc_stale_time = 120
+net.ipv4.ip_local_port_range = 10000 65000
+net.ipv4.ip_forward = 1
+net.ipv4.conf.lo.arp_announce = 2
+net.ipv4.conf.default.rp_filter = 0
+net.ipv4.conf.default.arp_announce = 2
+net.ipv4.conf.all.rp_filter = 0
+net.ipv4.conf.all.arp_announce = 2
+net.core.wmem_max = 262144
+net.core.wmem_default = 262144
+net.core.somaxconn = 10240
+net.core.rmem_max = 1048576
+net.core.rmem_default = 1048576
+net.bridge.bridge-nf-call-iptables = 1
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-arptables = 1
+kernel.sysrq = 1
+kernel.pid_max = 131072
+fs.nr_open = 52706963
+fs.inotify.max_user_watches=89100
+net.ipv4.neigh.default.gc_thresh1 = 5120
+net.ipv4.neigh.default.gc_thresh2 = 20480
+net.ipv4.neigh.default.gc_thresh3 = 40960
+#-------------
+sysctl -p
+如果有报错，处理掉报错
+8.开启ipvs模块
+cat > /etc/sysconfig/modules/ipvs.modules <<EOF
+#!/bin/bash
+ipvs_modules="ip_vs ip_vs_lc ip_vs_wlc ip_vs_rr ip_vs_wrr ip_vs_lblc ip_vs_lblcr ip_vs_dh ip_vs_sh ip_vs_fo ip_vs_nq ip_vs_sed ip_vs_ftp nf_conntrack"
+for kernel_module in \${ipvs_modules}; do
+ /sbin/modinfo -F filename \${kernel_module} > /dev/null 2>&1
+ if [ $? -eq 0 ]; then
+ /sbin/modprobe \${kernel_module}
+ fi
+done
+EOF
+#----------
+chmod 755 /etc/sysconfig/modules/ipvs.modules && bash /etc/sysconfig/modules/ipvs.modules && lsmod | grep -e ip_vs -e nf_conntrack_ipv4
+#
+如果无输出，则lvs 模块没有加载成功
+配置 ntpdate
+注意事项：
+1.安装软件有先后顺序
+2.ipvs影响后面的kube-porxy的网络转发
