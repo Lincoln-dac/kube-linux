@@ -80,7 +80,7 @@ ping 172.101.103.1
 所有节点执行
 docker login -u admin -p 1qaz@WSX harbor.aaa.com
 ####
-此处为harbor查看的密码
+此处为harbor仓库的密码
 cp /root/.docker/config.json /app/kubernetes/data/kubelet/
 /app/kubernetes/data/kubelet/为kubelet工作目录
 
