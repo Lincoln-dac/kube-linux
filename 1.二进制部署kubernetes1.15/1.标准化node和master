@@ -91,7 +91,7 @@ EOF
 #----------
 chmod 755 /etc/sysconfig/modules/ipvs.modules && bash /etc/sysconfig/modules/ipvs.modules && lsmod | grep -e ip_vs -e nf_conntrack_ipv4
 #
-如果无输出，则lvs 模块没有加载成功
+如果无输出，则ipvs 模块没有加载成功
 配置 ntpdate
 注意事项：
 1.安装软件有先后顺序
