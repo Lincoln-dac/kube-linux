@@ -1,6 +1,7 @@
-先yum install flannel ，然后将flannel执行程序替换成0.10
+1/先yum install flannel ，然后将flannel执行程序替换成0.10
 wget https://github.com/coreos/flannel/releases/download/v0.10.0/flanneld-amd64 && chmod +x flanneld-amd64
 mv flanneld-amd64 /usr/bin/ && chmod +x /usr/bin/flanneld-amd64
+2.修改配置文件
 cat /etc/sysconfig/flanneld
 # Flanneld configuration options  
 # etcd url location.  Point this to the server where etcd runs
@@ -14,6 +15,7 @@ FLANNEL_OPTIONS="-etcd-cafile=/app/kubernetes/ssl/ca.pem -etcd-certfile=/app/kub
 
 
 
+3.修改flanneld server
 vi /usr/lib/systemd/system/flanneld.service 
 [Unit]
 Description=Flanneld overlay address etcd agent
@@ -30,7 +32,7 @@ ExecStart=/usr/bin/flanneld-amd64 $FLANNEL_OPTIONS -etcd-endpoints=${FLANNEL_ETC
 ExecStartPost=/usr/libexec/flannel/mk-docker-opts.sh -k DOCKER_NETWORK_OPTIONS -d /run/flannel/docker
 Restart=on-failure
 
-查看版本
+4.查看版本
 flanneld-amd64 --version
 systemctl start flanneld && systemctl enable flanneld
 
