@@ -1,4 +1,4 @@
-主机IP 10.204.80.1
+主机IP 10.204.243.132
 1.apiserver
 cat /app/kubernetes/config/apiserver
 SSL="--token-auth-file=/app/kubernetes/ssl/token.csv --tls-cert-file=/app/kubernetes/ssl/kubernetes.pem  --tls-private-key-file=/app/kubernetes/ssl/kubernetes-key.pem --client-ca-file=/app/kubernetes/ssl/ca.pem --service-account-key-file=/app/kubernetes/ssl/ca-key.pem --etcd-cafile=/app/kubernetes/ssl/ca.pem --etcd-certfile=/app/kubernetes/ssl/kubernetes.pem --etcd-keyfile=/app/kubernetes/ssl/kubernetes-key.pem --proxy-client-cert-file=/app/kubernetes/ssl/proxy-client.pem --proxy-client-key-file=/app/kubernetes/ssl/proxy-client-key.pem --kubelet-certificate-authority=/app/kubernetes/ssl/ca.pem --kubelet-client-certificate=/app/kubernetes/ssl/kubernetes.pem --kubelet-client-key=/app/kubernetes/ssl/kubernetes-key.pem"
