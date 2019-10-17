@@ -23,6 +23,7 @@ yum install keepalived nginx -y
 net.ipv4.ip_nonlocal_bind = 1
 
 3.配置keepalived
+##########################
 主10.204.243.132
 cat /etc/keepalived/keepalived.conf 
 
@@ -62,10 +63,9 @@ vrrp_instance VI_1 {
     }
 
 }
-
+##########################
 备10.204.243.133
 cat /etc/keepalived/keepalived.conf 
-
 ! Configuration File for keepalived
  
 #全局配置
