@@ -82,7 +82,7 @@ global_defs {
 }
 vrrp_script check {
     script "/etc/keepalived/check.sh"
-    interval 2
+    interval 10
     weight 2
 } 
 vrrp_instance VI_1 { 
