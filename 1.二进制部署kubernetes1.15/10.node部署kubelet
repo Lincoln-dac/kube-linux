@@ -1,0 +1,12 @@
+1.创建用户
+kubelet 启动时向 kube-apiserver 发送 TLS bootstrapping 请求，需要先将 bootstrap token 文件中的 kubelet-bootstrap 用户赋予 system:node-bootstrapper cluster 角色(role)， 然后 kubelet 才能有权限创建认证请求(certificate signing requests)：
+
+kubectl create clusterrolebinding kubelet-bootstrap \
+  --clusterrole=system:node-bootstrapper \
+  --user=kubelet-bootstrap
+kubelet 通过认证后向 kube-apiserver 发送 register node 请求，需要先将 kubelet-nodes 用户赋予 system:node cluster角色(role) 和 system:nodes 组(group)， 然后 kubelet 才能有权限创建节点请求：
+kubectl create clusterrolebinding kubelet-nodes \
+  --clusterrole=system:node \
+  --group=system:nodes
+  2.配置kubelet
+  
