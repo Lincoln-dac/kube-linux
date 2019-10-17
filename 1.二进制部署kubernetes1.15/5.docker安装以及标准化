@@ -10,7 +10,7 @@ yum install docker-ce-18.03.0.ce-1.el7.centos -y containerd.io  -y
  cat /etc/docker/daemon.json 
 {
   "exec-opts": ["native.cgroupdriver=systemd"],
-  "insecure-registries": ["harbor.aaa.com"], 
+  "insecure-registries": ["10.204.57.39"], 
   "storage-driver": "overlay2",
   "data-root": "/data/dockerdata",
   "live-restore": true,
@@ -75,10 +75,10 @@ route -n
 本地网关绑定docker0,去其他节点绑定eth0出口
 
 全部启动后 ping 下各个节点的第一个IP 如
-ping 172.101.103.1
+ping 172.41.132.1
 
 所有节点执行
-docker login -u admin -p 1qaz@WSX harbor.aaa.com
+docker login -u admin -p 1qaz@WSX 10.204.57.39
 ####
 此处为harbor仓库的密码
 cp /root/.docker/config.json /app/kubernetes/data/kubelet/
