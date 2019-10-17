@@ -1,11 +1,11 @@
-1/先yum install flannel ，然后将flannel执行程序替换成0.10
+1.先yum install flannel ，然后将flannel执行程序替换成0.10
 wget https://github.com/coreos/flannel/releases/download/v0.10.0/flanneld-amd64 && chmod +x flanneld-amd64
 mv flanneld-amd64 /usr/bin/ && chmod +x /usr/bin/flanneld-amd64
 2.修改配置文件
 cat /etc/sysconfig/flanneld
 # Flanneld configuration options  
 # etcd url location.  Point this to the server where etcd runs
-FLANNEL_ETCD_ENDPOINTS="https://10.204.80.6:2379,https://10.204.80.7:2379,https://10.204.80.8:2379,https://10.204.80.9:2379,https://10.204.80.10:2379"
+ FLANNEL_ETCD_ENDPOINTS="https://10.204.243.132:2379,https://10.204.243.133:2379,https://10.204.243.134:2379"
 
 # etcd config key.  This is the configuration key that flannel queries
 # For address range assignment
