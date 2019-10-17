@@ -6,7 +6,7 @@ KUBE="--kubelet-timeout=60s --kubelet-port=10250"
 LOGS="--logtostderr=false --log-dir=/app/kubernetes/logs --v=2 --event-ttl=168h"
 ETCDMEMBER="--etcd-servers=https://10.204.243.132:2379,https://10.204.243.133:2379,https://10.204.243.134:2379"
 COMMON="--apiserver-count=2  --service-node-port-range=30000-50000 --enable-bootstrap-token-auth --authorization-mode=RBAC,Node --enable-admission-plugins=NamespaceLifecycle,LimitRanger,ServiceAccount,ResourceQuota,NodeRestriction --allow-privileged=true --default-not-ready-toleration-seconds=180 --default-unreachable-toleration-seconds=180 --runtime-config=api/all=true --anonymous-auth=false --enable-aggregator-routing=true"
-IP="--bind-address=10.204.243.132 --secure-port=6443 --insecure-port=8080 --advertise-address=10.204.243.132 --insecure-bind-address=10.204.243.132 --service-cluster-ip-range=172.40.0.0/24"
+IP="--bind-address=0.0.0.0 --secure-port=6443 --insecure-port=8080 --advertise-address=0.0.0.0 --insecure-bind-address=0.0.0.0 --service-cluster-ip-range=172.40.0.0/24"
 CONFIGHPA="--requestheader-allowed-names=aggregator  --requestheader-client-ca-file=/app/kubernetes/ssl/ca.pem  --requestheader-extra-headers-prefix="X-Remote-Extra-" --requestheader-group-headers=X-Remote-Group  --requestheader-username-headers=X-Remote-User"
 
 cat /usr/lib/systemd/system/kube-apiserver.service 
