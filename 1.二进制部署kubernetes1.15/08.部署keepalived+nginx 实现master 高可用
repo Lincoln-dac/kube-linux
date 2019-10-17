@@ -21,6 +21,8 @@ fi
 yum install keepalived nginx -y
 在/etc/sysctl.conf增加
 net.ipv4.ip_nonlocal_bind = 1
+参数生效
+sysctl -p
 
 3.配置keepalived
 ##########################
