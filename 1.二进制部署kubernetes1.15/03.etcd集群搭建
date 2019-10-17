@@ -99,7 +99,7 @@ systemctl daemon-reload && systemctl start etcd && systemctl enable etcd
 6.调整etcd磁盘优先级
 ionice -c2 -n0 -p `pgrep etcd`
 ###可以将此项写入到/etc/rc.d/rc.local 文件中去，让开机生效
-echo systemctl restart etcd && ionice -c2 -n0 -p `pgrep etcd` >> /etc/rc.d/rc.local 
+echo "systemctl restart etcd && ionice -c2 -n0 -p `pgrep etcd`" >> /etc/rc.d/rc.local 
 
 7.设置POD CIDR
 在etcd集群中的一个节点上执行
