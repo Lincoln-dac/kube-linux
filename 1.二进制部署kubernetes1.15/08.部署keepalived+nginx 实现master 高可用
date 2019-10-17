@@ -134,7 +134,7 @@ http {
                server 10.204.243.133:6443 max_fails=1 fail_timeout=10s;
 	}
     server {
-        listen 10.204.243.131:6443;
+        listen 10.204.243.131:8443;
         server_name apiserver;
         location / {
         proxy_pass http://server_pool/;
@@ -174,7 +174,7 @@ http {
                server 10.204.243.133:6443 max_fails=1 fail_timeout=10s;
 	}
     server {
-        listen 10.204.243.131:6443;
+        listen 10.204.243.131:8443;
         server_name apiserver;
         location / {
         proxy_pass http://server_pool/;
