@@ -58,7 +58,7 @@ cat  > ca-csr.json << EOF
        "expiry": "876000h"
     }
 }
- EOF
+EOF
 cfssl gencert -initca ca-csr.json | cfssljson -bare ca -
 4:生成server证书
 cat > kubernetes-csr.json << EOF
