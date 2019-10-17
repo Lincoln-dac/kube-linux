@@ -102,3 +102,88 @@ vrrp_instance VI_1 {
       check
     }
 }
+
+
+4.配置nginx
+##########################
+主10.204.243.132
+cat /etc/nginx/nginx.conf
+##########
+user nginx;
+worker_processes auto;
+error_log /var/log/nginx/error.log;
+pid /run/nginx.pid;
+events {
+    worker_connections 1024;
+}
+http {
+    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                      '$status $body_bytes_sent "$http_referer" '
+                      '"$http_user_agent" "$http_x_forwarded_for"';
+    access_log  /var/log/nginx/access.log  main;
+    sendfile            on;
+    tcp_nopush          on;
+    tcp_nodelay         on;
+    keepalive_timeout   65;
+    types_hash_max_size 2048;
+    include             /etc/nginx/mime.types;
+    default_type        application/octet-stream;
+    upstream server_pool {
+               hash $remote_addr consistent;
+               server 10.204.243.132:6443 max_fails=1 fail_timeout=10s;
+               server 10.204.243.133:6443 max_fails=1 fail_timeout=10s;
+	}
+    server {
+        listen 10.204.243.131:6443;
+        server_name apiserver;
+        location / {
+        proxy_pass http://server_pool/;
+        proxy_redirect off;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For         $proxy_add_x_forwarded_for;
+        proxy_set_header Host $host;
+         }
+    }
+
+}
+##########
+备10.204.243.133
+cat /etc/nginx/nginx.conf
+user nginx;
+worker_processes auto;
+error_log /var/log/nginx/error.log;
+pid /run/nginx.pid;
+events {
+    worker_connections 1024;
+}
+http {
+    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                      '$status $body_bytes_sent "$http_referer" '
+                      '"$http_user_agent" "$http_x_forwarded_for"';
+    access_log  /var/log/nginx/access.log  main;
+    sendfile            on;
+    tcp_nopush          on;
+    tcp_nodelay         on;
+    keepalive_timeout   65;
+    types_hash_max_size 2048;
+    include             /etc/nginx/mime.types;
+    default_type        application/octet-stream;
+    upstream server_pool {
+               hash $remote_addr consistent;
+               server 10.204.243.132:6443 max_fails=1 fail_timeout=10s;
+               server 10.204.243.133:6443 max_fails=1 fail_timeout=10s;
+	}
+    server {
+        listen 10.204.243.131:6443;
+        server_name apiserver;
+        location / {
+        proxy_pass http://server_pool/;
+        proxy_redirect off;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For         $proxy_add_x_forwarded_for;
+        proxy_set_header Host $host;
+         }
+
+    }
+  }
+
