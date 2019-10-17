@@ -1,15 +1,102 @@
 1.编写nginx脚本
-cat /etc/keepalived/nginx_check.sh
+cat /etc/keepalived/check.sh
 #!/bin/bash
 A=`ps -C nginx --no-header | wc -l`
-if [ $A -eq 0 ];then
-    /opt/nginx/sbin/nginx #尝试重新启动nginx
-    sleep 2  #睡眠2秒
-    if [ `ps -C nginx --no-header | wc -l` -eq 0 ];then
-        killall keepalived #启动失败，将keepalived服务杀死。将vip漂移到其它备份节点
-    fi
+if [ $A -eq 0 ];
+  then
+    systemctl restart nginx
+    sleep 2
+    if [ `ps -C nginx --no-header | wc -l` -eq 0 ];
+      then
+        exit 1
+      else
+        exit 0
+     fi
+    else
+      exit 0
 fi
+
 ==============
 2.安装keepalived 和nginx
 yum install keepalived nginx -y
+在/etc/sysctl.conf增加
+net.ipv4.ip_nonlocal_bind = 1
+
 3.配置keepalived
+主10.204.243.132
+cat /etc/keepalived/keepalived.conf 
+
+! Configuration File for keepalived
+ 
+#全局配置
+global_defs {
+   notification_email {  #指定keepalived在发生切换时需要发送email到的对象，一行一个
+     XXX@XXX.com
+   }
+   notification_email_from XXX@XXX.com  #指定发件人
+   #smtp_server XXX.smtp.com                             #指定smtp服务器地址
+   #smtp_connect_timeout 30                               #指定smtp连接超时时间
+   router_id LVS_DEVEL                                    #运行keepalived机器的一个标识
+}
+vrrp_script check {
+    script "/etc/keepalived/check.sh"
+    interval 10
+    weight 2
+}
+
+vrrp_instance VI_1 { 
+    state MASTER           #标示状态为MASTER 备份机为BACKUP
+    interface ens160        #设置实例绑定的网卡
+    virtual_router_id 111   #同一实例下virtual_router_id必须相同
+    priority 100           #MASTER权重要高于BACKUP 比如BACKUP为99  
+    advert_int 1           #MASTER与BACKUP负载均衡器之间同步检查的时间间隔，单位是秒
+    authentication {       #设置认证
+        auth_type PASS     #主从服务器验证方式
+        auth_pass 8888
+    }
+    virtual_ipaddress {    #设置vip
+        10.204.243.131       #可以多个虚拟IP，换行即可
+    }
+    track_script {
+      check
+    }
+
+}
+
+备10.204.243.133
+cat /etc/keepalived/keepalived.conf 
+
+! Configuration File for keepalived
+ 
+#全局配置
+global_defs {
+   notification_email {  #指定keepalived在发生切换时需要发送email到的对象，一行一个
+     XXX@XXX.com
+   }
+   notification_email_from XXX@XXX.com  #指定发件人
+   #smtp_server XXX.smtp.com                             #指定smtp服务器地址
+   #smtp_connect_timeout 30                               #指定smtp连接超时时间
+   router_id LVS_DEVEL                                    #运行keepalived机器的一个标识
+}
+vrrp_script check {
+    script "/etc/keepalived/check.sh"
+    interval 2
+    weight 2
+} 
+vrrp_instance VI_1 { 
+    state BACKUP           #标示状态为MASTER 备份机为BACKUP
+    interface ens160        #设置实例绑定的网卡
+    virtual_router_id 111   #同一实例下virtual_router_id必须相同
+    priority 99           #MASTER权重要高于BACKUP 比如BACKUP为99  
+    advert_int 1           #MASTER与BACKUP负载均衡器之间同步检查的时间间隔，单位是秒
+    authentication {       #设置认证
+        auth_type PASS     #主从服务器验证方式
+        auth_pass 8888
+    }
+    virtual_ipaddress {    #设置vip
+        10.204.243.131       #可以多个虚拟IP，换行即可
+    }
+    track_script {
+      check
+    }
+}
