@@ -12,3 +12,4 @@ fi
 ==============
 2.安装keepalived 和nginx
 yum install keepalived nginx -y
+3.配置keepalived
