@@ -1,4 +1,4 @@
-主机IP 10.204.80.1
+主机IP 10.204.243.132
 
 1.scheduler
 cat /app/kubernetes/config/scheduler
