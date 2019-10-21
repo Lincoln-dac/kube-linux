@@ -29,7 +29,6 @@ spec:
       labels:
         k8s-app: traefik-ingress-lb
         name: traefik-ingress-lb
-        TZ: Shanghai
     spec:
       nodeSelector:
         traefik: "traefik"
