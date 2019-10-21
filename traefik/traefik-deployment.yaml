@@ -31,7 +31,7 @@ spec:
       volumes:
       - name: ssl
         secret:
-          secretName: fcbox-cert
+          secretName: cert
       - name: config
         configMap:
           name: traefik-conf
@@ -42,7 +42,7 @@ spec:
         hostPath:
           path: /app/applogs/traefik/
       containers:
-      - image: harbor.fcbox.com/common/traefik:v1.7.18
+      - image: traefik:v1.7.18
         name: traefik-ingress-lb
         env: 
         - name: TZ
