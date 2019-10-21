@@ -39,7 +39,7 @@ spec:
       volumes:
       - name: ssl
         secret:
-          secretName: fcbox-cert
+          secretName: cert
       - name: config
         configMap:
           name: traefik-conf
