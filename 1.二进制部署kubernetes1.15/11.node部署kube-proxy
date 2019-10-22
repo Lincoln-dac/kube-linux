@@ -1,1 +1,23 @@
 
+cat /app/kubernetes/config/proxy
+LOGS="--logtostderr=false --v=2 --logtostderr=false --log-dir=/app/kubernetes/logs"
+PROXY_ARGS="--master=https://10.204.80.3:6443 --kubeconfig=/app/kubernetes/ssl/kube-proxy.kubeconfig --cluster-cidr=172.201.0.0/16 --kube-api-qps=50"  
+HOSTNAME="--bind-address=10.204.81.51 --hostname-override=10.204.81.51"
+IPVS="--proxy-mode=ipvs --proxy-mode=ipvs --ipvs-min-sync-period=5s --ipvs-sync-period=5s --ipvs-scheduler=rr --masquerade-all=true"
+
+cat /usr/lib/systemd/system/kube-proxy.service 
+
+[Unit]
+Description=Kubernetes Kube-Proxy Server
+Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+After=network.target
+
+[Service]
+EnvironmentFile=-/app/kubernetes/config/proxy
+ExecStart=/app/kubernetes/bin/kube-proxy $PROXY_ARGS $LOGS $HOSTNAME $IPVS
+Restart=on-failure
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target
+
