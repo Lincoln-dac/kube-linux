@@ -14,7 +14,7 @@ SSL="--cert-file=/app/kubernetes/ssl/kubernetes.pem \
 --peer-key-file=/app/kubernetes/ssl/kubernetes-key.pem \
 --trusted-ca-file=/app/kubernetes/ssl/ca.pem \
 --peer-trusted-ca-file=/app/kubernetes/ssl/ca.pem"
-MEMEBER="--initial-cluster infra1=https://10.204.243.132:2380,infra2=https://10.204.243.133:2380,infra3=https://10.204.243.134:2380,"
+MEMEBER="--initial-cluster infra1=https://10.204.243.132:2380,infra2=https://10.204.243.133:2380,infra3=https://10.204.243.134:2380"
 INITCLUSTER="--initial-advertise-peer-urls https://10.204.243.132:2380 \
 --listen-peer-urls https://10.204.243.132:2380 \
 --listen-client-urls https://10.204.243.132:2379,http://127.0.0.1:2379 \
