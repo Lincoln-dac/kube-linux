@@ -21,3 +21,9 @@ LimitNOFILE=65536
 [Install]
 WantedBy=multi-user.target
 
+
+将node节点加入到集群 在master节点上 执行
+kubectl certificate approve `kubectl get csr | awk '{ print $1}'`
+查看node
+kubectl get node
+
