@@ -2,7 +2,7 @@
 
 1.scheduler
 cat /app/kubernetes/config/scheduler
-KUBE_SCHEDULER_ARGS=" --master=10.204.243.131:8080 --leader-elect=true --address=127.0.0.1 --logtostderr=false --v=2 --log-dir=/app/kubernetes/logs"
+KUBE_SCHEDULER_ARGS=" --master=10.204.243.132:8080 --leader-elect=true --address=127.0.0.1 --logtostderr=false --v=2 --log-dir=/app/kubernetes/logs"
 CONFIGHPA="--requestheader-allowed-names="" --requestheader-client-ca-file=/app/kubernetes/ssl/ca.pem --requestheader-extra-headers-prefix="X-Remote-Extra-" --requestheader-group-headers=X-Remote-Group  --requestheader-username-headers=X-Remote-User"
 
 cat /usr/lib/systemd/system/kube-scheduler.service
