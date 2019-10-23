@@ -1,0 +1,8 @@
+yum install -y bash-completion
+locate bash_completion
+chmod +x  /usr/share/bash-completion/bash_completion
+/usr/share/bash-completion/bash_completion
+source /usr/share/bash-completion/bash_completion
+source <(kubectl completion bash)
+echo "source <(kubectl completion bash)" >> /root/.bash_profile
+重新登录系统，kubectl 按tab键 可以自动补齐命令
