@@ -22,7 +22,7 @@ systemctl disable --now dnsmasq
 modprobe br_netfilter
 4.安装软件
 yum install epel-release -y
-yum install -y keepalived mtr telnet ipvsadm ipset wget keepalived  nfs-utils systemd ceph-common  yum-plugin-ovl jq psmisc socat perl 
+yum install -y keepalived mtr telnet ipvsadm ipset wget keepalived  nfs-utils systemd ceph-common  yum-plugin-ovl jq psmisc socat perl iotop
 yum install lrzsz ipvsadm ipset sysstat conntrack libseccomp systemd -y
 
 5修改打开文件数
