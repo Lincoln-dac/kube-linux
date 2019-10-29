@@ -107,7 +107,7 @@ cat > admin-csr.json << EOF
             "C": "CN",
             "L": "Shenzhen",
             "ST": "Shenzhen",
-            "O": "System:masters",
+            "O": "system:masters",
             "OU": "System"
         }
     ]
