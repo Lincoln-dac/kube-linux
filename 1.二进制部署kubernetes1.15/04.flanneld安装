@@ -37,6 +37,7 @@ flanneld-amd64 --version
 systemctl start flanneld && systemctl enable flanneld
 
 5.创建pod cidr信息
+在etcd 某个节点下执行
 /etcd/bin/etcdctl   --ca-file=/app/kubernetes/ssl/ca.pem   --cert-file=/app/kubernetes/ssl/kubernetes.pem   --key-file=/app/kubernetes/ssl/kubernetes-key.pem mkdir /coreos.com/network
 /etcd/bin/etcdctl   --ca-file=/app/kubernetes/ssl/ca.pem   --cert-file=/app/kubernetes/ssl/kubernetes.pem   --key-file=/app/kubernetes/ssl/kubernetes-key.pem --ca-file=/app/kubernetes/ssl/ca.pem   --cert-file=/app/kubernetes/ssl/kubernetes.pem   --key-file=/app/kubernetes/ssl/kubernetes-key.pem mk /coreos.com/network/config '{"Network":"172.39.0.0/16","SubnetLen":24,"Backend":{"Type":"host-gw"}}'
 
