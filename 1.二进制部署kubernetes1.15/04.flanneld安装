@@ -10,7 +10,7 @@ cat /etc/sysconfig/flanneld
 # etcd config key.  This is the configuration key that flannel queries
 # For address range assignment
 FLANNEL_ETCD_PREFIX="/coreos.com/network"
-FLANNEL_OPTIONS="-etcd-cafile=/app/kubernetes/ssl/ca.pem -etcd-certfile=/app/kubernetes/ssl/kubernetes.pem -etcd-keyfile=/app/kubernetes/ssl/kubernetes-key.pem --ip-masq --iface=10.204.81.51 --subnet-file=/run/flannel/subnet.env --subnet-lease-renew-margin=1439 --ip-masq"
+FLANNEL_OPTIONS="-etcd-cafile=/app/kubernetes/ssl/ca.pem -etcd-certfile=/app/kubernetes/ssl/kubernetes.pem -etcd-keyfile=/app/kubernetes/ssl/kubernetes-key.pem --ip-masq --iface=10.204.243.132 --subnet-file=/run/flannel/subnet.env --subnet-lease-renew-margin=1439 --ip-masq"
 
 
 
@@ -35,6 +35,10 @@ Restart=on-failure
 4.查看版本
 flanneld-amd64 --version
 systemctl start flanneld && systemctl enable flanneld
+
+5.创建pod cidr信息
+/etcd/bin/etcdctl   --ca-file=/app/kubernetes/ssl/ca.pem   --cert-file=/app/kubernetes/ssl/kubernetes.pem   --key-file=/app/kubernetes/ssl/kubernetes-key.pem mkdir /coreos.com/network
+/etcd/bin/etcdctl   --ca-file=/app/kubernetes/ssl/ca.pem   --cert-file=/app/kubernetes/ssl/kubernetes.pem   --key-file=/app/kubernetes/ssl/kubernetes-key.pem --ca-file=/app/kubernetes/ssl/ca.pem   --cert-file=/app/kubernetes/ssl/kubernetes.pem   --key-file=/app/kubernetes/ssl/kubernetes-key.pem mk /coreos.com/network/config '{"Network":"172.39.0.0/16","SubnetLen":24,"Backend":{"Type":"host-gw"}}'
 
 注意：
 1./run/flannel/docker里面需要有内容，不然flanneld无法绑定docker0网桥
