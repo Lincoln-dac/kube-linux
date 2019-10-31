@@ -10,6 +10,47 @@ kubectl create clusterrolebinding kubelet-nodes \
   --group=system:nodes
   2.配置kubelet 配置文件
   主机：10.204.243.132
+  cat /app/kubernetes/config/kubelet-config.yaml
+  kind: KubeletConfiguration
+apiVersion: kubelet.config.k8s.io/v1beta1
+address: "10.204.243.132"
+syncFrequency: 1m
+fileCheckFrequency: 20s
+httpCheckFrequency: 20s
+port: 10250
+readOnlyPort: 10255
+serverTLSBootstrap: true
+authentication:
+  anonymous:
+    enabled: true
+  x509:
+    clientCAFile: "/app/kubernetes/ssl/ca.pem"
+clusterDomain: "cluster.local"
+clusterDNS: 
+  - "172.26.0.2"
+kubeletCgroups: "/systemd/system.slice"
+systemCgroups: ""
+cgroupRoot: ""
+cgroupDriver: "systemd"
+nodeStatusUpdateFrequency: 10s
+nodeStatusReportFrequency: 1m
+imageMinimumGCAge: 200m
+imageGCHighThresholdPercent: 85
+imageGCLowThresholdPercent: 80
+hairpinMode: promiscuous-bridge
+maxPods: 150
+resolvConf: /etc/resolv.conf
+maxOpenFiles: 1000000
+serializeImagePulls: false
+evictionHard:
+  memory.available:  "1000Mi"
+nodefs.available:  "10%"
+nodefs.inodesFree: "5%"
+imagefs.available: "15%"
+containerLogMaxSize: "20Mi"
+containerLogMaxFiles: 10
+
+  
   cat /app/kubernetes/config/kubelet
 KUBELET_ARGS=" --pod-infra-container-image=10.204.57.39.com/common/pause-amd64:3.0 --runtime-cgroups=/systemd/system.slice --bootstrap-kubeconfig=/app/kubernetes/ssl/bootstrap.kubeconfig --kubeconfig=/app/kubernetes/ssl/kubelet.kubeconfig --cert-dir=/app/kubernetes/ssl --image-pull-progress-deadline=15m --root-dir=/app/kubernetes/data/kubelet  "
 LOGS="--logtostderr=false --v=2 --log-dir=/app/kubernetes/logs"
