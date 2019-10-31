@@ -78,5 +78,9 @@ WantedBy=multi-user.target
 
 systemctl enable kubelet && systemctl start kubelet
 
+将node节点加入到集群 在master节点上 执行
+kubectl certificate approve `kubectl get csr | awk '{ print $1}'`
+查看node
+kubectl get node
 
   
