@@ -31,6 +31,7 @@ yum install docker-ce-18.03.0.ce-1.el7.centos -y containerd.io  -y
   }
 }
 3. 配置docker.service
+cat /usr/lib/systemd/system/docker.service
 [Unit]
 Description=Docker Application Container Engine
 Documentation=https://docs.docker.com
