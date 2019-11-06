@@ -38,7 +38,7 @@ spec:
       serviceAccountName: heapster
       containers:
       - name: heapster
-        image: harbor.fcbox.com/common/heapster-amd64:v1.5.4
+        image: 10.204.57.39/common/heapster-amd64:v1.5.4
         command:
         - /heapster
         - --source=kubernetes:https://kubernetes.default?useServiceAccount=true&kubeletHttps=true&kubeletPort=10250&insecure=true
