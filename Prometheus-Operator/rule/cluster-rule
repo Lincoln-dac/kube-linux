@@ -1,0 +1,47 @@
+新建 PrometheusRule 文件cluster-rule.yaml 
+kubectl apply -f cluster-rule.yaml 
+查看新建的PrometheusRule 名称为cluster-k8s-rules
+kubectl get PrometheusRule -n monitoring
+-----------
+cluster-rule.yaml 文件内容
+cat cluster-rule.yaml 
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: k8s
+    role: alert-rules
+  name: cluster-k8s-rules
+  namespace: monitoring
+spec:
+  groups:
+  - name: cluster.rules
+    rules:
+    - alert: cluster pod 数量
+      expr: sum(kube_pod_info) / sum(kube_node_status_allocatable_pods) * 100 > 80
+      for: 2m
+      labels:
+        type: cluster
+      annotations:
+        description: "k8s集群pod数量超过限制的 80% ,(current value is: {{ $value }}%)"
+    - alert: cluster cpu
+      expr: sum(kube_pod_container_resource_requests_cpu_cores) / sum(kube_node_status_allocatable_cpu_cores) * 100 > 80
+      for: 2m
+      labels:
+        type: cluster
+      annotations:
+        description: "k8s集群CPU使用率超过限制的80% ,(current value is: {{ $value }}%)"
+    - alert: cluster memory
+      expr: sum(kube_pod_container_resource_requests_memory_bytes) / sum(kube_node_status_allocatable_memory_bytes) * 100 > 80
+      for: 2m
+      labels:
+        type: cluster
+      annotations:
+        description: "k8s集群内存使用率超过限制的 80% ,(current value is: {{ $value }}%)"
+    - alert: cluster 磁盘
+      expr: (sum (node_filesystem_size) - sum (node_filesystem_free)) / sum (node_filesystem_size)  > 80
+      for: 2m
+      labels:
+        type: cluster
+      annotations:
+        description: "k8s集群磁盘使用率超过限制的 80% ,(current value is: {{ $value }}%)"  
