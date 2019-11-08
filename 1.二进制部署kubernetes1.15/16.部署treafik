@@ -159,10 +159,10 @@ spec:
         - --traefiklogsfile=traefik.log
         - --api
 ##################
-5. 部署 traefik server
-cat ui.yaml
-kubectl apply -f i.yaml
+5. 部署 traefik service
+kubectl apply -f ui.yaml
 
+cat ui.yaml
 apiVersion: v1
 kind: Service
 metadata:
