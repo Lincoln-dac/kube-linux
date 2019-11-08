@@ -170,7 +170,7 @@ metadata:
     kubernetes.io/ingress.class: traefik
 spec:
   rules:
-  - host: traefik-sit3.test.com
+  - host: traefik.test.com
     http:
       paths:
       - backend:
