@@ -1,5 +1,23 @@
 1.创建configmap
 kubectl create configmap traefik-conf --from-file=traefik.toml -n kube-system
+traefik.toml文件内容
+cat traefik.toml
+defaultEntryPoints = ["http","https"]
+[entryPoints]
+  [entryPoints.http]
+  address = ":80"
+  [entryPoints.https]
+  address = ":443"
+    [entryPoints.https.tls]
+      [[entryPoints.https.tls.certificates]]
+      CertFile = "/ssl/a.pem"
+      KeyFile = "/ssl/a.key"
+[metrics]
+  [metrics.prometheus]
+    entryPoint = "traefik"
+    buckets = [0.1,0.3,1.2,5.0]
+############key 名称根据实际情况调整##########
+
 2.创建secret
 kubectl create secret generic fcbox-cert --from-file=a.key --from-file=a.pem -n kube-system
 ############key 名称根据实际情况调整##########
