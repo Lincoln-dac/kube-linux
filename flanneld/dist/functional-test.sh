@@ -24,27 +24,27 @@ setup_suite() {
     etcd_endpt="http://$docker_ip:2379"
 
     # Start etcd
-    docker rm -f flannel-e2e-test-etcd >/dev/null 2>/dev/null
-    docker run --name=flannel-e2e-test-etcd -d -p 2379:2379 $ETCD_IMG $ETCD_LOCATION --listen-client-urls http://0.0.0.0:2379 --advertise-client-urls $etcd_endpt >/dev/null
+    docker rm -f flannel-e2e-设置scope登录认证-etcd >/dev/null 2>/dev/null
+    docker run --name=flannel-e2e-设置scope登录认证-etcd -d -p 2379:2379 $ETCD_IMG $ETCD_LOCATION --listen-client-urls http://0.0.0.0:2379 --advertise-client-urls $etcd_endpt >/dev/null
 }
 
 teardown_suite() {
     # Teardown the etcd server
-    docker rm -f flannel-e2e-test-etcd >/dev/null
+    docker rm -f flannel-e2e-设置scope登录认证-etcd >/dev/null
 }
 
 setup() {
     # rm any old flannel container that maybe running, ignore error as it might not exist
-    docker rm -f flannel-e2e-test-flannel1 >/dev/null 2>/dev/null
+    docker rm -f flannel-e2e-设置scope登录认证-flannel1 >/dev/null 2>/dev/null
     assert "docker run --name=flannel-e2e-test-flannel1 -d --privileged $FLANNEL_DOCKER_IMAGE --etcd-endpoints=$etcd_endpt -v 10 >/dev/null"
 
     # rm any old flannel container that maybe running, ignore error as it might not exist
-    docker rm -f flannel-e2e-test-flannel2 >/dev/null 2>/dev/null
+    docker rm -f flannel-e2e-设置scope登录认证-flannel2 >/dev/null 2>/dev/null
     assert "docker run --name=flannel-e2e-test-flannel2 -d --privileged $FLANNEL_DOCKER_IMAGE --etcd-endpoints=$etcd_endpt -v 10 >/dev/null"
 }
 
 teardown() {
-    docker rm -f flannel-e2e-test-flannel1 flannel-e2e-test-flannel2 flannel-e2e-test-flannel1-iperf flannel-host1 flannel-host2 > /dev/null 2>&1
+    docker rm -f flannel-e2e-设置scope登录认证-flannel1 flannel-e2e-设置scope登录认证-flannel2 flannel-e2e-设置scope登录认证-flannel1-iperf flannel-host1 flannel-host2 > /dev/null 2>&1
     docker run --rm $ETCDCTL_IMG etcdctl --endpoints=$etcd_endpt rm /coreos.com/network/config > /dev/null 2>&1
 }
 
@@ -66,12 +66,12 @@ write_config_etcd() {
 create_ping_dest() {
     # add a dummy interface with $FLANNEL_SUBNET so we have a known working IP to ping
     for host_num in 1 2; do
-       while ! docker exec flannel-e2e-test-flannel$host_num ls /run/flannel/subnet.env >/dev/null 2>&1; do
+       while ! docker exec flannel-e2e-设置scope登录认证-flannel$host_num ls /run/flannel/subnet.env >/dev/null 2>&1; do
          sleep 0.1
        done
 
        # Use declare to allow the host_num variable to be part of the ping_dest variable name. -g is needed to make it global
-       declare -g ping_dest$host_num=$(docker "exec" --privileged flannel-e2e-test-flannel$host_num /bin/sh -c '\
+       declare -g ping_dest$host_num=$(docker "exec" --privileged flannel-e2e-设置scope登录认证-flannel$host_num /bin/sh -c '\
         source /run/flannel/subnet.env && \
         ip link add name dummy0 type dummy && \
         ip addr add $FLANNEL_SUBNET dev dummy0 && ip link set dummy0 up && \
@@ -163,10 +163,10 @@ test_ipsec_perf() {
 #}
 
 perf() {
-    # Perf test - run iperf server on flannel1 and client on flannel2
-    docker rm -f flannel-e2e-test-flannel1-iperf 2>/dev/null
-    docker run -d --name flannel-e2e-test-flannel1-iperf --net=container:flannel-e2e-test-flannel1 iperf3:latest >/dev/null
-    docker run --rm --net=container:flannel-e2e-test-flannel2 iperf3:latest -c $ping_dest1 -B $ping_dest2
+    # Perf 设置scope登录认证 - run iperf server on flannel1 and client on flannel2
+    docker rm -f flannel-e2e-设置scope登录认证-flannel1-iperf 2>/dev/null
+    docker run -d --name flannel-e2e-设置scope登录认证-flannel1-iperf --net=container:flannel-e2e-设置scope登录认证-flannel1 iperf3:latest >/dev/null
+    docker run --rm --net=container:flannel-e2e-设置scope登录认证-flannel2 iperf3:latest -c $ping_dest1 -B $ping_dest2
 }
 
 test_multi() {

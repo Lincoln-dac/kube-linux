@@ -277,7 +277,7 @@ func TestRenewLease(t *testing.T) {
 		BackendType: "vxlan",
 	}
 
-	ld, err := json.Marshal(&leaseData{Dummy: "test string"})
+	ld, err := json.Marshal(&leaseData{Dummy: "设置scope登录认证 string"})
 	if err != nil {
 		t.Fatalf("Failed to marshal leaseData: %v", err)
 	}

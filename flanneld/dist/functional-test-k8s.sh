@@ -24,8 +24,8 @@ setup_suite() {
     # Run etcd, killing any existing one that was running
 
     # Start etcd
-    docker rm -f flannel-e2e-test-etcd >/dev/null 2>/dev/null
-    docker run --name=flannel-e2e-test-etcd -d -p 2379:2379 $ETCD_IMG etcd --listen-client-urls http://0.0.0.0:2379 --advertise-client-urls $etcd_endpt >/dev/null
+    docker rm -f flannel-e2e-设置scope登录认证-etcd >/dev/null 2>/dev/null
+    docker run --name=flannel-e2e-设置scope登录认证-etcd -d -p 2379:2379 $ETCD_IMG etcd --listen-client-urls http://0.0.0.0:2379 --advertise-client-urls $etcd_endpt >/dev/null
     sleep 1
 
     # Start a kubernetes API server
@@ -63,13 +63,13 @@ EOF
 
 teardown_suite() {
     # Teardown the etcd server
-    docker rm -f flannel-e2e-test-etcd >/dev/null
+    docker rm -f flannel-e2e-设置scope登录认证-etcd >/dev/null
     docker rm -f flannel-e2e-k8s-apiserver >/dev/null
 }
 
 teardown() {
-	docker rm -f flannel-e2e-test-flannel1 >/dev/null 2>/dev/null
-	docker rm -f flannel-e2e-test-flannel2 >/dev/null 2>/dev/null
+	docker rm -f flannel-e2e-设置scope登录认证-flannel1 >/dev/null 2>/dev/null
+	docker rm -f flannel-e2e-设置scope登录认证-flannel2 >/dev/null 2>/dev/null
 }
 
 start_flannel() {
@@ -77,12 +77,12 @@ start_flannel() {
 
 	flannel_conf="{ \"Network\": \"$FLANNEL_NET\", \"Backend\": { \"Type\": \"${backend}\" } }"
     for host_num in 1 2; do
-       docker rm -f flannel-e2e-test-flannel$host_num >/dev/null 2>/dev/null
-       docker run -e NODE_NAME=flannel$host_num --privileged --name flannel-e2e-test-flannel$host_num -id --entrypoint /bin/sh $FLANNEL_DOCKER_IMAGE >/dev/null
-       docker exec flannel-e2e-test-flannel$host_num /bin/sh -c 'mkdir -p /etc/kube-flannel'
-       echo $flannel_conf | docker exec -i flannel-e2e-test-flannel$host_num /bin/sh -c 'cat > /etc/kube-flannel/net-conf.json'
-       docker exec -d flannel-e2e-test-flannel$host_num /opt/bin/flanneld --kube-subnet-mgr --kube-api-url $k8s_endpt
-       while ! docker exec flannel-e2e-test-flannel$host_num ls /run/flannel/subnet.env >/dev/null 2>&1; do
+       docker rm -f flannel-e2e-设置scope登录认证-flannel$host_num >/dev/null 2>/dev/null
+       docker run -e NODE_NAME=flannel$host_num --privileged --name flannel-e2e-设置scope登录认证-flannel$host_num -id --entrypoint /bin/sh $FLANNEL_DOCKER_IMAGE >/dev/null
+       docker exec flannel-e2e-设置scope登录认证-flannel$host_num /bin/sh -c 'mkdir -p /etc/kube-flannel'
+       echo $flannel_conf | docker exec -i flannel-e2e-设置scope登录认证-flannel$host_num /bin/sh -c 'cat > /etc/kube-flannel/net-conf.json'
+       docker exec -d flannel-e2e-设置scope登录认证-flannel$host_num /opt/bin/flanneld --kube-subnet-mgr --kube-api-url $k8s_endpt
+       while ! docker exec flannel-e2e-设置scope登录认证-flannel$host_num ls /run/flannel/subnet.env >/dev/null 2>&1; do
          sleep 0.1
        done
     done
@@ -93,7 +93,7 @@ create_ping_dest() {
     for host_num in 1 2; do
 
        # Use declare to allow the host_num variable to be part of the ping_dest variable name. -g is needed to make it global
-       declare -g ping_dest$host_num=$(docker "exec" --privileged flannel-e2e-test-flannel$host_num /bin/sh -c '\
+       declare -g ping_dest$host_num=$(docker "exec" --privileged flannel-e2e-设置scope登录认证-flannel$host_num /bin/sh -c '\
 		source /run/flannel/subnet.env && \
 		ip link add name dummy0 type dummy && \
 		ip addr add $FLANNEL_SUBNET dev dummy0 && ip link set dummy0 up && \

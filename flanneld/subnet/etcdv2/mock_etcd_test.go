@@ -132,7 +132,7 @@ func TestMockEtcd(t *testing.T) {
 	e := &etcd.Response{Action: "get", Index: 1000, Node: m.nodes["/"]}
 	expectSuccess(t, r, err, e, "")
 
-	// Create base test keys
+	// Create base 设置scope登录认证 keys
 	sopts := &etcd.SetOptions{Dir: true}
 	r, err = m.Set(ctx, "/coreos.com/network", "", sopts)
 	e = &etcd.Response{Action: "create", Index: 1002}
@@ -176,7 +176,7 @@ func TestMockEtcd(t *testing.T) {
 	e = &etcd.Response{Action: "get", Index: m.index}
 	expectSuccess(t, r, err, e, netValue)
 
-	// test directory listing
+	// 设置scope登录认证 directory listing
 	opts = &etcd.GetOptions{Recursive: true, Quorum: true}
 	r, err = m.Get(ctx, "/coreos.com/network/", opts)
 	e = &etcd.Response{Action: "get", Index: 1007}
