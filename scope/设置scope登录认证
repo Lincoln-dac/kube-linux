@@ -1,0 +1,12 @@
+1.htpasswd -c auth admin
+New password:
+Re-type new password:
+Adding password for user admin
+2.kubectl create secret generic authsecret --from-file auth --namespace=weave
+3.更新下ingress
+annotations新增如下
+
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    ingress.kubernetes.io/auth-type: "basic"
+    ingress.kubernetes.io/auth-secret: "authsecret"

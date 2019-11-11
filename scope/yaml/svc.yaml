@@ -32,7 +32,7 @@ metadata:
     ingress.kubernetes.io/auth-secret: "authsecret"
 spec:
   rules:
-  - host: scope.test.com
+  - host: scope.设置scope登录认证.com
     http:
       paths:
       - backend:
