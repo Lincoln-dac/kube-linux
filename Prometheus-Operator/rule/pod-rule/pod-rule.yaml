@@ -1,0 +1,26 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: k8s
+    role: alert-rules
+  name: pod-k8s-rules
+  namespace: monitoring
+spec:
+  groups:
+    - name: pod.rules
+      rules:
+        - alert: POD内存
+          expr: container_memory_rss{container_name!=""} / container_spec_memory_limit_bytes{container_name!=""}  *100 != +Inf > 90
+          for: 2m
+          labels:
+            type: pod
+          annotations:
+            description: "{{$labels.instance}}: Pod 内存使用率超过 90% ,(current value is: {{ $value }}%)"
+        - alert: POD CPU
+          expr: sum(rate(container_cpu_usage_seconds_total{image!=""}[1m])) by (pod_name, namespace) / (sum(container_spec_cpu_quota{image!=""}/100000) by (pod_name, namespace))  > 90
+          for: 2m
+          labels:
+            type: pod
+          annotations:
+            description: "{{$labels.instance}}: Pod CPU使用率超过 90% ,(current value is: {{ $value }})%"

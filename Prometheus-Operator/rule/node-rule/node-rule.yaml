@@ -1,0 +1,48 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: k8s
+    role: alert-rules
+  name: node-k8s-rules
+  namespace: monitoring
+spec:
+  groups:
+    - name: node.rules
+      rules:
+        - alert: Node内存使用率
+          annotations:
+            description: "{{$labels.instance}}: Node 内存使用率超过90% (current value is: {{ $value }}%"
+          expr: |
+            (node_memory_MemTotal - (node_memory_MemFree+node_memory_Buffers+node_memory_Cached )) / node_memory_MemTotal * 100 > 90
+          for: 2m
+          labels:
+            type: node
+            severity: critical
+        - alert: Node文件系统使用率
+          annotations:
+            description: "{{$labels.instance}}: Node文件系统使用率 超过 80% (current value is: {{ $value }}"
+          expr: |
+            (node_filesystem_size{device="rootfs"} - node_filesystem_free{device="rootfs"}) / node_filesystem_size{device="rootfs"} * 100 > 80
+          for: 2m
+          labels:
+            type: node
+            severity: critical
+        - alert: NodeCPU使用率
+          annotations:
+            description: "{{$labels.instance}}: CPU 使用率超过 90% (current value is: {{ $value }}%"
+          expr: |
+            (100 - (avg by (instance) (irate(node_cpu{job="kubernetes-node-exporter",mode="idle"}[5m])) * 100)) > 90
+          for: 2m
+          labels:
+            type: node
+            severity: critical
+        - alert: 实例状态
+          annotations:
+            message: "{{$labels.instance}}: 已经离线"
+          expr: |
+            up == 0
+          for: 2m
+          labels:
+            type: node
+            severity: critical

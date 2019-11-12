@@ -1,0 +1,52 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: k8s
+    role: alert-rules
+  name: network-k8s-rules
+  namespace: monitoring
+spec:
+  groups:
+    - name: network.rules
+      rules:
+        - alert: POD 流入流量
+          annotations:
+            description: "{{$labels.instance}}: pod 流入流量大于1G (current value is: {{ $value }}"
+          expr: |
+            (sum by (namespace,job,pod_name) (irate(container_network_receive_bytes_total{image!=""}[2m]))  / 1024 /1024) > 1000
+          for: 2m
+          labels:
+            type: network
+        - alert: POD 流出流量
+          annotations:
+            description: "{{$labels.instance}}: pod 流出流量大于1G (current value is: {{ $value }}"
+          expr: |
+            (sum by (namespace,job,pod_name) (irate(container_network_transmit_bytes_total{image!=""}[2m]))  / 1024 /1024) > 1000
+          for: 2m
+          labels:
+            type: network
+        - alert: Node 流入流量
+          annotations:
+            description: "{{$labels.instance}}: node流入流量大于2G (current value is: {{ $value }}"
+          expr: |
+            ((sum(rate (node_network_receive_bytes{device!~'tap.*|veth.*|br.*|docker.*|virbr*|lo*'}[5m])) by (instance)) / 100) > 2048000
+          for: 2m
+          labels:
+            type: network
+        - alert: Node 流出流量
+          annotations:
+            description: "{{$labels.instance}}: node流出流量大于2G (current value is: {{ $value }}"
+          expr: |
+            ((sum(rate (node_network_transmit_bytes{device!~'tap.*|veth.*|br.*|docker.*|virbr*|lo*'}[5m])) by (instance)) / 100) > 2048000
+          for: 2m
+          labels:
+            type: network
+        - alert: NODE TCP会话
+          expr: |
+            node_netstat_Tcp_CurrEstab > 5000
+          for: 1m
+          labels:
+            type: network
+          annotations:
+            summary: "{{$labels.mountpoint}} TCP_连接数过高！,(目前使用:{{$value}})"
