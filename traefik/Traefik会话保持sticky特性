@@ -1,0 +1,5 @@
+Kubernetes中可以通过为指定的service对象或ingress对象声明annotation来为ingress controller做额外的详细配置。例如，如果要开启sticky，只需要在想要开启sticky的服务端对应的service上添加以下的annotation即可。
+metadata:
+  annotations:
+    traefik.ingress.kubernetes.io/affinity: "true"
+    
