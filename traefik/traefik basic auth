@@ -1,0 +1,42 @@
+1. 创建用户密码文件
+　　这里我们使用htpasswd创建加密过的密码文件。
+# htpasswd -bc basic-auth-secret username password
+ 
+2. 创建Kubernetes Secret
+# kubectl create secret generic basic-auth --from-file=basic-auth-secret --namespace=kube-system
+ 
+3. 部署服务Ingress使其使用basic auth
+　通过在Ingress中添加鉴权annotation实现服务basic auth。这里需要注意：
+Secret文件必须与Ingress规则在同一命名空间。
+目前只支持basic authentication。
+Realm不可配置，默认使用traefik。
+Secret必须只包含一个文件。
+apiVersion: v1
+kind: Service
+metadata:
+  name: traefik-web-ui
+  namespace: kube-system
+spec:
+  selector:
+    k8s-app: traefik-ingress-lb
+  ports:
+  - port: 80
+    targetPort: 8080
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: traefik-web-ui
+  namespace: kube-system
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    ingress.kubernetes.io/auth-type: basic
+    ingress.kubernetes.io/auth-secret: basic-auth
+spec:
+  rules:
+  - host: traefik-ui.domain.com
+    http:
+      paths:
+      - backend:
+          serviceName: traefik-web-ui
+          servicePort: 80
