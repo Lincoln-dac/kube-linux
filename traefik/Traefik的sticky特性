@@ -1,0 +1,38 @@
+Kubernetes中可以通过为指定的service对象或ingress对象声明annotation来为ingress controller做额外的详细配置。例如，如果要开启sticky，只需要在想要开启sticky的服务端对应的service上添加以下的annotation即可。
+metadata:
+  annotations:
+    traefik.ingress.kubernetes.io/affinity: "true"
+还有更多配置可以参考Traefik文档
+举例
+apiVersion: v1
+kind: Service
+metadata:
+    name: gls
+    namespace: {{ .Release.Namespace }}
+    labels:
+        name: gls
+    annotations:
+        traefik.ingress.kubernetes.io/affinity: "true"
+        traefik.ingress.kubernetes.io/session-cookie-name: "gls-test"
+        traefik.ingress.kubernetes.io/load-balancer-method: drr
+spec:
+    selector:
+        name: gls
+    ports:
+    -   port: 80
+        targetPort: 8080
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+    name: gls
+    namespace: {{ .Release.Namespace }}
+spec:
+    rules:
+    -   host: {{ .Release.Namespace }}.{{ .Values.runtime.network.domainName }}
+        http:
+            paths:
+            -   backend:
+                    serviceName: gls
+                    servicePort: 80
+                path: /gls
