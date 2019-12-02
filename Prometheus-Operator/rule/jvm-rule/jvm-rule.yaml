@@ -1,0 +1,21 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: k8s
+    role: alert-rules
+  name: jvm-k8s-rules
+  namespace: monitoring
+spec:
+  groups:
+  - name: jvm.rules
+    rules:
+    - alert: JAVA堆内存使用率
+      annotations:
+        description: "{{$labels.instance}}: JAVA堆内存使用率超过90% (current value is: {{ $value }}%"  
+      expr: |
+        ( jvm_memory_bytes_used /  jvm_memory_bytes_max ) * 100 > 90
+      for: 2m
+      labels:
+        type: jvm
+        severity: critical
