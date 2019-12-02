@@ -1,8 +1,8 @@
- 1.java 镜像制作（这里忽略）
+ 1.java 镜像制作
  
  # Dockerfile
 # Version 1.0
 FROM  harbor.fcbox.com/common/centos-oraclejdk:1.2
 ENV LANG en_US.UTF-8
- ADD javaagent.tar.gz /app/
- CMD java  -javaagent:/app/jvmagent/jmx_prometheus_javaagent-0.12.0.jar=12345:/app/jvmagent/config.yaml $JAVA_OPTS
+ADD javaagent.tar.gz /app/
+CMD java  -javaagent:/app/jvmagent/jmx_prometheus_javaagent-0.12.0.jar=12345:/app/jvmagent/config.yaml $JAVA_OPTS
