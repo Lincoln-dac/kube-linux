@@ -6,3 +6,5 @@ FROM  harbor.fcbox.com/common/centos-oraclejdk:1.2
 ENV LANG en_US.UTF-8
 ADD javaagent.tar.gz /app/
 CMD java  -javaagent:/app/jvmagent/jmx_prometheus_javaagent-0.12.0.jar=12345:/app/jvmagent/config.yaml $JAVA_OPTS
+#########
+这里的12345端口为Prometheus-Operator获取数据的端口
