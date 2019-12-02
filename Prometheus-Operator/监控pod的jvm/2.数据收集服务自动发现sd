@@ -1,1 +1,50 @@
+前提条件是你已经成功部署prometheus-opreator
+
+1.新建prometheus-additional.yaml文件内容如下
+cat prometheus-additional.yaml
+- job_name: 'JVM'
+  scrape_interval: 30s
+  metrics_path: /metrics
+  kubernetes_sd_configs:
+  - role: pod
+  scheme: http
+  relabel_configs:
+  - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_jvm]
+    action: keep
+    regex: true
+  - source_labels: [__meta_kubernetes_pod_container_port_name]
+    action: keep
+    regex: 'jvmport'
+  - source_labels: [__meta_kubernetes_pod_container_port_number]
+    action: keep
+    regex: 12345
+  - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+    action: replace
+    regex: ([^:]+)(?::\d+)?;(\d+)
+    replacement: $1:$2
+    target_label: __address__
+  - action: labelmap
+    regex: __meta_kubernetes_pod_label_(.+)
+  - source_labels: [__meta_kubernetes_namespace]
+    action: replace
+    target_label: namespace
+  - source_labels: [__meta_kubernetes_pod_name]
+    action: replace
+    target_label: pod
+    
+2.新建additional-configs
+kubectl create secret generic additional-configs --from-file=prometheus-additional.yaml -n monitoring
+查看secret
+kubectl get secret -n monitoring
+    
+3.修改prometheus-prometheus.yaml ，在spec 新增
+
+      additionalScrapeConfigs:
+    name: additional-configs
+    key: prometheus-additional.yaml
+
+4.重建prometheus
+kubectl delete -f prometheus-prometheus.yaml && kubectl apply -f prometheus-prometheus.yaml
+    
+
 
