@@ -1,0 +1,8 @@
+在yaml文件中给定特定的label标签做关联，一定要按照如下标注，否则无法关联，监控展示
+
+
+        ports:
+        - containerPort: 8080
+          name: svport
+        - containerPort: 12345
+          name: jvmport
