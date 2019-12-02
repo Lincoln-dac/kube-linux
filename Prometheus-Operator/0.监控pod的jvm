@@ -1,5 +1,0 @@
-如何通过prometheus-opreator 自动获取pod为java进程相关的jvm数据，需要做以下几个操作
-1.将jvmagent 和配置文件写进java镜像中
-2.配置jvm数据收集服务自动发现sd
-3.在yaml文件中给定特定的label标签做关联
-4.配置granfan jvm图形展示
