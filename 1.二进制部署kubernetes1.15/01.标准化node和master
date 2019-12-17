@@ -70,11 +70,13 @@ net.bridge.bridge-nf-call-ip6tables = 1
 net.bridge.bridge-nf-call-arptables = 1
 kernel.sysrq = 1
 kernel.pid_max = 131072
-fs.nr_open = 52706963
+fs.nr_open = 527069630
 fs.inotify.max_user_watches=89100
+fs.file-max = 6553560000
 net.ipv4.neigh.default.gc_thresh1 = 5120
 net.ipv4.neigh.default.gc_thresh2 = 20480
 net.ipv4.neigh.default.gc_thresh3 = 40960
+
 #-------------
 sysctl -p
 如果有报错，处理掉报错
