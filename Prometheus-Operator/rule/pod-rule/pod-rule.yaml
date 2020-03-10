@@ -8,19 +8,93 @@ metadata:
   namespace: monitoring
 spec:
   groups:
-    - name: pod.rules
-      rules:
-        - alert: POD内存
-          expr: container_memory_rss{container_name!=""} / container_spec_memory_limit_bytes{container_name!=""}  *100 != +Inf > 90
-          for: 2m
-          labels:
-            type: pod
-          annotations:
-            description: "{{$labels.instance}}: Pod 内存使用率超过 90% ,(current value is: {{ $value }}%)"
-        - alert: POD CPU
-          expr: sum(rate(container_cpu_usage_seconds_total{image!=""}[1m])) by (pod_name, namespace) / (sum(container_spec_cpu_quota{image!=""}/100000) by (pod_name, namespace))  > 90
-          for: 2m
-          labels:
-            type: pod
-          annotations:
-            description: "{{$labels.instance}}: Pod CPU使用率超过 90% ,(current value is: {{ $value }})%"
+  - name: pod.rules
+    rules:
+    - alert: POD 内存
+      expr: container_memory_rss{container_name!=""} / container_spec_memory_limit_bytes{container_name!=""}  *100 != +Inf > 80
+      for: 1m
+      labels:
+        type: jvm
+      annotations:
+        description: "{{$labels.instance}}: Pod 内存使用率超过 80% ,(current value is: {{ $value }}%)"
+    - alert: POD CPU
+      expr: sum(irate(container_cpu_usage_seconds_total{image!=""}[3m])) by (container,container_name,endpoint,instance,job,name,namespace, pod, pod_name,service ) / (sum(container_spec_cpu_quota{image!=""}/100000) by (container,container_name,endpoint,instance,job,name,namespace, pod, pod_name,service )) * 100 > 80
+      for: 1m
+      labels:
+        type: jvm
+      annotations:
+        description: "{{$labels.instance}}: Pod CPU使用率超过 80% ,(current value is: {{ $value }})%"
+    - alert: POD ImagePullBackOff
+      expr: kube_pod_container_status_waiting_reason{reason="ImagePullBackOff"}  == 1
+      for: 1m
+      labels:
+        type: pod
+        severity: critical
+      annotations:
+        description: "{{$labels.instance}}: Pod 镜像拉取失败或者镜像不存在"
+    - alert: POD OOMKilled
+      expr: kube_pod_container_status_waiting_reason{reason="OOMKilled"} == 1
+      for: 30s
+      labels:
+        type: pod
+        severity: critical
+      annotations:
+        description: "{{$labels.instance}}: Pod OOM"
+    - alert: POD CrashLoopBackOff
+      expr: kube_pod_container_status_waiting_reason{reason="CrashLoopBackOff"} == 1
+      for: 1m
+      labels:
+        type: pod
+        severity: critical
+      annotations:
+        description: "{{$labels.instance}}: Pod 状态为CrashLoopBackOff"
+    - alert: Pod NotReady
+      annotations:
+        description: '{{ $labels.namespace }}/{{ $labels.pod }}  POD 未就绪'
+      expr: |
+        sum by (container,container_name,endpoint,instance,job,name,namespace, pod, pod_name,service) (kube_pod_status_phase{job="kube-state-metrics", phase!~"Running|Succeeded"}) > 0
+      for: 1m
+      labels:
+        type: pod
+        severity: critical
+    - alert: Pod Failed
+      expr: sum by (container,container_name,endpoint,instance,job,name,namespace, pod, pod_name,service) (kube_pod_status_phase{phase="Failed"})  > 0
+      for: 1m
+      labels:
+        type: pod
+        severity: critical
+      annotations:
+        description: "{{ $labels.namespace }} | pod: {{ $labels.pod }} POD状态为失败"
+    - alert: Pod Pending
+      expr: sum by (container,container_name,endpoint,instance,job,name,namespace, pod, pod_name,service) (kube_pod_status_phase{phase="Pending"}) > 0
+      for: 1m
+      labels: 
+        type: pod
+        severity: critical
+      annotations:
+        description: "{{ $labels.namespace }} | pod: {{ $labels.pod }} POD 状态为Pending"
+    - alert: Pod Restart
+      expr: sum (changes (kube_pod_container_status_restarts_total[1m])) by (container,container_name,endpoint,instance,job,name,namespace, pod, pod_name,service) > 0
+      for: 15s
+      labels:
+        type: pod
+        severity: critical
+      annotations:
+        description: " {{ $labels.namespace }} | pod: {{ $labels.pod }} POD 重启了"
+    - alert: Pod Restart Number
+      expr: kube_pod_container_status_restarts_total{namespace="default"}   > 3
+      for: 1m
+      labels:
+        type: pod
+        severity: critical
+      annotations:
+        description: " {{ $labels.namespace }} | pod: {{ $labels.pod }} pod 重启次数大于3"
+    - alert: POD Number
+      expr: |
+        kubelet_running_pod_count{job="kubelet"} > 60
+      for: 15m
+      labels:
+        type: pod
+        severity: critical
+      annotations:
+        description: Kubelet {{$labels.instance}} is running {{$value}} pods, NODE节点上的pod超过限定的数量
