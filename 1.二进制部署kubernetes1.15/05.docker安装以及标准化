@@ -13,7 +13,6 @@ yum install docker-ce-18.03.0.ce-1.el7.centos -y containerd.io  -y
   "insecure-registries": ["10.204.57.39"], 
   "storage-driver": "overlay2",
   "data-root": "/data/dockerdata",
-  "live-restore": true,
   "max-concurrent-downloads": 10,
   "max-concurrent-uploads": 5,
   "default-shm-size": "64M",
