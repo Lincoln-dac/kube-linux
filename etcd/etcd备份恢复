@@ -123,6 +123,4 @@ Kubernetes 集群备份主要是备份 ETCD 集群。而恢复时，主要考虑
 
 注意：备份ETCD集群时，只需要备份一个ETCD就行，恢复时，拿同一份备份数据恢复。
 
-参考链接
-https://yq.aliyun.com/articles/11035
-https://www.jianshu.com/p/8b483ed49f26
+
