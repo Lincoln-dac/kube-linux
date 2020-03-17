@@ -1,8 +1,7 @@
 默认情况下部署taefik 打印出来的日志与我们实际情况差8个小时，并不友好，需要做一下操作 才能改过来
 1.traefik 镜像版本选择1.7.18 docker pull traefik:v1.7.18
 链接https://hub.docker.com/_/traefik/?tab=description
-2.修改traefik-deployment.yaml ，我这里把traefik日志映射到本机的/app/applogs/traefik下，这里开启过443 证书
-这个文件需要按照需要修改
+2.修改traefik-deployment.yaml 
 3.github上的说明
 https://github.com/containous/traefik/pull/4954/files/10b89a56de7ec040b1d88a313af9dc05d852b9fa#diff-3b63471b3cda248684c7409a84b0ee7f
 cat traefik-deployment.yaml
