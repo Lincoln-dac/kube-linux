@@ -19,8 +19,7 @@ INITCLUSTER="--initial-advertise-peer-urls https://10.204.243.132:2380 \
 --listen-peer-urls https://10.204.243.132:2380 \
 --listen-client-urls https://10.204.243.132:2379,http://127.0.0.1:2379 \
 --advertise-client-urls https://10.204.243.132:2379 \
---initial-cluster-token etcd-cluster \
---initial-cluster-state new"
+--initial-cluster-token etcd-cluster"
 TUNNING="--initial-cluster-state new --heartbeat-interval=300 --election-timeout=3000 --snapshot-count=10000 --metrics=basic --quota-backend-bytes=8589934592"
 ETCDDATA="--data-dir=/etcd/data/"
 ###
