@@ -1,8 +1,0 @@
-net.ipv4.neigh.default.gc_thresh3 的默认值 1024，这个值是个硬限制，arp cache记录数大于这个就会强制触发 gc，所以会造成频繁gc，当有数据包发送会查本地 arp，如果本地没找到 arp 记录就会判断当前 arp cache 记录数+1是否大于 gc_thresh3，如果没有就会广播 arp 查询 mac 地址，如果大于了就直接报 arp_cache: neighbor table overflow!，并且放弃 arp 请求，无法获取 mac 地址也就无法知道探测报文该往哪儿发(即便就在本机某个 veth pair)，kubelet 对本机 pod 做存活检查发 arp 查 mac 地址，在 arp cahce 找不到，由于这时 arp cache已经满了，刚要 gc 但还没做所以就只有报错丢包，导致存活检查失败重启 pod
-
-解决方案
-调整部分节点内核参数，将 arp cache 的 gc 阀值调高 (/etc/sysctl.conf):
-
-net.ipv4.neigh.default.gc_thresh1 = 80000
-net.ipv4.neigh.default.gc_thresh2 = 90000
-net.ipv4.neigh.default.gc_thresh3 = 100000

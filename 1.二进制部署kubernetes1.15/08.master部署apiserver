@@ -25,5 +25,5 @@ WantedBy=multi-user.target
 
 3.创建集群用户
 绑定一个cluster-admin的权限。
-kubectl create clusterrolebinding system:anonymous --clusterrole=cluster-admin --user=kubernetes
+kubectl create clusterrolebinding kubernetes   --clusterrole=cluster-admin   --user=kubernetes
 
