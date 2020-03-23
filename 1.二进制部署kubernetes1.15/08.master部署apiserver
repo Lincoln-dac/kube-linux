@@ -23,3 +23,7 @@ WantedBy=multi-user.target
 
 2.systemctl daemon-reload && systemctl  start kube-apiserver && systemctl  enable kube-apiserver 
 
+3.创建集群用户
+绑定一个cluster-admin的权限。
+kubectl create clusterrolebinding system:anonymous --clusterrole=cluster-admin --user=kubernetes
+
