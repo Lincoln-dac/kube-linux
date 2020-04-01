@@ -1,0 +1,26 @@
+1.traefik.toml文件新增
+[metrics]
+  [metrics.prometheus]
+    entryPoint = "traefik"
+    buckets = [0.1,0.3,1.2,5.0]
+   
+2.重新加载traefik.toml
+kubectl create configmap traefik-conf --from-file=traefik.toml -n kube-system
+3.修改traefik-deployment.yaml
+新增args 启动参数
+        args:
+        - --web
+        - --kubernetes
+        - --configfile=/config/traefik.toml
+        - --logLevel=INFO
+        - --web.metrics.prometheus
+        - --web.metrics
+        - --accesslog
+        - --accesslog.filepath=/var/log/traefik-access.log
+        - --accesslog.fields.names="StartLocal=keep StartUTC=drop"
+        - --traefiklog
+        - --traefiklog.filepath=/var/log/traefik.log
+        - --traefiklogsfile=traefik.log
+        - --api
+4.重新部署traefik controller 
+kubectl apply -f traefik-deployment.yaml
