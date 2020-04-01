@@ -1,0 +1,44 @@
+修改prometheus-prometheus.yaml，将之前创建好的etcd secert 引用进去
+kubectl apply -f prometheus-prometheus.yaml 
+
+apiVersion: monitoring.coreos.com/v1
+kind: Prometheus
+metadata:
+  labels:
+    prometheus: k8s
+  name: k8s
+  namespace: monitoring
+spec:
+  alerting:
+    alertmanagers:
+    - name: alertmanager-main
+      namespace: monitoring
+      port: web
+  storage:
+    volumeClaimTemplate:
+      spec:
+        storageClassName: prometheus-data-db
+        resources:
+          requests:
+            storage: 10Gi
+  baseImage: harbor.fcbox.com/prometheus/prometheus
+  nodeSelector:
+    network: esn
+  replicas: 2
+  retention: 7d
+  secrets:
+  - etcd-certs
+  resources:
+    requests:
+      memory: 4000Mi
+  ruleSelector:
+    matchLabels:
+      prometheus: k8s
+      role: alert-rules
+  additionalScrapeConfigs:
+    name: additional-configs
+    key: prometheus-additional.yaml
+  serviceAccountName: prometheus-k8s
+  serviceMonitorNamespaceSelector: {}
+  serviceMonitorSelector: {}
+  version: v2.3.1
