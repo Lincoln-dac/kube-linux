@@ -1,0 +1,15 @@
+  想要删除K8s里的一个Namespace，结果删除了所有该Namespace资源之后使用kubectl delete namespace test发现删除不掉，一直卡在Terminating状态，使用--force参数依然无法删除，报错:
+Error from server (Conflict): Operation cannot be fulfilled on namespaces "test": The system is ensuring all content is removed from this namespace. Upon completion, this namespace will automatically be purged by the system.
+找了一圈，发现这个Issue，里面有条评论
+kubectl get namespace annoying-namespace-to-delete -o json > tmp.json
+then edit tmp.json and remove”kubernetes”
+curl -k -H “Content-Type: application/json” -X PUT –data-binary @tmp.json https://kubernetes-cluster-ip/api/v1/namespaces/annoying-namespace-to-delete/finalize
+and it should delete your namespace,
+跟着试了一下，很管用，直接就删除了：
+1.先运行kubectl get namespace test -o json > tmp.json，拿到当前namespace描述，然后打开tmp.json，删除其中的spec字段。
+
+2.因为这边的K8s集群是带认证的，所以又新开了窗口运行kubectl proxy跑一个API代理在本地的8081端口。
+r如  kubectl proxy 8001
+
+
+3.最后运行curl -k -H "Content-Type: application/json" -X PUT --data-binary @tmp.json http://127.0.0.1:8001/api/v1/namespaces/test/finalize
