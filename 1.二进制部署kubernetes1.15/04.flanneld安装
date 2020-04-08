@@ -1,4 +1,4 @@
-1.先yum install flannel ，然后将flannel执行程序替换成0.10
+1.先yum install flannel -y ，然后将flannel执行程序替换成0.10
 wget https://github.com/coreos/flannel/releases/download/v0.10.0/flanneld-amd64 && chmod +x flanneld-amd64
 mv flanneld-amd64 /usr/bin/ && chmod +x /usr/bin/flanneld-amd64
 2.修改配置文件

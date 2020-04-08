@@ -1,0 +1,147 @@
+1.kubectl apply -f etcd-prometheus-service.yaml
+
+***********
+apiVersion: v1
+kind: Service
+metadata:
+  name: etcd01
+  namespace: kube-system
+  labels:
+    k8s-app: etcd
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+  - name: port
+    port: 2379
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: etcd01
+  namespace: kube-system
+  labels:
+    k8s-app: etcd
+subsets:
+- addresses:
+  - ip: 10.204.80.6
+    nodeName: etcd01
+  ports:
+  - name: port
+    port: 2379
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: etcd02
+  namespace: kube-system
+  labels:
+    k8s-app: etcd
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+  - name: port
+    port: 2379
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: etcd02
+  namespace: kube-system
+  labels:
+    k8s-app: etcd
+subsets:
+- addresses:
+  - ip: 10.204.80.7
+    nodeName: etc02
+  ports:
+  - name: port
+    port: 2379
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: etcd03
+  namespace: kube-system
+  labels:
+    k8s-app: etcd
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+  - name: port
+    port: 2379
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: etcd03
+  namespace: kube-system
+  labels:
+    k8s-app: etcd
+subsets:
+- addresses:
+  - ip: 10.204.80.8
+    nodeName: etc03
+  ports:
+  - name: port
+    port: 2379
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: etcd04
+  namespace: kube-system
+  labels:
+    k8s-app: etcd
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+  - name: port
+    port: 2379
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: etcd04
+  namespace: kube-system
+  labels:
+    k8s-app: etcd
+subsets:
+- addresses:
+  - ip: 10.204.80.9
+    nodeName: etc04
+  ports:
+  - name: port
+    port: 2379
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: etcd05
+  namespace: kube-system
+  labels:
+    k8s-app: etcd
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+  - name: port
+    port: 2379
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: etcd05
+  namespace: kube-system
+  labels:
+    k8s-app: etcd
+subsets:
+- addresses:
+  - ip: 10.204.80.10
+    nodeName: etc05
+  ports:
+  - name: port
+    port: 2379

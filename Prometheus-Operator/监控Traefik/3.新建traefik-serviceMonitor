@@ -1,0 +1,21 @@
+kubectl apply -f traefik-serviceMonitor.yaml
+cat traefik-serviceMonitor.yaml
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    k8s-app: traefik
+  name: traefik-web-ui
+  namespace: kube-system
+spec:
+  endpoints:
+  - interval: 30s
+    port: web
+  jobLabel: k8s-app
+  namespaceSelector:
+    matchNames:
+    - kube-system
+  selector:
+    matchLabels:
+      #k8s-app: traefik-ingress-lb
+      k8s-app: traefik

@@ -1,0 +1,33 @@
+ kubectl apply -f traefik-prometheus-service.yaml
+ 
+ cat traefik-prometheus-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: traefik01
+  namespace: kube-system
+  labels:
+    k8s-app: traefik
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+  - name: port
+    port: 8080
+    protocol: TCP
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: traefik01
+  namespace: kube-system
+  labels:
+    k8s-app: traefik
+subsets:
+- addresses:
+  - ip: 10.204.60.31
+    nodeName: traefik
+  ports:
+  - name: port
+    port: 8080
+    protocol: TCP

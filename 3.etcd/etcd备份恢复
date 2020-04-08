@@ -16,20 +16,20 @@ ETCD 是k8s集群极为重要的一块服务，存储了集群所有的数据信
 ETCD 一些查询操作
 查看集群状态
 
-$ ETCDCTL_API=3 etcdctl --cacert=/opt/kubernetes/ssl/ca.pem --cert=/opt/kubernetes/ssl/server.pem --key=/opt/kubernetes/ssl/server-key.pem --endpoints=https://192.168.1.36:2379,https://192.168.1.37:2379,https://192.168.1.38:2379 endpoint health
+$ ETCDCTL_API=3 etcdctl --cacert=/app/kubernetes/ssl/ca.pem --cert=/app/kubernetes/ssl/server.pem --key=/app/kubernetes/ssl/server-key.pem --endpoints=https://192.168.1.36:2379,https://192.168.1.37:2379,https://192.168.1.38:2379 endpoint health
 
 https://192.168.1.36:2379 is healthy: successfully committed proposal: took = 1.698385ms
 https://192.168.1.37:2379 is healthy: successfully committed proposal: took = 1.577913ms
 https://192.168.1.38:2379 is healthy: successfully committed proposal: took = 5.616079ms
 获取某个 key 信息
 
-$ ETCDCTL_API=3 etcdctl --cacert=/opt/kubernetes/ssl/ca.pem --cert=/opt/kubernetes/ssl/server.pem --key=/opt/kubernetes/ssl/server-key.pem --endpoints=https://192.168.1.36:2379,https://192.168.1.37:2379,https://192.168.1.38:2379 get /registry/apiregistration.k8s.io/apiservices/v1.apps
+$ ETCDCTL_API=3 etcdctl --cacert=/app/kubernetes/ssl/ca.pem --cert=/app/kubernetes/ssl/server.pem --key=/app/kubernetes/ssl/server-key.pem --endpoints=https://192.168.1.36:2379,https://192.168.1.37:2379,https://192.168.1.38:2379 get /registry/apiregistration.k8s.io/apiservices/v1.apps
 获取 etcd 版本信息
 
-$ ETCDCTL_API=3 etcdctl --cacert=/opt/kubernetes/ssl/ca.pem --cert=/opt/kubernetes/ssl/server.pem --key=/opt/kubernetes/ssl/server-key.pem --endpoints=https://192.168.1.36:2379,https://192.168.1.37:2379,https://192.168.1.38:2379 version
+$ ETCDCTL_API=3 etcdctl --cacert=/app/kubernetes/ssl/ca.pem --cert=/app/kubernetes/ssl/server.pem --key=/app/kubernetes/ssl/server-key.pem --endpoints=https://192.168.1.36:2379,https://192.168.1.37:2379,https://192.168.1.38:2379 version
 获取 ETCD 所有的 key
 
-$ ETCDCTL_API=3 etcdctl --cacert=/opt/kubernetes/ssl/ca.pem --cert=/opt/kubernetes/ssl/server.pem --key=/opt/kubernetes/ssl/server-key.pem --endpoints=https://192.168.1.36:2379,https://192.168.1.37:2379,https://192.168.1.38:2379 get / --prefix --keys-only
+$ ETCDCTL_API=3 etcdctl --cacert=/app/kubernetes/ssl/ca.pem --cert=/app/kubernetes/ssl/server.pem --key=/app/kubernetes/ssl/server-key.pem --endpoints=https://192.168.1.36:2379,https://192.168.1.37:2379,https://192.168.1.38:2379 get / --prefix --keys-only
 环境
 主机	IP
 k8s-master1	192.168.1.36
@@ -42,16 +42,16 @@ Kubernetes version v1.15.6 二进制安装
 
 命令备份（k8s-master1 机器上备份）：
 
-$ ETCDCTL_API=3 etcdctl --cacert=/opt/kubernetes/ssl/ca.pem --cert=/opt/kubernetes/ssl/server.pem --key=/opt/kubernetes/ssl/server-key.pem --endpoints=https://192.168.1.36:2379 snapshot save /data/etcd_backup_dir/etcd-snapshot-`date +%Y%m%d`.db
+$ ETCDCTL_API=3 etcdctl --cacert=/app/kubernetes/ssl/ca.pem --cert=/app/kubernetes/ssl/server.pem --key=/app/kubernetes/ssl/server-key.pem --endpoints=https://192.168.1.36:2379 snapshot save /data/etcd_backup_dir/etcd-snapshot-`date +%Y%m%d`.db
 备份脚本（k8s-master1 机器上备份）：
 
 #!/usr/bin/env bash
 
 date;
 
-CACERT="/opt/kubernetes/ssl/ca.pem"
-CERT="/opt/kubernetes/ssl/server.pem"
-EKY="/opt/kubernetes/ssl/server-key.pem"
+CACERT="/app/kubernetes/ssl/ca.pem"
+CERT="/app/kubernetes/ssl/server.pem"
+EKY="/app/kubernetes/ssl/server-key.pem"
 ENDPOINTS="192.168.1.36:2379"
 
 ETCDCTL_API=3 etcdctl \
@@ -109,7 +109,7 @@ $ ETCDCTL_API=3 etcdctl snapshot restore /data/etcd_backup_dir/etcd-snapshot-201
 $ systemctl start etcd
 三台 ETCD 启动完成，检查 ETCD 集群状态
 
-$ ETCDCTL_API=3 etcdctl --cacert=/opt/kubernetes/ssl/ca.pem --cert=/opt/kubernetes/ssl/server.pem --key=/opt/kubernetes/ssl/server-key.pem --endpoints=https://192.168.1.36:2379,https://192.168.1.37:2379,https://192.168.1.38:2379 endpoint health
+$ ETCDCTL_API=3 etcdctl --cacert=/app/kubernetes/ssl/ca.pem --cert=/app/kubernetes/ssl/server.pem --key=/app/kubernetes/ssl/server-key.pem --endpoints=https://192.168.1.36:2379,https://192.168.1.37:2379,https://192.168.1.38:2379 endpoint health
 三台 ETCD 全部健康，分别到每台 Master 启动 kube-apiserver
 
 $ systemctl start kube-apiserver

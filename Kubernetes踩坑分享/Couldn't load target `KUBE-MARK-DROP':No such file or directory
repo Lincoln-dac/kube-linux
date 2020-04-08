@@ -1,0 +1,9 @@
+1.重启kube-proxy 遇到报错
+Couldn't load target `KUBE-MARK-DROP':No such file or directory
+2.这个问题github上没有 比较好的答案，有的说可以升级iptables版本可以解决
+3.实际遇到这个情况 比较多是 新增node节点
+4.按照以下操作可以解决
+5.如果node还没有加入集群 可以
+先让node加入集群 认证通过，在重启kubelet和kube-proxy 问题消失
+5.如果node还加入集群 可以
+先将node剔除集群 在按照上面的操作执行
