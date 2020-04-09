@@ -1,0 +1,6 @@
+Reservations
+flannel also supports reservations for the subnet assigned to a host. Reservations allow a fixed subnet to be used for a given host.
+
+The only difference between a lease and reservation is the etcd TTL value. Simply removing the TTL from a lease will convert it to a reservation. e.g.
+
+etcdctl set -ttl 0 /coreos.com/network/subnets/10.5.1.0-24 $(etcdctl get /coreos.com/network/subnets/10.5.1.0-24)

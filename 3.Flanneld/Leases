@@ -1,0 +1,10 @@
+$ etcdctl ls /coreos.com/network/subnets
+/coreos.com/network/subnets/10.5.34.0-24
+$ etcdctl -o extended get /coreos.com/network/subnets/10.5.34.0-24
+Key: /coreos.com/network/subnets/10.5.34.0-24
+Created-Index: 5
+Modified-Index: 5
+TTL: 85925
+Index: 6
+
+{"PublicIP":"10.37.7.195","BackendType":"vxlan","BackendData":{"VtepMAC":"82:4b:b6:2f:54:4e"}}

@@ -1,0 +1,25 @@
+VXLAN
+Use in-kernel VXLAN to encapsulate the packets.
+
+Type and options:
+
+Type (string): vxlan
+VNI (number): VXLAN Identifier (VNI) to be used. Defaults to 1.
+Port (number): UDP port to use for sending encapsulated packets. Defaults to kernel default, currently 8472.
+GBP (Boolean): Enable VXLAN Group Based Policy. Defaults to false.
+DirectRouting (Boolean): Enable direct routes (like host-gw) when the hosts are on the same subnet. VXLAN will only be used to encapsulate packets to hosts on different subnets. Defaults to false.
+host-gw
+Use host-gw to create IP routes to subnets via remote machine IPs. Requires direct layer2 connectivity between hosts running flannel.
+
+host-gw provides good performance, with few dependencies, and easy set up.
+
+Type:
+
+Type (string): host-gw
+UDP
+Use UDP only for debugging if your network and kernel prevent you from using VXLAN or host-gw.
+
+Type and options:
+
+Type (string): udp
+Port (number): UDP port to use for sending encapsulated packets. Defaults to 8285.

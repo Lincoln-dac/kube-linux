@@ -1,0 +1,19 @@
+时间参数
+
+# Command line arguments:
+$ etcd --heartbeat-interval=100 --election-timeout=500
+
+# Environment variables:
+$ ETCD_HEARTBEAT_INTERVAL=100 ETCD_ELECTION_TIMEOUT=500 etcd
+
+快照调整
+# Command line arguments:
+$ etcd --snapshot-count=5000
+
+# Environment variables:
+$ ETCD_SNAPSHOT_COUNT=5000 etcd
+
+磁盘
+
+# best effort, highest priority
+$ sudo ionice -c2 -n0 -p `pgrep etcd`
