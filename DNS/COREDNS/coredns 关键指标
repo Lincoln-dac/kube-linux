@@ -1,0 +1,268 @@
+0 - 通过本文你会获得什么
+如何监控CoreDNS，通过了解它的几个关键指标，查询历史趋势、服务负载，可以反馈出运行的状态，及早预知可能出现的异常，做到心中有数，保证服务的稳定。
+
+涉及知识点：kubernetes prometheus coredns
+
+1 - 开始前准备
+需有一套K8S集群，使用CoreDNS作为内部的域名解析系统，同时集群内设置了Prometheus作为指标收集。
+
+在k8s 1.9之前，可选的dns服务只有kube-dns（实际由3个容器组成的Pod），在1.10之后可选coredns替换kube-dns作为集群内解析服务，同时官方也推荐后续均由coredns替代kube-dns组件。
+
+CoreDNS在k8s 1.11的时候GA，正式引入集群作为默认服务是在k8s的1.13版本，DNS在集群中的作用也是至关重要的，负责集群内服务发现以及外部域名解析，如果出现异常，对业务也会造成较大影响。
+
+2 - 开启CoreDNS性能指标
+通过在Corefile配置文件中开启prometheus插件，语法格式：
+
+
+. {
+    prometheus 0.0.0.0:9253
+}
+默认监听的地址为: 127.0.0.1:9253，由于需从外部进行数据抓取，所以必须监听在0.0.0.0否则Prometheus无法获取coredns性能数据。
+
+3 - CoreDNS性能指标列表
+指标名称	指标类型	用途描述
+coredns_dns_request_count_total	counter	服务端记录所有请求查询的累计值，单位：次
+coredns_dns_request_duration_seconds	histogram	服务端每个查询所消耗的时间分布，单位：秒
+coredns_dns_request_size_bytes	histogram	客户端通过UDP传递的EDNS0数据包大小分布，单位：字节
+coredns_dns_request_do_count_total	counter	客户端设置了DO标志位的请求次数累计值，单位：次
+coredns_dns_request_type_count_total	counter	请求查询记录类型的累计值，单位：次
+coredns_dns_response_size_bytes	histogram	服务端响应客户端数据包大小分布，单位：字节
+coredns_dns_response_rcode_count_total	counter	服务端响应状态码次数的累计值，单位：次
+coredns_panic_count_total	counter	进程出现异常中断次数的累计值，单位：次
+coredns_plugin_enabled	gauge	插件的启用情况
+coredns_build_info	gauge	编译的版本信息
+这里主要关注这6个指标：
+
+coredns_dns_request_count_total
+coredns_dns_request_duration_seconds
+coredns_dns_request_type_count_total
+coredns_dns_response_size_bytes
+coredns_dns_response_rcode_count_total
+coredns_panic_count_total
+在下一步我们将会通过它们进行数值展示。
+
+3.1 - 几个通用维度
+大部分指标都存在server、zone这两个维度
+
+维度名称	维度说明
+server	客户端请求解析所使用的dns服务端地址
+zone	客户端请求解析所匹配到服务端设置的zone
+server 有时候会设置监听多个，这样就有多个server维度值，格式为：
+
+<scheme>://[<bind>]:<port>
+例如：dns://:53 或者 dns://127.0.0.1:53 或者 dns://:9153
+
+3.2 - 指标：coredns_dns_request_count_total
+维度名称	维度说明
+server	见通用维度
+zone	见通用维度
+proto	响应传输层的协议，值为：tcp或udp
+family	网络层IP协议版本，值为：1(ipv4)或者2(ipv6)
+3.3 - 指标：coredns_dns_request_duration_seconds
+是一个histogram类型的指标，所以存在三个具体的指标名：
+
+coredns_dns_request_duration_seconds_bucket
+coredns_dns_request_duration_seconds_sum
+coredns_dns_request_duration_seconds_count
+维度名称	维度说明
+server	通用维度
+zone	通用维度
+le	请求所消耗的时间，单位秒
+其中le维度只有X_bucket才有。
+
+le维度取值范围：0.00025，0.0005，..., 后一个以前值的2被数增加，最多16个，最后一个为无穷大。
+
+3.4 - 指标：coredns_dns_request_size_bytes
+是一个histogram类型的指标，所以存在三个具体的指标名：
+
+coredns_dns_request_size_bytes_bucket
+coredns_dns_request_size_bytes_sum
+coredns_dns_request_size_bytes_count
+维度名称	维度说明
+server	通用维度
+zone	通用维度
+proto	响应传输层的协议，值为：tcp或udp
+le	通过UDP传递的EDNS0数据包大小分布情况，单位字节
+其中le维度只有X_bucket才有
+
+le维度取值范围：0, 100, 200, 300, 400, 511, 1023, 2047, 4095, 8291, 16000, 32000, 48000, 64000
+
+3.5 - 指标：coredns_dns_request_do_count_total
+维度名称	维度说明
+server	通用维度
+zone	通用维度
+有时候可能会看不到这个指标，可能没有存在dnssec的请求，你可以通过以下dig命令
+
+dig www.google.com +dnssec @127.0.0.1 -p 53
+通过该DNS查询，这样该指标值累加1次
+
+3.6 - 指标：coredns_dns_request_type_count_total
+维度名称	维度说明
+server	通用维度
+zone	通用维度
+type	DNS的解析记录类型
+可支持大部分主流的记录类型，如下表：
+
+DNS解析记录	说明
+AAAA	域名指向一个IPv6地址
+A	域名指向一个IPv4地址
+CNAME	域名指向一个域名
+DNSKEY	在DNSSEC内使用的关键记录
+DS	委托签发者，用于鉴定DNSSEC已授权区域的签名密钥
+MX	电邮交互记录，引导域名到该域名的邮件传输代理列表
+NSEC3	NSEC记录第三版
+NSEC	DNSSEC的一部分，用来验证一个未存在的服务器，使用与NXT记录的格式
+NS	名称服务器记录，指定DNS区域使用已有的权威域名服务器
+PTR	指针记录，最常用来运行反向DNS查找
+RRSIG	DNSSEC 安全记录集证书
+SOA	权威记录的起始，指定有关DNS区域的权威性信息
+SRV	服务定位器，被新式协议使用而避免产生特定协议的记录，例如：MX 记录
+TXT	文本记录
+IXFR	增量区域转移，请求只有与先前流水式编号不同的特定区域的区域转移
+AXFR	全域转移，由主域名服务器转移整个区域文件至二级域名服务器
+ANY	所有缓存的记录或者全部已知的记录类型
+other	不属于以上类型的，均归属为此类
+3.7 - 指标：coredns_dns_response_size_bytes
+是一个histogram类型的指标，所以存在三个具体的指标名：
+
+coredns_dns_response_size_bytes_bucket
+coredns_dns_response_size_bytes_sum
+coredns_dns_response_size_bytes_count
+维度名称	维度说明
+server	通用维度
+zone	通用维度
+proto	响应传输层的协议，值为：tcp或udp
+le	响应返回客户端的数据大小，单位：字节
+le维度取值范围：0, 100, 200, 300, 400, 511, 1023, 2047, 4095, 8291, 16000, 32000, 48000, 64000
+
+3.8 - 指标：coredns_dns_response_rcode_count_total
+维度名称	维度说明
+server	通用维度
+zone	通用维度
+rcode	响应状态码
+常见的几个响应状态码，如下表：
+
+DNS响应状态码	说明
+NOERROR	查询请求成功完成
+FORMERR	查询请求格式错误
+SERVFAIL	服务端处理失败
+NXDOMAIN	请求查询的域名不存在
+NOTIMP	功能未实现
+REFUSED	服务端拒绝回复该查询
+3.8 - coredns_panic_count_total
+进程出现中断的次数，这个比较严重，需判断是否新加了什么插件导致的，需要关注了。
+
+3.9 - 指标：coredns_plugin_enabled
+维度名称	维度说明
+server	通用维度
+zone	通用维度
+name	启用插件的名称
+当前各个server下的zone开启了哪些插件功能。
+
+3.10 - 指标：coredns_build_info
+维度名称	维度说明
+version	运行coredns的版本
+revision	编译coredns时的git修订号
+goversion	编译coredns的go版本
+记录coredns编译时的版本
+
+4 - 关键指标展示
+同时制作了一个视图模版，可在Grafana官方地址：https://grafana.com/grafana/dashboards/10639 下载，
+
+以下通过展示几个promQL查询语句，示例均以维度server=172.23.243.136:9153。
+
+4.1 - 请求时间耗时
+示例1: 以维度server,zone,le分组，最近5分钟内，平均每秒耗时小于le维度的变化数量
+
+sort_desc(
+    avg(
+        rate(
+            coredns_dns_request_duration_seconds_bucket{instance="172.23.243.136:9153"}[5m]
+            )
+    ) by(server,zone,le)
+)
+示例2：计算示例1结果90%的范围小于多少，也就是第90百分位数
+
+百分位数: 用99个数值或99个点，将按从小到大顺序排列的观测值划分为100个等分，则这99个数值或99个点就称为百分位数，比如：第90百分位数的值，表示有90%的值均小于该数值。
+
+histogram_quantile(0.90,
+    sum(
+        rate(
+            coredns_dns_request_duration_seconds_bucket{instance="172.23.243.136:9153"}[5m]
+        )
+    ) by(server,zone,le)
+)
+4.2 - 客户端数据包大小
+示例1：以维度proto,server,zone,le分组，最近5分钟内，平均每秒数据包大小小于le维度的变化数量
+
+sort_desc(
+    avg(
+        rate(
+            coredns_dns_response_size_bytes_bucket{instance="172.23.243.136:9153",zone!="dropped"}[5m]
+        )
+    ) by (proto,server,zone,le)
+)
+示例2：计算示例1结果90%的范围小于多少，也就是第90百分位数
+
+histogram_quantile(0.90,
+    avg(
+        rate(
+            coredns_dns_response_size_bytes_bucket{instance="172.23.243.136:9153",zone!="dropped"}[5m]
+        )
+    ) by (proto,server,zone,le)
+)
+4.3 - 服务端处理请求数
+示例1：最近5分钟内，平均每秒处理的请求次数
+
+sort_desc(
+    avg(
+        rate(
+            coredns_dns_request_count_total{instance="172.23.243.136:9153"}[5m]
+        )
+    ) by (proto,server,zone)
+)
+4.4 - 客户端请求记录类型
+示例1：最近5分钟内，各请求记录类型，平均每秒处理的次数
+
+sort_desc(
+    avg(
+        rate(
+            coredns_dns_request_type_count_total{instance="172.23.243.136:9153"}[5m]
+        )
+    ) by (server,zone,type)
+)
+4.5 - 服务端响应状态码分布
+示例1：最近5分钟，平均每秒响应状态码的次数
+
+sort_desc(
+    avg(
+        rate(
+            coredns_dns_response_rcode_count_total{instance="172.23.243.136:9153"}[5m]
+        )
+    ) by(server,zone,rcode)
+)
+4.6 - 服务异常统计
+出现panic时候，记录drop
+不存在dns question section（向DNS请求的部分）
+其他原因被拒绝解析的
+所以不需要关注 zone=droped 的数据，可以通过rcode其他指标反应出来
+
+示例1：响应状态码非正常的处理请求，平均每秒次数，单位：次/秒
+
+sort_desc(
+    avg(
+        rate(
+            coredns_dns_response_rcode_count_total{instance="172.23.243.136:9153",rcode!="NOERROR"}[10m]
+        )
+    ) by(server,zone,rcode)
+)
+示例2: 进程出现panic的次数
+
+avg(coredns_panic_count_total{instance="172.23.243.136:9153"})
+5 - 总结讨论
+在配合prometheus的alertmanager组件，根据以上指标设置告警规则，做到及时预警。Kubernetes是分布式系统，带来了一定的维护复杂度，必须有一套完善的监控体系去做支撑。
+
+作者：运维研究所
+链接：https://www.jianshu.com/p/cfa09d95b072
+来源：简书
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
