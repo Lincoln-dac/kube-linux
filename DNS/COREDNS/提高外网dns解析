@@ -1,0 +1,5 @@
+修改deploy  dns策略
+dnsConfig:
+    options:
+    - name: ndots
+      value: "1"
