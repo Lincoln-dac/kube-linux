@@ -52,15 +52,18 @@ net.ipv4.tcp_keepalive_time = 600
 net.ipv4.tcp_keepalive_probes = 10
 net.ipv4.tcp_keepalive_intvl = 30
 net.ipv4.tcp_fin_timeout = 30
+net.ipv4.neigh.default.gc_thresh3 = 40960
+net.ipv4.neigh.default.gc_thresh2 = 20480
+net.ipv4.neigh.default.gc_thresh1 = 5120
 net.ipv4.neigh.default.gc_stale_time = 120
 net.ipv4.ip_local_port_range = 10000 65000
 net.ipv4.ip_forward = 1
+net.ipv4.conf.lo.arp_ignore=1
+net.ipv4.conf.lo.arp_announce=2
 net.ipv4.conf.default.rp_filter = 0
 net.ipv4.conf.all.rp_filter = 0
 net.ipv4.conf.all.arp_ignore=1
-net.ipv4.conf.lo.arp_ignore=1
 net.ipv4.conf.all.arp_announce=2
-net.ipv4.conf.lo.arp_announce=2
 net.core.wmem_max = 262144
 net.core.wmem_default = 262144
 net.core.somaxconn = 10240
@@ -74,9 +77,7 @@ kernel.pid_max = 131072
 fs.nr_open = 527069630
 fs.inotify.max_user_watches=89100
 fs.file-max = 6553560000
-net.ipv4.neigh.default.gc_thresh1 = 5120
-net.ipv4.neigh.default.gc_thresh2 = 20480
-net.ipv4.neigh.default.gc_thresh3 = 40960
+
 
 #-------------
 sysctl -p
