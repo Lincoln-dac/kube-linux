@@ -12,6 +12,7 @@ yum install docker-ce-18.03.0.ce-1.el7.centos  containerd.io  -y
   "exec-opts": ["native.cgroupdriver=systemd"],
   "insecure-registries": ["10.204.57.39"], 
   "storage-driver": "overlay2",
+  "storage-opts": ["overlay2.override_kernel_check=true"],
   "data-root": "/data/dockerdata",
   "max-concurrent-downloads": 10,
   "max-concurrent-uploads": 5,
