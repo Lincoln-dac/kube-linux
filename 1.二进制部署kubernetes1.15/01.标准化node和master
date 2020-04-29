@@ -86,7 +86,7 @@ kernel.sysrq = 1
 kernel.pid_max = 131072
 fs.nr_open = 527069630
 fs.inotify.max_user_watches=89100
-fs.file-max = 6553560000
+fs.file-max = 65535600
 
 
 #-------------
