@@ -27,3 +27,7 @@ WantedBy=multi-user.target
 绑定一个cluster-admin的权限。
 kubectl create clusterrolebinding kubernetes   --clusterrole=cluster-admin   --user=kubernetes
 
+4.创建仓库私密
+kubectl create secret docker-registry imagesecret --docker-server=10.204.57.39 --docker-username=admin --docker-password=123456
+
+
