@@ -8,6 +8,12 @@ grub2-mkconfig -o /boot/grub2/grub.cfg
 grub2-set-default 0 && grub2-mkconfig -o /etc/grub2.cfg
 grubby --default-kernel
 #确保内核切换成功
+关闭IPV6
+if [ $(cat /etc/default/grub |grep 'ipv6.disable=1' |grep GRUB_CMDLINE_LINUX|wc -l) -eq 0 ];then
+    sed -i 's/GRUB_CMDLINE_LINUX="/GRUB_CMDLINE_LINUX="ipv6.disable=1 /' /etc/default/grub
+    /usr/sbin/grub2-mkconfig -o /boot/grub2/grub.cfg
+fi
+
 2.重启服务器
 #关闭防火墙，swap,selinux
 systemctl disable firewalld NetworkManager
