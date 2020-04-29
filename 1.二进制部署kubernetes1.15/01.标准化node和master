@@ -24,6 +24,10 @@ sed -ri '/^[^#]*swap/s@^@#@' /etc/fstab
 cat /etc/fstab
 cat /etc/selinux/config
 确保虚拟内存关闭 seliunx关闭
+开启br_netfilter模块
+cat > /etc/sysconfig/modules/br_netfilter.modules << EOF
+modprobe br_netfilter
+EOF
 3.关闭dnsmasq 加载模块
 systemctl disable --now dnsmasq
 modprobe br_netfilter
