@@ -1,1 +1,2 @@
+for i in 0 1 2; do kubectl exec zk-$i zkServer.sh status; done
 
