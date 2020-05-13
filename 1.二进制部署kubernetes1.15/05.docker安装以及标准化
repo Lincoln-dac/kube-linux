@@ -4,7 +4,7 @@ sudo yum-config-manager \
     https://download.docker.com/linux/centos/docker-ce.repo
 yum-config-manager --enable docker-ce-nightly
 
-yum install -y yum-utils device-mapper-persistent-data lvm2 perl  conntrack-tools systemd libtool libtool-ltdl pigz libcgroup
+yum install -y yum-utils device-mapper-persistent-data lvm2 perl  conntrack-tools systemd libtool libtool-ltdl pigz libcgroup container-selinux
 yum install containerd.io docker-ce-18.03.0.ce-1.el7.centos    -y
 2.配置docker
  cat /etc/docker/daemon.json 
