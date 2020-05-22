@@ -176,3 +176,52 @@ deployment.extensions/metrics-server created
 service/metrics-server created
 clusterrole.rbac.authorization.k8s.io/system:metrics-server created
 clusterrolebinding.rbac.authorization.k8s.io/system:metrics-server created
+
+确认是否成功
+部署完成后，等待几分钟，通过以下几步来确认是否部署成功：
+1、kubectl api-versions 出现 metrics.k8s.io/v1beta1
+
+ 
+
+# kubectl api-versions
+...
+metrics.k8s.io/v1beta1
+...
+ 
+
+2、kubectl get apiservices.apiregistration.k8s.io
+
+ 
+
+# kubectl get apiservices.apiregistration.k8s.io|grep metrics
+v1beta1.metrics.k8s.io                 kube-system/metrics-server   True        3d19h
+ 
+# kubectl get apiservices.apiregistration.k8s.io v1beta1.metrics.k8s.io -oyaml
+apiVersion: apiregistration.k8s.io/v1
+kind: APIService
+metadata:
+  creationTimestamp: "2020-05-07T06:46:10Z"
+  name: v1beta1.metrics.k8s.io
+  resourceVersion: "18904165"
+  selfLink: /apis/apiregistration.k8s.io/v1/apiservices/v1beta1.metrics.k8s.io
+  uid: c654db1a-648a-4284-a46d-15568bc8aa66
+spec:
+  group: metrics.k8s.io
+  groupPriorityMinimum: 100
+  insecureSkipTLSVerify: true
+  service:
+    name: metrics-server
+    namespace: kube-system
+    port: 443
+  version: v1beta1
+  versionPriority: 100
+status:
+  conditions:
+  - lastTransitionTime: "2020-05-07T08:45:13Z"
+    message: all checks passed
+    reason: Passed
+    status: "True"
+    type: Available
+ 
+
+3、kubectl top node(kubectl top pod)命令可用
