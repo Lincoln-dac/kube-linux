@@ -5,7 +5,7 @@
  kubelet        ca.pem ca-key.pem
  kube-proxy     ca.pem kube-proxy.pem kube-proxy-key.pem
  kubectl        ca.pem admin.pem admin-key.pem
- metircs        proxy-client.pem proxy-client-key.pem
+
 2:安装证书生成工具
 wget  http://pkg.cfssl.org/R1.2/cfssl_linux-amd64
 wget  http://pkg.cfssl.org/R1.2/cfssljson_linux-amd64
@@ -139,29 +139,6 @@ EOF
  
 cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=kubernetes  kube-proxy-csr.json  | cfssljson -bare kube-proxy
 
-7:创建访问 metrics-server 使用的证书
-cat > proxy-client-csr.json <<EOF
-{
-  "CN": "aggregator",
-  "hosts": [],
-  "key": {
-    "algo": "rsa",
-    "size": 2048
-  },
-  "names": [
-    {
-      "C": "CN",
-      "ST": "Shenzhen",
-      "L": "Shenzhen",
-      "O": "k8s",
-      "OU": "System"
-    }
-  ]
-}
-EOF
-CN 名称需要位于 kube-apiserver 的 --requestheader-allowed-names 参数中，否则后续访问 metrics 时会提示权限不足。
-
-cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=kubernetes proxy-client-csr.json | cfssljson -bare proxy-client
 
    坑1：注意生成的证书要每个服务器同步一下
    坑2：如果 etcd服务器上配置有多个IP ，要把对应的IP 都写到证书里去
