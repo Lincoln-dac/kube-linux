@@ -1,1 +1,178 @@
-readme
+1、生成CA私钥及CA证书：
+openssl req -newkey rsa:4096 -nodes -sha256 -x509 -days 3650 \
+ -subj "/CN=front-proxy-ca" \
+ -keyout /tmp/certs/front-proxy-ca.key\
+ -out /tmp/certs/front-proxy-ca.crt
+ 
+2、生成front-proxy-client私钥和证书签名请求CSR
+openssl req -newkey rsa:4096 -nodes -sha256 \
+ -subj "/CN=front-proxy-client" \
+ -keyout /tmp/certs/front-proxy-client.key \
+ -out /tmp/certs/front-proxy-client.csr
+ 
+#3、用第一步生成的CA签署上面的CSR
+openssl x509 -req  -sha256 -days 3650 \
+  -CA /tmp/certs/front-proxy-ca.crt \
+  -CAkey /tmp/certs/front-proxy-ca.key\
+  -CAcreateserial \
+  -in /tmp/certs/front-proxy-client.csr\
+  -out /tmp/certs/front-proxy-client.crt
+ 
+cd /tmp/certs
+rm -f front-proxy-client.csr front-proxy-ca.srl
+ 
+"
+ 
+
+将/tmp/certs 目录下证书和私钥：front-proxy-ca.crt front-proxy-ca.keyfront-proxy-client.crtfront-proxy-client.key 拷贝到2台master /app/kubernetes/ssl/目录
+
+ 
+
+脚本
+cd /tmp/certs
+scp -r ./ root@MasterIP:/app/kubernetes/ssl/
+
+
+3.2 配置apiserver(/app/kubernetes/config/apiserver),添加以下参数：
+ 
+
+--requestheader-client-ca-file=/app/kubernetes/ssl/front-proxy-ca.crt \
+--requestheader-allowed-names=front-proxy-client \
+--requestheader-extra-headers-prefix=X-Remote-Extra- \
+--requestheader-group-headers=X-Remote-Group \
+--requestheader-username-headers=X-Remote-User \
+--proxy-client-cert-file=/app/kubernetes/ssl/front-proxy-client.crt\
+--proxy-client-key-file=/app/kubernetes/ssl/front-proxy-client.key \
+--enable-aggregator-routing=true \
+ 
+
+两台apiserver都添加上面的参数，并依次重启两台 kube-apiserver
+
+systemctl daemon-reload && systemctl restart kube-apiserver.service
+
+参数说明：
+
+If you are not running kube-proxy on a host running the API server then you must make sure that the system is enabled with the following kube-apiserver flag:
+
+--enable-aggregator-routing=true
+不添加这个参数--enable-aggregator-routing=true，aggregator 请求 metrics-server的时候，是使用的 metrcis-server 的 svc IP
+
+添加了--enable-aggregator-routing=true ，aggregator 请求 metrics-server的时候，是使用的metrcis-server 的 POD IP
+
+
+
+3.3 部署metrcis-server组件
+也可在这里下载部署文件
+
+metrics-server版本：v0.3.3
+
+ 
+
+# cd metrics-server-0.3.3/deploy/
+# tree 1.8+
+1.8+
+├── aggregated-metrics-reader.yaml
+├── auth-delegator.yaml
+├── auth-reader.yaml
+├── metrics-apiservice.yaml
+├── metrics-server-deployment.yaml
+├── metrics-server-service.yaml
+└── resource-reader.yaml
+ 
+0 directories, 7 files
+ 
+# cat metrics-server-deployment.yaml
+......
+      containers:
+      - name: metrics-server
+        command:
+        - /metrics-server
+        - --metric-resolution=30s
+        - --kubelet-insecure-tls
+        - --kubelet-preferred-address-types=InternalIP,Hostname,InternalDNS,ExternalDNS,ExternalIP
+        image: 10.204.57.39/common/metrics-server-amd64:v0.3.3
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+        - name: tmp-dir
+          mountPath: /tmp
+ 
+
+说明：
+
+相较于官方文档，metrics-server-deployment.yaml 做了上面的几项修改：
+
+--metric-resolution=30s 从Kubelet获取指标的时间间隔(默认为60秒),设置为30s
+--kubelet-insecure-tls metrics-server从kubelet获取数据时，跳过验证Kubelet CA证书
+--kubelet-preferred-address-types=InternalIP,Hostname,InternalDNS,ExternalDNS,ExternalIP
+默认metrcis-server是使用集群的kube-dns或coredns来解析node主机名，但这两个dns默认是不提供node主机名的解析的。（我们的k8s集群是用NodeIp替代了主机名，不存在此问题，但最好加上）
+
+部署完如果提示拉不到镜像，需要配置imagePullSecrets, 可以配在 ServiceAccount 或配置在Pod模板中。如下示例，配置在Pod模板中
+ 
+
+# ---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: metrics-server
+  namespace: kube-system
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: metrics-server
+  namespace: kube-system
+  labels:
+    k8s-app: metrics-server
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      k8s-app: metrics-server
+  template:
+    metadata:
+      name: metrics-server
+      labels:
+        k8s-app: metrics-server
+    spec:
+      imagePullSecrets:
+      - name: default
+      serviceAccountName: metrics-server
+      # mount in tmp so we can safely use from-scratch images and/or read-only containers
+      containers:
+      - name: metrics-server
+        command:
+        - /metrics-server
+        - --metric-resolution=30s
+        - --kubelet-insecure-tls
+        - --kubelet-preferred-address-types=InternalIP,Hostname,InternalDNS,ExternalDNS,ExternalIP
+        image: 10.204.57.39/common/metrics-server-amd64:v0.3.3
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+        - name: tmp-dir
+          mountPath: /tmp
+        - name: localtime
+          mountPath: /etc/localtime
+      volumes:
+      - name: localtime
+        hostPath:
+          path: /etc/localtime
+      - name: tmp-dir
+        emptyDir: {}
+ 
+
+部署
+ 
+
+kubectl apply -f 1.8+/
+ 
+# 示例
+ kubectl apply -f 1.8+/
+clusterrole.rbac.authorization.k8s.io/system:aggregated-metrics-reader created
+clusterrolebinding.rbac.authorization.k8s.io/metrics-server:system:auth-delegator created
+rolebinding.rbac.authorization.k8s.io/metrics-server-auth-reader created
+apiservice.apiregistration.k8s.io/v1beta1.metrics.k8s.io created
+serviceaccount/metrics-server created
+deployment.extensions/metrics-server created
+service/metrics-server created
+clusterrole.rbac.authorization.k8s.io/system:metrics-server created
+clusterrolebinding.rbac.authorization.k8s.io/system:metrics-server created
