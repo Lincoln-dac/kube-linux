@@ -1,0 +1,74 @@
+master api server IP 10.204.96.17
+backup aip server IP 10.204.96.18
+vip 10.204.96.19
+1.首先安装keeaplived 
+yum install -y keepalived
+2.修改主/etc/keepalived/keepalived.conf
+global_defs {
+        router_id lb
+}
+vrrp_script checkk8s {    
+   script "/app/kubernetes/scripts/check.sh"
+   interval 5    --- 执行监控脚本的间隔时间
+   weight 2  ---利用权重值和优先级进行运算，从而降低主服务优先级使之变为备服务器（建议先忽略）
+}
+vrrp_instance VI_1 {
+    state MASTER
+    interface bond0
+    virtual_router_id 17
+    priority 100 
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass 1111
+    }
+    track_script {
+        checkk8s
+    }
+    virtual_ipaddress {
+        10.204.96.19/24
+    }
+}
+3.修改备/etc/keepalived/keepalived.conf
+global_defs {
+        router_id lb
+}
+vrrp_script checkk8s {    
+   script "/app/kubernetes/scripts/check.sh"
+   interval 5    --- 执行监控脚本的间隔时间
+   weight 2  ---利用权重值和优先级进行运算，从而降低主服务优先级使之变为备服务器（建议先忽略）
+}
+vrrp_instance VI_1 {
+    state BACKUP
+    interface bond0
+    virtual_router_id 17
+    priority 99 
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass 1111
+    }
+    track_script {
+        checkk8s
+    }
+    virtual_ipaddress {
+        10.204.96.19/24
+    }
+}
+
+4 脚本配置文件 cat /app/kubernetes/scripts/check.sh
+#!/bin/bash
+netstat -naltp|grep 0.0.0.0:6443
+if [ $? = 0 ];
+  then
+    exit 0
+  else
+    exit 1 
+fi
+
+5:主从切换
+
+
+
+
+
