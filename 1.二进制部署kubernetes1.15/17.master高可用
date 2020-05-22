@@ -68,6 +68,7 @@ fi
 
 5:主从切换
 
+注意事项:在完成主从切换后，如果主恢复工作，建议将备的api server 重启一次，及systemctl restart kube-apiserver
 
 
 
