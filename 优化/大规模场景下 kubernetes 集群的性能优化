@@ -8,7 +8,13 @@ etcd 性能测试与调优。
 来源：知乎
 著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
 
-二、apiserver 的优化1、参数调整--max-mutating-requests-inflight ：在给定时间内的最大 mutating 请求数，调整 apiserver 的流控 qos，可以调整至 3000，默认为 200--max-requests-inflight：在给定时间内的最大 non-mutating 请求数，默认 400，可以调整至 1000--watch-cache-sizes：调大 resources 的 watch size，默认为 100，当集群中 node 以及 pod 数量非常多时可以稍微调大，比如： --watch-cache-sizes=node#1000,pod#50002、etcd 多实例支持对于不同 object 进行分库存储，首先应该将数据与状态分离，即将 events 放在单独的 etcd 实例中，在 apiserver 的配置中加上--etcd-servers-overrides=/events#https://xxx:3379;https://xxx:3379;https://xxx:3379;https://xxxx:3379;https://xxx:3379，后期可以将 pod、node 等 object 也分离在单独的 etcd 实例中。3、apiserver 的负载均衡通常为了保证集群的高可用，集群中一般会有多个 master 节点，kubelet 的连接也会被均分到不同的 apiserver，在 k8s v1.10 以前的版本中，kubelet 使用 HTTP/2，HTTP/2 为了提高网络性能，一个主机只建立一个连接，所有的请求都通过该连接进行，默认情况下，即使网络异常，它还是重用这个连接，直到操作系统将连接关闭，而操作系统关闭僵尸连接的时间默认是十几分钟，所以在 v1.10 以前的版本中 kubelet 连接 apiserver 超时之后不会主动 reset 掉连接进行重试，除非主动重启 kubelet 或者等待十多分钟后其进行重试。此问题在 v1.10 版本中被修复过（track/close kubelet->API connections on heartbeat failure #63492），代码也被 merge 到了 v1.8 和 v1.9，但是该问题并没有完全修复，直到 v1.14 版本才被完全修复（ kubelet: fix fail to close kubelet->API connections on heartbeat failure #78016）。所以为了保证 apiserver 的连接数均衡，请使用 v1.14 及以上版本。4、使用 pprof 进行性能分析pprof 是 golang 的一大杀器，要想进行源码级别的性能分析，必须使用 pprof。// 安装相关包
+二、apiserver 的优化1、参数调整--max-mutating-requests-inflight ：在给定时间内的最大 mutating 请求数，调整 apiserver 的流控 qos，可以调整至 3000，
+默认为 200--max-requests-inflight：在给定时间内的最大 non-mutating 请求数，默认 400，可以调整至 1000--watch-cache-sizes：调大 resources 的 watch size，
+默认为 100，当集群中 node 以及 pod 数量非常多时可以稍微调大，比如： --watch-cache-sizes=node#1000,pod#50002、etcd 多实例支持对于不同 object 进行分库存储，
+首先应该将数据与状态分离，即将 events 放在单独的 etcd 实例中，在 apiserver 的配置中加上--etcd-servers-overrides=/events#https://xxx:3379;https://xxx:3379;https://xxx:3379;https://xxxx:3379;https://xxx:3379，
+后期可以将 pod、node 等 object 也分离在单独的 etcd 实例中。3、apiserver 的负载均衡通常为了保证集群的高可用，集群中一般会有多个 master 节点，kubelet 的连接也会被均分到不同的 apiserver，
+在 k8s v1.10 以前的版本中，kubelet 使用 HTTP/2，HTTP/2 为了提高网络性能，一个主机只建立一个连接，所有的请求都通过该连接进行，默认情况下，即使网络异常，它还是重用这个连接，直到操作系统将连接关闭，而操作系统关闭僵尸连接的时间默认是十几分钟，
+所以在 v1.10 以前的版本中 kubelet 连接 apiserver 超时之后不会主动 reset 掉连接进行重试，除非主动重启 kubelet 或者等待十多分钟后其进行重试。此问题在 v1.10 版本中被修复过（track/close kubelet->API connections on heartbeat failure #63492），代码也被 merge 到了 v1.8 和 v1.9，但是该问题并没有完全修复，直到 v1.14 版本才被完全修复（ kubelet: fix fail to close kubelet->API connections on heartbeat failure #78016）。所以为了保证 apiserver 的连接数均衡，请使用 v1.14 及以上版本。4、使用 pprof 进行性能分析pprof 是 golang 的一大杀器，要想进行源码级别的性能分析，必须使用 pprof。// 安装相关包
 $ brew install graphviz
 
 // 启动 pprof
