@@ -5,6 +5,7 @@
 - 3、etcd 快照(snap)与预写式日志(wal)分盘存储
 
 etcd 详细的优化操作可以参考上篇文章：etcd 性能测试与调优。
+https://link.zhihu.com/?target=http%3A//blog.tianfeiyu.com/2019/10/08/etcd_improvements/
 
 二、apiserver 的优化
 
