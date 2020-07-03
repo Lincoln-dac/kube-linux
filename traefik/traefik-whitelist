@@ -1,0 +1,4 @@
+traefik-whitelist
+
+traefik.ingress.kubernetes.io/whitelist-source-range: "1.2.3.0/24, fe80::/16"	
+#A comma-separated list of IP ranges permitted for access (7).
