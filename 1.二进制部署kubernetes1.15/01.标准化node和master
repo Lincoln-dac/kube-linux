@@ -106,7 +106,7 @@ chmod 755 /etc/sysconfig/modules/ipvs.modules && bash /etc/sysconfig/modules/ipv
 如果无输出，则ipvs 模块没有加载成功
 ####
 9.所有节点配置 ntpdate 时间同步
-10.所有节点创建 mkdir -p /app/kubernetes/{bin,logs,config,data,ssl} && && mkdir -p /app/kubernetes/data/kubelet
+10.所有节点创建 mkdir -p /app/kubernetes/{bin,logs,config,data,ssl} &&  mkdir -p /app/kubernetes/data/kubelet
 
 注意事项：
 1.安装软件有先后顺序
