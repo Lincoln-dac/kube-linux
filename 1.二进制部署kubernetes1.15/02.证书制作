@@ -185,6 +185,55 @@ kubectl config set-context system:kube-controller-manager \
 
 kubectl config use-context system:kube-controller-manager --kubeconfig=kube-controller-manager.kubeconfig
 
+
+
+配置kube-scheduler证书
+
+cat > kube-scheduler-csr.json <<EOF
+{
+"CN": "system:kube-scheduler",
+"key": {
+"algo": "rsa",
+"size": 2048
+},
+"names": [
+{
+"C": "CN",
+"ST": "BeiJing",
+"L": "BeiJing",
+"O": "system:masters",
+"OU": "System"
+}
+]
+}
+EOF
+
+cfssl gencert -ca=/app/kubernetes/ssl/ca.pem \
+-ca-key=/app/kubernetes/ssl/ca-key.pem \
+-config=/app/kubernetes/ssl/ca-config.json \
+-profile=kubernetes kube-scheduler-csr.json | cfssljson -bare kube-scheduler
+
+
+
+kubectl config set-cluster kubernetes \
+--certificate-authority=/app/kubernetes/ssl/ca.pem \
+--embed-certs=true \
+--server=${KUBE_APISERVER} \
+--kubeconfig=kube-scheduler.kubeconfig
+
+kubectl config set-credentials system:kube-scheduler \
+--client-certificate=kube-scheduler.pem \
+--client-key=kube-scheduler-key.pem \
+--embed-certs=true \
+--kubeconfig=kube-scheduler.kubeconfig
+
+kubectl config set-context system:kube-scheduler \
+--cluster=kubernetes \
+--user=system:kube-scheduler \
+--kubeconfig=kube-scheduler.kubeconfig
+
+kubectl config use-context system:kube-scheduler --kubeconfig=kube-scheduler.kubeconfig
+
    坑1：注意生成的证书要每个服务器同步一下
    坑2：如果 etcd服务器上配置有多个IP ，要把对应的IP 都写到证书里去
    坑3：证书时间写长点，不要挖坑埋自己
