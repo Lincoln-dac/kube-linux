@@ -151,8 +151,8 @@ cat > kube-controller-manager-csr.json <<EOF
 "names": [
 {
 "C": "CN",
-"ST": "BeiJing",
-"L": "BeiJing",
+"ST": "Shenzhen",
+"L": "Shenzhen",
 "O": "system:masters",
 "OU": "System"
 }
@@ -199,8 +199,8 @@ cat > kube-scheduler-csr.json <<EOF
 "names": [
 {
 "C": "CN",
-"ST": "BeiJing",
-"L": "BeiJing",
+"ST": "Shenzhen",
+"L": "Shenzhen",
 "O": "system:masters",
 "OU": "System"
 }
