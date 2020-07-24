@@ -5,13 +5,16 @@ mv flanneld-amd64 /usr/bin/ && chmod +x /usr/bin/flanneld-amd64
 cat /etc/sysconfig/flanneld
 # Flanneld configuration options  
 # etcd url location.  Point this to the server where etcd runs
- FLANNEL_ETCD_ENDPOINTS="https://10.204.243.132:2379,https://10.204.243.133:2379,https://10.204.243.134:2379"
+ FLANNEL_ETCD_ENDPOINTS="https://10.204.51.64:2379,https://10.204.51.65:2379,https://10.204.51.66:2379"
 
 # etcd config key.  This is the configuration key that flannel queries
 # For address range assignment
 FLANNEL_ETCD_PREFIX="/coreos.com/network"
-FLANNEL_OPTIONS="-etcd-cafile=/app/kubernetes/ssl/ca.pem -etcd-certfile=/app/kubernetes/ssl/kubernetes.pem -etcd-keyfile=/app/kubernetes/ssl/kubernetes-key.pem --ip-masq --iface=10.204.243.132 --subnet-file=/run/flannel/subnet.env --subnet-lease-renew-margin=1439 --ip-masq"
+FLANNEL_OPTIONS="-etcd-cafile=/app/kubernetes/ssl/ca.pem -etcd-certfile=/app/kubernetes/ssl/kubernetes.pem -etcd-keyfile=/app/kubernetes/ssl/kubernetes-key.pem --iface=10.204.51.64 --subnet-file=/run/flannel/subnet.env --subnet-lease-renew-margin=1439 --ip-masq"
 
+########
+--iface 为当前宿主机ip地址
+--subnet-lease-renew-margin 为pod 网络配置文件最大过期时间（存etcd）
 
 
 
