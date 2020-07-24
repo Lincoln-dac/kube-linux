@@ -76,7 +76,7 @@ route -n
 本地网关绑定docker0,去其他节点绑定eth0出口
 
 全部启动后 ping 下各个节点的第一个IP 如
-ping 172.41.132.1
+
 
 所有节点执行
 docker login -u admin -p 123456 10.204.57.39
