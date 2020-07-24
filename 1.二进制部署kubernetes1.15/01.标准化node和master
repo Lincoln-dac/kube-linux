@@ -24,6 +24,11 @@ pod 网段
 172.16.0.0/24
 service 网段
 172.17.0.0/24
+harbor
+10.204.57.37
+10.204.57.38
+harbor vip
+10.204.57.39
 
 升级内核
 curl -o /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo
