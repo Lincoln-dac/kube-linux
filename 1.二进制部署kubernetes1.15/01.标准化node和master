@@ -1,5 +1,7 @@
 
 1.升级内核
+curl -o /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo
+
 export Kernel_Version=4.14.15-1
 wget http://mirror.rc.usf.edu/compute_lock/elrepo/kernel/el7/x86_64/RPMS/kernel-ml{,-devel}-${Kernel_Version}.el7.elrepo.x86_64.rpm
 rpm -ivh kernel-ml-$Kernel_Version.el7.elrepo.x86_64.rpm
