@@ -5,6 +5,8 @@
  kubelet        ca.pem ca-key.pem
  kube-proxy     ca.pem kube-proxy.pem kube-proxy-key.pem
  kubectl        ca.pem admin.pem admin-key.pem
+ kube-controller-manager kube-controller-manager-key.pem kube-controller-manager.pem
+ kube-scheduler kube-scheduler-key.pem kube-scheduler.pem
 
 2:安装证书生成工具
 wget  http://pkg.cfssl.org/R1.2/cfssl_linux-amd64
