@@ -143,7 +143,7 @@ EOF
  
 cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=kubernetes  kube-proxy-csr.json  | cfssljson -bare kube-proxy
 
-配置kube-controller-manager证书
+7.配置kube-controller-manager证书
 
 cat > kube-controller-manager-csr.json <<EOF
 {
@@ -191,7 +191,7 @@ kubectl config use-context system:kube-controller-manager --kubeconfig=kube-cont
 
 
 
-配置kube-scheduler证书
+8.配置kube-scheduler证书
 
 cat > kube-scheduler-csr.json <<EOF
 {
