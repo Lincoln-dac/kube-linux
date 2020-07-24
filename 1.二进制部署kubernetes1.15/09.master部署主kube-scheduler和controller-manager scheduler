@@ -1,9 +1,8 @@
-主机IP 10.204.243.132
+主机IP 10.204.51.64
 
 1.scheduler
 cat /app/kubernetes/config/scheduler
-KUBE_SCHEDULER_ARGS=" --master=10.204.243.132:8080 --leader-elect=true --address=127.0.0.1 --logtostderr=false --v=2 --log-dir=/app/kubernetes/logs"
-CONFIGHPA="--requestheader-allowed-names="" --requestheader-client-ca-file=/app/kubernetes/ssl/ca.pem --requestheader-extra-headers-prefix="X-Remote-Extra-" --requestheader-group-headers=X-Remote-Group  --requestheader-username-headers=X-Remote-User"
+KUBE_SCHEDULER_ARGS=" --master=10.204.51.70:6443 --leader-elect=true --address=127.0.0.1 --logtostderr=false --v=2 --log-dir=/app/kubernetes/logs --kubeconfig=/app/kubernetes/ssl/kube-scheduler.kubeconfig"
 
 cat /usr/lib/systemd/system/kube-scheduler.service
 [Unit]
@@ -25,8 +24,7 @@ systemctl  start kube-scheduler && systemctl  enable kube-scheduler
 
 2.controller-manager
 cat /app/kubernetes/config/controller-manager
-CONTROL="--horizontal-pod-autoscaler-use-rest-clients=false --address=127.0.0.1 --service-cluster-ip-range=172.40.0.0/16 --cluster-name=kubernetes --cluster-signing-cert-file=/app/kubernetes/ssl/ca.pem --cluster-signing-key-file=/app/kubernetes/ssl/ca-key.pem --service-account-private-key-file=/app/kubernetes/ssl/ca-key.pem --root-ca-file=/app/kubernetes/ssl/ca.pem --leader-elect=true --master=http://10.204.243.131:8080 --logtostderr=false --v=2 --pod-eviction-timeout=180s --log-dir=/app/kubernetes/logs --experimental-cluster-signing-duration=876000h"
-CONFIGHPA="--requestheader-allowed-names=""  --requestheader-client-ca-file=/app/kubernetes/ssl/ca.pem  --requestheader-extra-headers-prefix="X-Remote-Extra-" --requestheader-group-headers=X-Remote-Group  --requestheader-username-headers=X-Remote-User"
+CONTROL="--address=127.0.0.1 --service-cluster-ip-range=172.17.0.0/16 --cluster-name=kubernetes --cluster-signing-cert-file=/app/kubernetes/ssl/ca.pem --cluster-signing-key-file=/app/kubernetes/ssl/ca-key.pem --service-account-private-key-file=/app/kubernetes/ssl/ca-key.pem --root-ca-file=/app/kubernetes/ssl/ca.pem --leader-elect=true --master=http://10.204.51.70:6443--logtostderr=false --v=2 --pod-eviction-timeout=180s --log-dir=/app/kubernetes/logs --experimental-cluster-signing-duration=876000h --horizontal-pod-autoscaler-use-rest-clients=false "
 
 cat /usr/lib/systemd/system/kube-controller-manager.service
 [Unit]
