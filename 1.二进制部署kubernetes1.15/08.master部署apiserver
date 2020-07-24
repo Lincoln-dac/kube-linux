@@ -6,16 +6,16 @@ KUBE="--kubelet-timeout=60s --kubelet-port=10250"
 LOGS="--logtostderr=false --log-dir=/app/kubernetes/logs --v=2 --event-ttl=24h"
 ETCDMEMBER="--etcd-servers=https://10.204.51.64:2379,https://10.204.51.65:2379,https://10.204.51.66:2379"
 COMMON="--apiserver-count=2  --service-node-port-range=30000-50000 --enable-bootstrap-token-auth --authorization-mode=RBAC,Node --enable-admission-plugins=NamespaceLifecycle,LimitRanger,ServiceAccount,ResourceQuota,NodeRestriction --allow-privileged=true --default-not-ready-toleration-seconds=180 --default-unreachable-toleration-seconds=180 --runtime-config=api/all=true --anonymous-auth=false --enable-aggregator-routing=true"
-IP="--bind-address=0.0.0.0 --secure-port=6443 --insecure-port=8080 --advertise-address=0.0.0.0 --insecure-bind-address=0.0.0.0 --service-cluster-ip-range=172.17.0.0/16"
-CONFIGHPA="--requestheader-allowed-names=aggregator  --requestheader-client-ca-file=/app/kubernetes/ssl/ca.pem  --requestheader-extra-headers-prefix="X-Remote-Extra-" --requestheader-group-headers=X-Remote-Group  --requestheader-username-headers=X-Remote-User"
+IP="--bind-address=0.0.0.0 --secure-port=6443 --insecure-port=0--advertise-address=0.0.0.0 --insecure-bind-address=0.0.0.0 --service-cluster-ip-range=172.17.0.0/16"
 
-cat /usr/lib/systemd/system/kube-apiserver.service 
+
+cat 
 [Unit]
 Description=Kubernetes API Server
 Documentation=https://github.com/kubernetes/kubernetes
 [Service]
 EnvironmentFile=-/app/kubernetes/config/apiserver
-ExecStart=/app/kubernetes/bin/kube-apiserver $KUBE $SSL $IP $ETCDMEMBER $LOGS $COMMON $CONFIGHPA
+ExecStart=/app/kubernetes/bin/kube-apiserver $KUBE $SSL $IP $ETCDMEMBER $LOGS $COMMON 
 Restart=on-failure
 [Install]
 WantedBy=multi-user.target
