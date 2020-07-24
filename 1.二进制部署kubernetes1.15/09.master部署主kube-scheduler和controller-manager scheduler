@@ -24,7 +24,7 @@ systemctl  start kube-scheduler && systemctl  enable kube-scheduler
 
 2.controller-manager
 cat /app/kubernetes/config/controller-manager
-CONTROL="--address=127.0.0.1 --service-cluster-ip-range=172.17.0.0/16 --cluster-name=kubernetes --cluster-signing-cert-file=/app/kubernetes/ssl/ca.pem --cluster-signing-key-file=/app/kubernetes/ssl/ca-key.pem --service-account-private-key-file=/app/kubernetes/ssl/ca-key.pem --root-ca-file=/app/kubernetes/ssl/ca.pem --leader-elect=true --master=http://10.204.51.70:6443--logtostderr=false --v=2 --pod-eviction-timeout=180s --log-dir=/app/kubernetes/logs --experimental-cluster-signing-duration=876000h --horizontal-pod-autoscaler-use-rest-clients=false "
+CONTROL="--address=127.0.0.1 --service-cluster-ip-range=172.17.0.0/16 --cluster-name=kubernetes --cluster-signing-cert-file=/app/kubernetes/ssl/ca.pem --cluster-signing-key-file=/app/kubernetes/ssl/ca-key.pem --service-account-private-key-file=/app/kubernetes/ssl/ca-key.pem --root-ca-file=/app/kubernetes/ssl/ca.pem --leader-elect=true --master=http://10.204.51.70:6443 --logtostderr=false --v=2 --pod-eviction-timeout=180s --log-dir=/app/kubernetes/logs --experimental-cluster-signing-duration=876000h --kubeconfig=/app/kubernetes/ssl/kube-controller-manager.kubeconfig "
 
 cat /usr/lib/systemd/system/kube-controller-manager.service
 [Unit]
@@ -33,7 +33,7 @@ Documentation=https://github.com/GoogleCloudPlatform/kubernetes
 
 [Service]
 EnvironmentFile=-/app/kubernetes/config/controller-manager
-ExecStart=/app/kubernetes/bin/kube-controller-manager $CONTROL $CONFIGHPA
+ExecStart=/app/kubernetes/bin/kube-controller-manager $CONTROL 
 Restart=on-failure
 LimitNOFILE=65536
 
