@@ -26,6 +26,7 @@ WantedBy=multi-user.target
 3.创建集群用户
 绑定一个cluster-admin的权限。
 kubectl create clusterrolebinding kubernetes   --clusterrole=cluster-admin   --user=kubernetes
+kubectl create clusterrolebinding kubelet-bootstrap --clusterrole=system:node-bootstrapper --user=kubelet-bootstrap
 
 4.创建仓库私密
 kubectl create secret docker-registry imagesecret --docker-server=10.204.57.39 --docker-username=admin --docker-password=123456
