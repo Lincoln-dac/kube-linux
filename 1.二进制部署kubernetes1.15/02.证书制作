@@ -7,6 +7,7 @@
  kubectl        ca.pem admin.pem admin-key.pem
  kube-controller-manager kube-controller-manager-key.pem kube-controller-manager.pem
  kube-scheduler kube-scheduler-key.pem kube-scheduler.pem
+ metrics-server front-proxy-ca.key front-proxy-client.key front-proxy-ca.crt front-proxy-client.crt
 
 2:安装证书生成工具
 wget  http://pkg.cfssl.org/R1.2/cfssl_linux-amd64
@@ -236,7 +237,13 @@ kubectl config set-context system:kube-scheduler \
 
 kubectl config use-context system:kube-scheduler --kubeconfig=kube-scheduler.kubeconfig
 
-   坑1：注意生成的证书要每个服务器同步一下
-   坑2：如果 etcd服务器上配置有多个IP ，要把对应的IP 都写到证书里去
-   坑3：证书时间写长点，不要挖坑埋自己
-   坑4 :kubernetes-csr.json IP 记得把master的 VIP 写进去，考虑到etcd和 master迁移 请多写几个IP
+metrics-server
+#生成CA私钥及CA证书：
+openssl req -newkey rsa:4096 -nodes -sha256 -x509 -days 3650  -subj "/CN=front-proxy-ca"  -keyout front-proxy-ca.key  -out front-proxy-ca.crt
+openssl req -newkey rsa:4096 -nodes -sha256  -subj "/CN=front-proxy-client"  -keyout front-proxy-client.key  -out front-proxy-client.csr
+openssl x509 -req  -sha256 -days 3650   -CA front-proxy-ca.crt   -CAkey front-proxy-ca.key  -CAcreateserial   -in front-proxy-client.csr  -out front-proxy-client.crt
+
+ 坑1：注意生成的证书要每个服务器同步一下
+ 坑2：如果 etcd服务器上配置有多个IP ，要把对应的IP 都写到证书里去
+ 坑3：证书时间写长点，不要挖坑埋自己
+ 坑4 :kubernetes-csr.json IP 记得把master的 VIP 写进去，考虑到etcd和 master迁移 请多写几个IP
