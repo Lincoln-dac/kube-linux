@@ -1,8 +1,8 @@
 
 cat /app/kubernetes/config/proxy
 LOGS="--logtostderr=false --v=2  --log-dir=/app/kubernetes/logs"
-PROXY_ARGS="--master=https://10.204.243.132:6443 --kubeconfig=/app/kubernetes/ssl/kube-proxy.kubeconfig --cluster-cidr=172.40.0.0/16 --kube-api-qps=50"  
-HOSTNAME="--bind-address=10.204.243.132 --hostname-override=10.204.243.132"
+PROXY_ARGS="--master=https://10.204.51.70:6443 --kubeconfig=/app/kubernetes/ssl/kube-proxy.kubeconfig --cluster-cidr=172.17.0.0/16 --kube-api-qps=100"  
+HOSTNAME="--bind-address=10.204.51.64 --hostname-override=10.204.51.64"
 IPVS="--proxy-mode=ipvs --ipvs-min-sync-period=5s --ipvs-sync-period=5s --ipvs-scheduler=rr --masquerade-all=true"
 
 cat /usr/lib/systemd/system/kube-proxy.service 
