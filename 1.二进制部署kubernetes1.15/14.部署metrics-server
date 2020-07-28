@@ -1,4 +1,3 @@
-
 1.开启聚合层（Aggregation Layer）
 开启聚合层apiserver需要配置的参数：
 修改master /app/kubernetes/conf/apiserver
@@ -6,7 +5,7 @@
 
 CONFIG="--requestheader-allowed-names=front-proxy-client --requestheader-client-ca-file=/app/kubernetes/ssl/front-proxy-ca.crt --requestheader-extra-headers-prefix=X-Remote-Extra- --requestheader-group-headers=X-Remote-Group --requestheader-username-headers=X-Remote-User --proxy-client-cert-file=/app/kubernetes/ssl/front-proxy-client.crt --proxy-client-key-file=/app/kubernetes/ssl/front-proxy-client.key --enable-aggregator-routing=true"
 
-修改/usr/lib/systemd/system/kube-apiserver.service
+修改 /usr/lib/systemd/system/kube-apiserver.service
 [Unit]
 Description=Kubernetes API Server
 Documentation=https://github.com/kubernetes/kubernetes
@@ -21,7 +20,7 @@ WantedBy=multi-user.target
 systemctl daemon-reload && systemctl restart kube-apiserver.service
 
 
-部署metrcis-server组件
+2.部署metrcis-server组件
 metrics-server版本：v0.3.3
 # cd metrics-server-0.3.3/deploy/
 # tree 1.8+
@@ -58,61 +57,6 @@ metrics-server版本：v0.3.3
 --kubelet-preferred-address-types=InternalIP,Hostname,InternalDNS,ExternalDNS,ExternalIP
 默认metrcis-server是使用集群的kube-dns或coredns来解析node主机名，但这两个dns默认是不提供node主机名的解析的。（我们的k8s集群是用NodeIp替代了主机名，不存在此问题，但最好加上）
 
-部署完如果提示拉不到镜像，需要配置imagePullSecrets, 可以配在 ServiceAccount 或配置在Pod模板中。如下示例，配置在Pod模板中
- 
-# ---
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: metrics-server
-  namespace: kube-system
----
-apiVersion: extensions/v1beta1
-kind: Deployment
-metadata:
-  name: metrics-server
-  namespace: kube-system
-  labels:
-    k8s-app: metrics-server
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      k8s-app: metrics-server
-  template:
-    metadata:
-      name: metrics-server
-      labels:
-        k8s-app: metrics-server
-    spec:
-      imagePullSecrets:
-      - name: default
-      serviceAccountName: metrics-server
-      # mount in tmp so we can safely use from-scratch images and/or read-only containers
-      containers:
-      - name: metrics-server
-        command:
-        - /metrics-server
-        - --metric-resolution=30s
-        - --kubelet-insecure-tls
-        - --kubelet-preferred-address-types=InternalIP,Hostname,InternalDNS,ExternalDNS,ExternalIP
-        image: 10.204.57.39/common/metrics-server-amd64:v0.3.3
-        imagePullPolicy: IfNotPresent
-        volumeMounts:
-        - name: tmp-dir
-          mountPath: /tmp
-        - name: localtime
-          mountPath: /etc/localtime
-      volumes:
-      - name: localtime
-        hostPath:
-          path: /etc/localtime
-      - name: tmp-dir
-        emptyDir: {}
- 
-
-部署
- 
 
 kubectl apply -f 1.8+/
  
