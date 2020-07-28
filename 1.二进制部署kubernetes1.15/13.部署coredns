@@ -1,12 +1,34 @@
-1.
-需要修改2个地方
-  clusterIP: 172.40.0.2 这个为集群内部的dns IP地址
-  
+1.创建configmap 
+kubectl create configmap coredns --from-file=cm.yaml -n kube-system
+cat cm.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: coredns
+  namespace: kube-system
+  labels:
+      addonmanager.kubernetes.io/mode: EnsureExists
+data:
   Corefile: |
     .:53 {
         errors
+        log
         health
         kubernetes cluster.local in-addr.arpa ip6.arpa {
+            pods insecure
+            upstream
+            fallthrough in-addr.arpa ip6.arpa
+            ttl 30
+        }
+        prometheus :9153
+        forward . /etc/resolv.conf
+        cache 30
+        loop
+        log
+        reload
+        loadbalance
+    }
+ 
         
         
 2.kubectl apply -f coredns.yaml
