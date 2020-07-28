@@ -1,281 +1,28 @@
-1.资源指标API(Resource metrics API)
-从 v1.8 开始，资源使用情况的度量（如容器的 CPU 和内存使用）可以通过 Metrics API 获取。注意：
-Metrics API 只可以查询当前的度量数据，并不保存历史数据
-Metrics API URI 为 /apis/metrics.k8s.io/，在 k8s.io/metrics 维护
-必须部署 metrics-server 才能使用该 API，metrics-server 通过调用 Kubelet Summary API (kubelet 10250 端口)获取数据
-HPA功能使用的就是 metrics.k8s.io API，所以要使用HPA功能，必须安装metrics-server
 
-2.开启聚合层（Aggregation Layer）
+1.开启聚合层（Aggregation Layer）
 开启聚合层apiserver需要配置的参数：
-enable-kubernetes-apiserver-flags
+修改master /app/kubernetes/conf/apiserver
+新增
 
+CONFIG="--requestheader-allowed-names=front-proxy-client --requestheader-client-ca-file=/app/kubernetes/ssl/front-proxy-ca.crt --requestheader-extra-headers-prefix=X-Remote-Extra- --requestheader-group-headers=X-Remote-Group --requestheader-username-headers=X-Remote-User --proxy-client-cert-file=/app/kubernetes/ssl/front-proxy-client.crt --proxy-client-key-file=/app/kubernetes/ssl/front-proxy-client.key --enable-aggregator-routing=true"
+
+修改/usr/lib/systemd/system/kube-apiserver.service
+[Unit]
+Description=Kubernetes API Server
+Documentation=https://github.com/kubernetes/kubernetes
+[Service]
+EnvironmentFile=-/app/kubernetes/config/apiserver
+ExecStart=/app/kubernetes/bin/kube-apiserver $KUBE $SSL $IP $ETCDMEMBER $LOGS $COMMON  $CONFIG
+Restart=on-failure
+[Install]
+WantedBy=multi-user.target
  
-
---requestheader-client-ca-file=/app/kubernetes/ssl/front-proxy-ca.crt \
---requestheader-allowed-names=front-proxy-client \
---requestheader-extra-headers-prefix=X-Remote-Extra- \
---requestheader-group-headers=X-Remote-Group \
---requestheader-username-headers=X-Remote-User \
---proxy-client-cert-file=/app/kubernetes/ssl/front-proxy-client.crt\
---proxy-client-key-file=/app/kubernetes/ssl/front-proxy-client.key \
---enable-aggregator-routing=true \
-解释这几个参数意思之前，先来看一下聚合层到底到怎么工作的。
-
-聚合层是k8s提供的一种扩展API的方式。扩展Kubernetes API常用方式：
-
-使用CRD自定义资源类型 (易用但限制颇多)
-开发自定义API Server并聚合至主API Server (富于弹性但代码工作量大)
-metrics-server使用的是第二种方式。那到底怎样实现的呢？
-kube-apiserver中，聚合自定义API Server的组件是kube-aggregator
-先在主API Server上添加一个APIService资源对象，将自定义API Server注册到kube-aggregator上，以完成聚合操作
-
-kube-aggregator 充当了kube-apiserver和其他扩展API server（extension API server）的代理，kube-aggregator会将客户端的请求转发到后端的 API server上。如对此接口 /apis/metrics.k8s.io/ 的请求 kube-aggregator 会转发给 metrics-server 处理。
-
-那么问题来了，kube-aggregator怎么知道将请求转发到哪里？
-Register APIService objects
-通过注册APIService对象，您可以动态配置将哪些客户端请求代理给扩展apiserver。
-metrics-server示例：
-
- 
-
-#  kubectl get apiservices.apiregistration.k8s.io v1beta1.metrics.k8s.io -oyaml
-apiVersion: apiregistration.k8s.io/v1
-kind: APIService
-metadata:
-  creationTimestamp: "2020-05-07T06:46:10Z"
-  name: v1beta1.metrics.k8s.io
-  resourceVersion: "18904165"
-  selfLink: /apis/apiregistration.k8s.io/v1/apiservices/v1beta1.metrics.k8s.io
-  uid: c654db1a-648a-4284-a46d-15568bc8aa66
-spec:
-  group: metrics.k8s.io
-  groupPriorityMinimum: 100
-  insecureSkipTLSVerify: true
-  service:
-    name: metrics-server
-    namespace: kube-system
-    port: 443
-  version: v1beta1
-  versionPriority: 100
-status:
-  conditions:
-  - lastTransitionTime: "2020-05-07T08:45:13Z"
-    message: all checks passed
-    reason: Passed
-    status: "True"
-    type: Available
- 
-
-“service”配置段 是对扩展apiserver的服务的引用。服务命名空间和名称是必需的。端口是可选的，默认为443。路径是可选的，默认为“/”。
-
-一旦Kubernetes apiserver确定应该将请求发送到扩展apiserver，它需要知道如何联系它。
-
-通过注册APIService对象，当客户端请求 apis/metrics.k8s.io/v1beta1 API时，kube-aggregator 就知道需要将此请求转发给 kube-system 命名空间下的 metrics-server 服务（service）去处理。
-
-kube-aggregator作用
-Provide an API for registering API servers.
-Summarize discovery information from all the servers.
-Proxy client requests to individual servers.
-kube-aggregator作为代理proxy和后端 extension API server通信时，需要满足两个条件：
-
-相互TLS认证（mutual TLS auth between the proxy and extension apiservers）具体的认证流程参考官网authentication-flow
-确保代理是由汇聚层CA签名的，而不是由其他东西(如主CA)签名的
-所以现在就比较清楚了，以--requestheader和--proxy-client的参数，就是用来配置 kube-aggregator和 extension API server 通信时、建立 相互TLS会话 的配置。
-
-具体来说，--proxy-client-cert-file=/app/kubernetes/ssl/front-proxy-client.crt和--proxy-client-key-file=/app/kubernetes/ssl/front-proxy-client.key参数是kube-aggregator的配置：指定 kube-aggregator 转发请求到后端 extension API server时，建立相互TLS认证所使用的客户端证书。
-
---requestheader-client-ca-file=/app/kubernetes/ssl/front-proxy-ca.crt是配置给 extension API server（如metrics-server）的CA证书。
-
-那么问题来了，既然你说CA证书是配置给metrics-server使用的，但我并没有对metrics-server做任何配置，metrics-server是怎么拿到这个证书和其他一些配置新的呢（--requestheader-client开头的参数）？
-
-当kube-apiserver开启聚合层，配置了这些参数时，启动apiserver后，kube-apiserver会在kube-system命令空间下生成一个configmap:extension-apiserver-authentication
-
- 
-
-# kubectl -n kube-system get cm extension-apiserver-authentication -oyaml
-apiVersion: v1
-data:
-  client-ca-file: |
-    -----BEGIN CERTIFICATE-----
-    MIIDxDCCAqygAwIBAgIUUIKuFXoNWo9XUWaCLa1ZEbFV0igwDQYJKoZIhvcNAQEL
-    BQAwZzELMAkGA1UEBhMCQ04xETAPBgNVBAgTCFNoZW56aGVuMREwDwYDVQQHEwhT
-    aGVuemhlbjEMMAoGA1UEChMDazhzMQ8wDQYDVQQLEwZTeXN0ZW0xEzARBgNVBAMT
-    Cmt1YmVybmV0ZXMwIBcNMTkxMDIyMDY1MTAwWhgPMjExOTA5MjgwNjUxMDBaMGcx
-    CzAJBgNVBAYTAkNOMREwDwYDVQQIEwhTaGVuemhlbjERMA8GA1UEBxMIU2hlbnpo
-    ZW4xDDAKBgNVBAoTA2s4czEPMA0GA1UECxMGU3lzdGVtMRMwEQYDVQQDEwprdWJl
-    cm5ldGVzMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA2FQ55vbDPVi6
-    FAOQBGtCPseenc2krcOqHMXaq/3a6JnzkZEr4v+5lmC/HZ6nDq82CgAWbnoSYGWj
-    SNu0VCYBxYTdw8QcBKOhljnO0hCA7P2x1wiQcCEWiU8NqSfBQToamB5qDRd2XyCQ
-    0EHVpTPiK/GI4kL8B+wdZGYJ5YyMs1z8fa4sBtQz5khzf8CvTuUQ4UkRlc6JH3Vq
-    MTpPB1lqeoYT1jrkMdU0fwyVIVDUg0gmqv8W7A020Rn8O9ZGZMAKTel+os2eTwXA
-    XbbO+Vo6zcU0BbkLdk0S+/TUrzOI0SVIG3lKdw/KotpxKroIEGU/7yYuUtn/86fA
-    ZG6LqDCItQIDAQABo2YwZDAOBgNVHQ8BAf8EBAMCAQYwEgYDVR0TAQH/BAgwBgEB
-    /wIBAjAdBgNVHQ4EFgQUIIZkTatXs4xSn4Rs3zib8b9wpwkwHwYDVR0jBBgwFoAU
-    IIZkTatXs4xSn4Rs3zib8b9wpwkwDQYJKoZIhvcNAQELBQADggEBAGh1j1Im1ZcE
-    ZvWv4n3+6MKXfRAmUsF9MrUE5qKAoHxAWT6JuHCEv2ByHzLkp9nbfVt65ABJftgu
-    qiZ4LZ0M7HnCxBmRCp+A0uByfstbkgUMYI2phNwXABkFVjcGtyEJgVtw+PWBGoyu
-    42HEvQ6WmhZaUqVOUvh4ZmQJLIRaQHTD0cCm+kGDnz4WGCv0/kCIlD75cviDe2jX
-    HJfjT8A2S/XhdtFhkZXpMVxbrh2AH11ha9n2JbyvgrO6khr2GIAT0wC0/pdRF/IT
-    3VBHl4jJDsutOMAt2m/aGqWbDENamfJIkvUYPJqtihB3ulTsqqBJDa/QYnzQQge+
-    xdoyX/rcKIY=
-    -----END CERTIFICATE-----
-  requestheader-allowed-names: '["front-proxy-client"]'
-  requestheader-client-ca-file: |
-    -----BEGIN CERTIFICATE-----
-    MIIFBTCCAu2gAwIBAgIJAJwT1vMuK8fNMA0GCSqGSIb3DQEBCwUAMBkxFzAVBgNV
-    BAMMDmZyb250LXByb3h5LWNhMB4XDTIwMDUwNzA2MDIxNloXDTMwMDUwNTA2MDIx
-    NlowGTEXMBUGA1UEAwwOZnJvbnQtcHJveHktY2EwggIiMA0GCSqGSIb3DQEBAQUA
-    A4ICDwAwggIKAoICAQDVKVT5duo+x2MJPank7tdgWGGI8tZ+/xHgSb0g9nB02QgO
-    YuWa5JpAkbzGq6jUgXFsCESNuBrFK1UiZuYnKU5DSJXwJPLVxodkDnhD86D5ZARd
-    d+GDcU9LXxEdazDcHwtYVj5kTwCxkJ/Hi1yrvxAY9z8FVDj+c5xDEQlKIwbWLI1A
-    yN01kmNvKs51OsVdsuYr9BJidtQFYjpK27VkjEeZJEeDCuo3Na6UZohTw+WgKNJz
-    g4J6NcZ+eqTiM2psLerHNSk9Z2ooVHQ4GGj+Jd/wfpMQBCDVYLouIsd2i5MePr3f
-    qqBmvt1g9rh3LzL7vjuDJwrsJmF6XrhCXLjPMwBOz812YsmD4Lb+JebX3DylStPG
-    EghfBfkHRLJbqo3i/WCaz3iUkq34euBBNOLuMwNfLvJsosBkpmoy9oFmKWMNMs3T
-    f57Xf5ztMIUI734KC1twmYs/oKbaiSXIqfoA2b8IiX1w37G5BULB77HQ2rxs6rzG
-    czEO8BR3SiZJ9fyFs8tdYyPysySLVNMfMjJeYo9fZqJ7UVANmyw9mrUimLqluOVw
-    6+Ci01KIiIUiMytiRgRSZDwExW4ej6ifk9O2T0O2xJKAgDsMMsQo2v04Ia4wLuN1
-    p+j+zWBxvRdqbqLk9iGDf4U1JVljonwuLmcyIwdkXnOXnikbWR4tXEJGGlWaXQID
-    AQABo1AwTjAdBgNVHQ4EFgQUt68CY9AebdrQd0f6XGZO02WgHRcwHwYDVR0jBBgw
-    FoAUt68CY9AebdrQd0f6XGZO02WgHRcwDAYDVR0TBAUwAwEB/zANBgkqhkiG9w0B
-    AQsFAAOCAgEAR7d4duB+pB6Q0sNHRV9I23Zrqmh8l5yVVK3/S8PsqSNqA82NUHpd
-    8bPTeiugJ0eU886TkEHGF82t5JKHWj5LNAJo9njn+M+VQfYv26p/AYREd+sSGp3r
-    yHZHNhQK/RX6H8a8bOyQwZ4O+tqqDroKw5AgTZRjDAxwQzfssUa/ZLgdZmDOfUyx
-    T1lhb8NKBWxY8yabsEIl1NmRWaqOzh038gA4reJvvmzzqC0EMslBxd5TzZvrS0wh
-    heaS6EW+qfhUnC3U6APR9e9RjhQutR7QciFZpl7iVtF7o77ME832x01ogxSPktHm
-    0vw0B12lsmCm01RKiNyLsG1Bbu6NmAiOlWpaexaTxNknFvDTGd2JpyC+cOFx+pCY
-    ZMcQHhmtuRimSCz3T1kKU6yJtGvKMCyY3W4L+6DwpAG2zw2G5U4l2ipIINKgwVdu
-    xArBfzrRSlLnAkeCG76isaES9FbTiRbfXJov5dM5QFHoAL0TUS0fhNIW+5RBlyXM
-    47Tai8YjkQZYe24dhPKlMqHokvqutOfHolEmaqhU3IV8NbwrkMM581/owXz9aZa4
-    n6QAV8Mu2CxMFkNWsuuXU3LGroTJ+II1nSBzCbQZNqLBhTuJcWlx+0sR6mZD4bSS
-    2Z0wOzc0ILnH2vlKXiNfopoqdT5g87AgvlE08NyMjACMy2AroktNxXg=
-    -----END CERTIFICATE-----
-  requestheader-extra-headers-prefix: '["X-Remote-Extra-"]'
-  requestheader-group-headers: '["X-Remote-Group"]'
-  requestheader-username-headers: '["X-Remote-User"]'
-kind: ConfigMap
-metadata:
-  creationTimestamp: "2020-03-13T04:26:30Z"
-  name: extension-apiserver-authentication
-  namespace: kube-system
-  resourceVersion: "18844656"
-  selfLink: /api/v1/namespaces/kube-system/configmaps/extension-apiserver-authentication
-  uid: f187ce11-3c0c-41d4-9284-e812fc85919e
- 
-
- 
-
-当部署了metrics-server后，metrics-server Pod 启动后，会从kube-apiserver获取这个配置文件，如果获取不到，metrics-server会run不起来
-
- 
-
-# kubectl -n kube-system logs -f metrics-server-76d4dd48-r9ttv |head -30
-I0701 08:33:25.956746       1 serving.go:312] Generated self-signed cert (apiserver.local.config/certificates/apiserver.crt, apiserver.local.config/certificates/apiserver.key)
-I0701 08:33:27.377141       1 round_trippers.go:438] GET https://172.254.0.1:443/api/v1/namespaces/kube-system/configmaps/extension-apiserver-authentication 200 OK in 14 milliseconds
-I0701 08:33:27.394313       1 manager.go:108] Beginning cycle, collecting metrics...
-I0701 08:33:27.394387       1 manager.go:95] Scraping metrics from 0 sources
-I0701 08:33:27.394403       1 manager.go:150] ScrapeMetrics: time: 1.387µs, nodes: 0, pods: 0
-I0701 08:33:27.394419       1 manager.go:124] ...Storing metrics...
-I0701 08:33:27.394430       1 manager.go:135] ...Cycle complete
-I0701 08:33:27.409396       1 healthz.go:116] Installing healthz checkers:"ping","log","poststarthook/generic-apiserver-start-informers","healthz"
-I0701 08:33:27.409954       1 secure_serving.go:116] Serving securely on [::]:443
-I0701 08:33:27.410298       1 reflector.go:123] Starting reflector *v1.Pod (0s) from k8s.io/client-go/informers/factory.go:133
-I0701 08:33:27.410337       1 reflector.go:161] Listing and watching *v1.Pod from k8s.io/client-go/informers/factory.go:133
-I0701 08:33:27.415203       1 reflector.go:123] Starting reflector *v1.Node (0s) from k8s.io/client-go/informers/factory.go:133
-I0701 08:33:27.415225       1 reflector.go:161] Listing and watching *v1.Node from k8s.io/client-go/informers/factory.go:133
-I0701 08:33:27.421446       1 round_trippers.go:438] GET https://172.254.0.1:443/api/v1/pods?limit=500&resourceVersion=0 200 OK in 10 milliseconds
-I0701 08:33:27.421529       1 round_trippers.go:438] GET https://172.254.0.1:443/api/v1/nodes?limit=500&resourceVersion=0 200 OK in 6 milliseconds
-extension API server(如metrics-server)则会使用 --requestheader-client-ca-file=/app/kubernetes/ssl/front-proxy-ca.crt
-
-指定的CA去验证 --proxy-client-cert-file=/app/kubernetes/ssl/front-proxy-client.crt参数指定的客户端证书（kube-aggregator使用）。
-
-客户端证书是CA签署的、有效的，并且客户端证书的CN在 --requestheader-allowed-names=front-proxy-client指定的name中, 则请求是有效的，否则报错，请求没通过认证，不会响应客户端的请求。
-
-3.metrics-server部署实战
-以下部署是严格按照官网推荐配置进行。建议以后的生产集群按照此步骤进行配置。kube-apiserver开启聚合层、部署metrcis-server后，kubectl top命令和HPA均可使用
-
-3.1 生成聚合层CA及客户端证书
-即front-proxy-ca.crt front-proxy-client.crt front-proxy-client.key
-
-在其中一台master节点上执行即可
-
-脚本如下：
-
- 
-
- 
-mkdir -pv /tmp/certs
- 
-#1、生成CA私钥及CA证书：
-openssl req -newkey rsa:4096 -nodes -sha256 -x509 -days 3650 \
- -subj "/CN=front-proxy-ca" \
- -keyout /tmp/certs/front-proxy-ca.key\
- -out /tmp/certs/front-proxy-ca.crt
- 
-#2、生成front-proxy-client私钥和证书签名请求CSR
-openssl req -newkey rsa:4096 -nodes -sha256 \
- -subj "/CN=front-proxy-client" \
- -keyout /tmp/certs/front-proxy-client.key \
- -out /tmp/certs/front-proxy-client.csr
- 
-#3、用第一步生成的CA签署上面的CSR
-openssl x509 -req  -sha256 -days 3650 \
-  -CA /tmp/certs/front-proxy-ca.crt \
-  -CAkey /tmp/certs/front-proxy-ca.key\
-  -CAcreateserial \
-  -in /tmp/certs/front-proxy-client.csr\
-  -out /tmp/certs/front-proxy-client.crt
- 
-cd /tmp/certs
-rm -f front-proxy-client.csr front-proxy-ca.srl
- 
-"
- 
-
-将/tmp/certs 目录下证书和私钥：front-proxy-ca.crt front-proxy-ca.keyfront-proxy-client.crtfront-proxy-client.key 拷贝到2台master /app/kubernetes/ssl/目录
-
- 
-
-脚本
-cd /tmp/certs
-scp -r ./ root@MasterIP:/app/kubernetes/ssl/
-
-
-3.2 配置apiserver(/app/kubernetes/config/apiserver),添加以下参数：
- 
-
---requestheader-client-ca-file=/app/kubernetes/ssl/front-proxy-ca.crt \
---requestheader-allowed-names=front-proxy-client \
---requestheader-extra-headers-prefix=X-Remote-Extra- \
---requestheader-group-headers=X-Remote-Group \
---requestheader-username-headers=X-Remote-User \
---proxy-client-cert-file=/app/kubernetes/ssl/front-proxy-client.crt\
---proxy-client-key-file=/app/kubernetes/ssl/front-proxy-client.key \
---enable-aggregator-routing=true \
- 
-
-两台apiserver都添加上面的参数，并依次重启两台 kube-apiserver
-
+重启apiserver
 systemctl daemon-reload && systemctl restart kube-apiserver.service
 
-参数说明：
 
-If you are not running kube-proxy on a host running the API server then you must make sure that the system is enabled with the following kube-apiserver flag:
-
---enable-aggregator-routing=true
-不添加这个参数--enable-aggregator-routing=true，aggregator 请求 metrics-server的时候，是使用的 metrcis-server 的 svc IP
-
-添加了--enable-aggregator-routing=true ，aggregator 请求 metrics-server的时候，是使用的metrcis-server 的 POD IP
-
-
-
-3.3 部署metrcis-server组件
-也可在这里下载部署文件
-
+部署metrcis-server组件
 metrics-server版本：v0.3.3
-
- 
-
 # cd metrics-server-0.3.3/deploy/
 # tree 1.8+
 1.8+
@@ -304,11 +51,8 @@ metrics-server版本：v0.3.3
         - name: tmp-dir
           mountPath: /tmp
  
-
 说明：
-
 相较于官方文档，metrics-server-deployment.yaml 做了上面的几项修改：
-
 --metric-resolution=30s 从Kubelet获取指标的时间间隔(默认为60秒),设置为30s
 --kubelet-insecure-tls metrics-server从kubelet获取数据时，跳过验证Kubelet CA证书
 --kubelet-preferred-address-types=InternalIP,Hostname,InternalDNS,ExternalDNS,ExternalIP
@@ -316,7 +60,6 @@ metrics-server版本：v0.3.3
 
 部署完如果提示拉不到镜像，需要配置imagePullSecrets, 可以配在 ServiceAccount 或配置在Pod模板中。如下示例，配置在Pod模板中
  
-
 # ---
 apiVersion: v1
 kind: ServiceAccount
@@ -390,17 +133,12 @@ clusterrolebinding.rbac.authorization.k8s.io/system:metrics-server created
 部署完成后，等待几分钟，通过以下几步来确认是否部署成功：
 1、kubectl api-versions 出现 metrics.k8s.io/v1beta1
 
- 
-
 # kubectl api-versions
 ...
 metrics.k8s.io/v1beta1
 ...
  
-
 2、kubectl get apiservices.apiregistration.k8s.io
-
- 
 
 # kubectl get apiservices.apiregistration.k8s.io|grep metrics
 v1beta1.metrics.k8s.io                 kube-system/metrics-server   True        3d19h
