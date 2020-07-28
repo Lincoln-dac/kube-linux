@@ -19,7 +19,6 @@ WantedBy=multi-user.target
 重启apiserver
 systemctl daemon-reload && systemctl restart kube-apiserver.service
 
-
 2.部署metrcis-server组件
 metrics-server版本：v0.3.3
 # cd metrics-server-0.3.3/deploy/
