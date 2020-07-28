@@ -1,5 +1,7 @@
 traefik作为k8s的入口，边缘路由器，最好固定到特定的node节点，traefik会占用宿主机 80 8080 等重要端口，以防止端口冲突
-
+给node打上标签
+kubectl label node  10.204.51.67 traefik=traefik
+kubectl label node  10.204.51.68 traefik=traefik
 1.创建configmap
 kubectl create configmap traefik-conf --from-file=traefik.toml -n kube-system
 traefik.toml文件内容
@@ -99,7 +101,7 @@ spec:
         name: traefik-ingress-lb
     spec:
       nodeSelector:
-        https: "443"
+        traefik: "traefik"
       serviceAccountName: traefik-ingress-controller
       hostNetwork: true
       terminationGracePeriodSeconds: 60
