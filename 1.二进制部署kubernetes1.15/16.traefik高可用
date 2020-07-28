@@ -1,0 +1,77 @@
+traefik 作为边缘路由器，并非纯粹的网关，作为k8s的唯一流量入口需要对其做高可用，这里我们使用keepalived做主从
+traefik vip  10.204.51.69
+1.按照keepalived
+yum install -y keepalived 
+
+2修改配置
+在10.204.51.67上操作
+vi /etc/keepalived/keepalived.conf
+global_defs {
+        router_id lba
+}
+vrrp_script checkport {    
+   script "/app/kubernetes/scripts/port.sh"
+   interval 10    --- 执行监控脚本的间隔时间
+   weight 2  ---利用权重值和优先级进行运算，从而降低主服务优先级使之变为备服务器（建议先忽略）
+}
+vrrp_instance VI_10 {
+    state MASTER
+    interface eth0
+    virtual_router_id 150
+    priority 100 
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass 1111
+    }
+    track_script {
+        checkport
+    }
+    virtual_ipaddress {
+        10.204.51.69 dev eth0 label eth0:1
+    }
+}
+vim /app/kubernetes/scripts/port.sh
+
+#!/bin/bash
+netstat -naltp|grep traefik|grep 80
+if [ $? = 0 ];
+  then
+    exit 0
+  else
+    exit 1 
+fi
+新增执行权限
+chmod +x /app/kubernetes/scripts/port.sh 
+并将搅拌copy 到10.204.51.68/app/kubernetes/scripts/目录下
+
+在10.204.51.68上操作
+cat /etc/keepalived/keepalived.conf
+
+global_defs {
+        router_id lba
+}
+vrrp_script checkport {    
+   script "/app/kubernetes/scripts/port.sh"
+   interval 10    --- 执行监控脚本的间隔时间
+   weight 2  ---利用权重值和优先级进行运算，从而降低主服务优先级使之变为备服务器（建议先忽略）
+}
+vrrp_instance VI_10 {
+    state BACKUP
+    interface eth0
+    virtual_router_id 150
+    priority 99 
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass 1111
+    }
+    track_script {
+        checkport
+    }
+    virtual_ipaddress {
+        10.204.51.69 dev eth0 label eth0:1
+    }
+}
+
+
