@@ -1,5 +1,5 @@
-master api server IP 10.204.96.17
-backup aip server IP 10.204.96.18
+master api server IP 10.204.51.64
+backup aip server IP 10.204.51.65
 vip 10.204.96.19
 1.首先安装keeaplived 
 yum install -y keepalived
