@@ -9,11 +9,12 @@ kubectl create clusterrolebinding kubelet-nodes \
   --clusterrole=system:node \
   --group=system:nodes
   2.配置kubelet 配置文件
-  主机：10.204.243.132
-  cat /app/kubernetes/config/kubelet-config.yaml
-  kind: KubeletConfiguration
+  ########
+  以10.204.51.64位例，kubelet-config.yaml配置文件的address修改为对应主机的ip ，172.17.0.2为内部dns ip地址，需要跟service在同一网段
+cat /app/kubernetes/config/kubelet-config.yaml
+kind: KubeletConfiguration
 apiVersion: kubelet.config.k8s.io/v1beta1
-address: "10.204.243.132"
+address: "10.204.51.64"
 syncFrequency: 1m
 fileCheckFrequency: 20s
 httpCheckFrequency: 20s
@@ -27,7 +28,7 @@ authentication:
     clientCAFile: "/app/kubernetes/ssl/ca.pem"
 clusterDomain: "cluster.local"
 clusterDNS: 
-  - "172.26.0.2"
+  - "172.17.0.2"
 kubeletCgroups: "/systemd/system.slice"
 systemCgroups: ""
 cgroupRoot: ""
@@ -51,11 +52,11 @@ containerLogMaxSize: "20Mi"
 containerLogMaxFiles: 10
 
   
-  cat /app/kubernetes/config/kubelet
+cat /app/kubernetes/config/kubelet
 KUBELET_ARGS=" --pod-infra-container-image=10.204.57.39/common/pause-amd64:3.0 --runtime-cgroups=/systemd/system.slice --bootstrap-kubeconfig=/app/kubernetes/ssl/bootstrap.kubeconfig --kubeconfig=/app/kubernetes/ssl/kubelet.kubeconfig --cert-dir=/app/kubernetes/ssl --image-pull-progress-deadline=15m --root-dir=/app/kubernetes/data/kubelet  "
 LOGS="--logtostderr=false --v=2 --log-dir=/app/kubernetes/logs"
 CONFIG="--config=/app/kubernetes/config/kubelet-config.yaml"
-HOSTNAME="--hostname-override=10.204.243.132"
+HOSTNAME="--hostname-override=10.204.51.64"
 
 
 cat /usr/lib/systemd/system/kubelet.service 
@@ -82,5 +83,12 @@ systemctl enable kubelet && systemctl start kubelet
 kubectl certificate approve `kubectl get csr | awk '{ print $1}'`
 查看node
 kubectl get node
+修改node 标签角色
+kubectl label node 10.204.51.64 node-role.kubernetes.io/node=node
+结果
+[root@k8s-node64 bin]# kubectl get node
+NAME           STATUS   ROLES   AGE   VERSION
+10.204.51.64   Ready    node    87s   v1.15.0
+
 
   
