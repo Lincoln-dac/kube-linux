@@ -143,4 +143,4 @@ chmod 755 /etc/sysconfig/modules/ipvs.modules && bash /etc/sysconfig/modules/ipv
 
 注意事项：
 1.安装软件有先后顺序
-2.ipvs影响后面的kube-porxy的网络转发
+2.ipvs影响后面的网络转发
