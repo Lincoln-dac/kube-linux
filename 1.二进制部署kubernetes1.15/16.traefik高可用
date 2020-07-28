@@ -43,7 +43,7 @@ if [ $? = 0 ];
 fi
 新增执行权限
 chmod +x /app/kubernetes/scripts/port.sh 
-并将搅拌copy 到10.204.51.68/app/kubernetes/scripts/目录下
+并将脚本copy 到10.204.51.68/app/kubernetes/scripts/目录下
 
 在10.204.51.68上操作
 cat /etc/keepalived/keepalived.conf
