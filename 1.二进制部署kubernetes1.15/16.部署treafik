@@ -75,7 +75,6 @@ subjects:
  4. 部署traefik-deployment
  kubectl apply -f traefik-deployment.yaml
  cat traefik-deployment.yaml
- 
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -99,6 +98,7 @@ spec:
       labels:
         k8s-app: traefik-ingress-lb
         name: traefik-ingress-lb
+        TZ: Shanghai
     spec:
       nodeSelector:
         traefik: "traefik"
@@ -111,16 +111,19 @@ spec:
           secretName: fcbox-cert
       - name: config
         configMap:
-          name: fcboxcert
+          name: traefik-conf
       - name: localtime
         hostPath:
-          path: /etc/localtime
+          path: /usr/share/zoneinfo
       - name: logdir
         hostPath:
           path: /app/applogs/traefik/
       containers:
-      - image: 10.204.57.39/common/traefik:latest
+      - image: 10.204.57.39/common/traefik:v1.7.18
         name: traefik-ingress-lb
+        env: 
+        - name: TZ
+          value: "Asia/Shanghai"
         volumeMounts:
         - mountPath: "/var/log"
           name: "logdir"
@@ -128,7 +131,7 @@ spec:
           name: "ssl"
         - mountPath: "/config"
           name: "config"
-        - mountPath: "/etc/localtime"
+        - mountPath: "/usr/share/zoneinfo"
           name: "localtime"
         resources:
           limits:
@@ -158,10 +161,12 @@ spec:
         - --web.metrics
         - --accesslog
         - --accesslog.filepath=/var/log/traefik_access.log
+        - --accesslog.fields.names="StartLocal=keep StartUTC=drop"
         - --traefiklog
         - --traefiklog.filepath=/var/log/traefik.log
         - --traefiklogsfile=traefik.log
         - --api
+
 ##################
 5. 部署 traefik service
 kubectl apply -f ui.yaml
