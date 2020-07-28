@@ -14,7 +14,7 @@
 cat coredns.yaml
 
 
-# __MACHINE_GENERATED_WARNING__
+
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -104,10 +104,6 @@ metadata:
     addonmanager.kubernetes.io/mode: Reconcile
     kubernetes.io/name: "CoreDNS"
 spec:
-  # replicas: not specified here:
-  # 1. In order to make Addon Manager do not reconcile this replicas parameter.
-  # 2. Default is 1.
-  # 3. Will be tuned in real time if DNS horizontal auto-scaling is turned on.
   selector:
     matchLabels:
       k8s-app: kube-dns
