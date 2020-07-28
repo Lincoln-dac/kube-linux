@@ -2,6 +2,7 @@ traefik作为k8s的入口，边缘路由器，最好固定到特定的node节点
 给node打上标签
 kubectl label node  10.204.51.67 traefik=traefik
 kubectl label node  10.204.51.68 traefik=traefik
+在10.204.51.67 10.204.51.68 上创建好目录 mkdir /app/applogs/traefik 这个是为将traefik日志映射到本地，为后面排查故障方便
 1.创建configmap
 kubectl create configmap traefik-conf --from-file=traefik.toml -n kube-system
 traefik.toml文件内容
