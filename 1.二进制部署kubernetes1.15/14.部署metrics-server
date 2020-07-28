@@ -113,3 +113,13 @@ status:
     reason: Passed
     status: "True"
     type: Available
+
+结果
+kubectl top node 
+
+NAME           CPU(cores)   CPU%   MEMORY(bytes)   MEMORY%   
+10.204.51.64   141m         1%     3163Mi          21%       
+10.204.51.65   96m          1%     2524Mi          16%       
+10.204.51.66   101m         1%     2464Mi          16%       
+10.204.51.67   85m          1%     3691Mi          24%       
+10.204.51.68   87m          1%     4137Mi          27%  
