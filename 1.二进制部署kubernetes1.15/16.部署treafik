@@ -1,3 +1,5 @@
+traefik作为k8s的入口，边缘路由器，最好固定到特定的node节点，traefik会占用宿主机 80 8080 等重要端口，以防止端口冲突
+
 1.创建configmap
 kubectl create configmap traefik-conf --from-file=traefik.toml -n kube-system
 traefik.toml文件内容
