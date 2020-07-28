@@ -35,8 +35,6 @@ data:
 
 cat coredns.yaml
 
-
-
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -189,7 +187,7 @@ metadata:
 spec:
   selector:
     k8s-app: kube-dns
-  clusterIP: 172.40.0.2
+  clusterIP: 172.17.0.2
   ports:
   - name: dns
     port: 53
