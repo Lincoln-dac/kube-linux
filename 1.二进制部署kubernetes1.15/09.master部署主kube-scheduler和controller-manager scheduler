@@ -1,6 +1,6 @@
 主机IP 10.204.51.64
 说明#####
-10.204.51.70 为master ip 可以先将这个ip配置到master节点 后续做k8s master高可用，否则scheduler controller-manager无法启动
+10.204.51.70 为master ip 可以先将这个ip配置到master节点 后续做k8s master高可用，否则scheduler controller-manager无法启动 ，这里先配置scheduler controller-manager 连apisever ip 为10.204.51.64
 
 1.scheduler
 cat /app/kubernetes/config/scheduler
