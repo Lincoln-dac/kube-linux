@@ -4,7 +4,7 @@
 
 1.scheduler
 cat /app/kubernetes/config/scheduler
-KUBE_SCHEDULER_ARGS=" --master=10.204.51.64:6443 --leader-elect=true --address=127.0.0.1 --logtostderr=false --v=2 --log-dir=/app/kubernetes/logs --kubeconfig=/app/kubernetes/ssl/kube-scheduler.kubeconfig"
+KUBE_SCHEDULER_ARGS=" --master=10.204.51.64:6443 --leader-elect=true --address=127.0.0.1 --logtostderr=false --v=2 --log-dir=/app/kubernetes/logs --kubeconfig=/app/kubernetes/ssl/kube-scheduler.kubeconfig --authentication-kubeconfig=/app/kubernetes/ssl/kube-controller-manager.kubeconfig --authorization-kubeconfig=/app/kubernetes/ssl/kube-controller-manager.kubeconfig"
 
 cat /usr/lib/systemd/system/kube-scheduler.service
 [Unit]
