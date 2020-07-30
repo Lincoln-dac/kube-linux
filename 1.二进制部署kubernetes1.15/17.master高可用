@@ -1,5 +1,6 @@
 master api server IP 10.204.51.64
 backup aip server IP 10.204.51.65
+将之前10.204.51.64 的 apiserver scheduler controller-manager 全部复制到 10.204.51.65 对应目录
 vip 10.204.51.70
 1.首先安装keeaplived 
 yum install -y keepalived
@@ -73,9 +74,18 @@ if [ $? = 0 ];
     exit 1 
 fi
 
+检查ip是否绑定成功
+
+修改scheduler controller-manager配置
+修改scheduler --master=https://10.204.51.70:6443
+修改controller-manager--master=https://10.204.51.70:6443
+重启scheduler controller-manager
+
 5:主从切换
 
 注意事项:在完成主从切换后，如果主恢复工作，建议将备的api server 重启一次，及systemctl restart kube-apiserver
+
+
 
 
 
