@@ -1,0 +1,286 @@
+HPA简介
+
+HPA（Horizontal Pod Autoscaler）是kubernetes（以下简称k8s）的一种资源对象，能够根据某些指标对在statefulSet、replicaController、replicaSet等集合中的pod数量进行动态伸缩，使运行在上面的服务对指标的变化有一定的自适应能力。
+
+HPA目前支持四种类型的指标，分别是Resource、Object、External、Pods。其中在稳定版本autoscaling/v1中只支持对CPU指标的动态伸缩，在测试版本autoscaling/v2beta2中支持memory和自定义指标的动态伸缩，并以annotation的方式工作在autoscaling/v1版本中。
+
+
+
+HPA在k8s中的结构
+
+首先可以看一下HPA在k8s中的结构，这里找了一个k8s官方给出的HPA例子，我在关键字段上给出一些注释方便理解。
+
+    apiVersion: autoscaling/v2beta2
+    kind: HorizontalPodAutoscaler
+    metadata:
+      name: php-apache
+      namespace: default
+    spec:
+      # HPA的伸缩对象描述，HPA会动态修改该对象的pod数量
+      scaleTargetRef:
+        apiVersion: apps/v1
+        kind: Deployment
+        name: php-apache
+      # HPA的最小pod数量和最大pod数量
+      minReplicas: 1
+      maxReplicas: 10
+      # 监控的指标数组，支持多种类型的指标共存
+      metrics:
+      # Object类型的指标
+      - type: Object
+        object:
+          metric:
+            # 指标名称
+            name: requests-per-second
+          # 监控指标的对象描述，指标数据来源于该对象
+          describedObject:
+            apiVersion: networking.k8s.io/v1beta1
+            kind: Ingress
+            name: main-route
+          # Value类型的目标值，Object类型的指标只支持Value和AverageValue类型的目标值
+          target:
+            type: Value
+            value: 10k
+      # Resource类型的指标
+      - type: Resource
+        resource:
+          name: cpu
+          # Utilization类型的目标值，Resource类型的指标只支持Utilization和AverageValue类型的目标值
+          target:
+            type: Utilization
+            averageUtilization: 50
+      # Pods类型的指标
+      - type: Pods
+        pods:
+          metric:
+            name: packets-per-second
+          # AverageValue类型的目标值，Pods指标类型下只支持AverageValue类型的目标值
+          target:
+            type: AverageValue
+            averageValue: 1k
+      # External类型的指标
+      - type: External
+        external:
+          metric:
+            name: queue_messages_ready
+            # 该字段与第三方的指标标签相关联，（此处官方文档有问题，正确的写法如下）
+            selector:
+              matchLabels:
+                env: "stage"
+                app: "myapp"
+          # External指标类型下只支持Value和AverageValue类型的目标值
+          target:
+            type: AverageValue
+            averageValue: 30
+
+- autoscaling/v1版本将metrics字段放在了annotation中进行处理。
+target共有3种类型：Utilization、Value、AverageValue。Utilization表示平均使用率；Value表示裸值；AverageValue表示平均值。
+metrics中的type字段有四种类型的值：Object、Pods、Resource、External。
+Resource指的是当前伸缩对象下的pod的cpu和memory指标，只支持Utilization和AverageValue类型的目标值。
+Object指的是指定k8s内部对象的指标，数据需要第三方adapter提供，只支持Value和AverageValue类型的目标值。
+Pods指的是伸缩对象（statefulSet、replicaController、replicaSet）底下的Pods的指标，数据需要第三方的adapter提供，并且只允许AverageValue类型的目标值。
+External指的是k8s外部的指标，数据同样需要第三方的adapter提供，只支持Value和AverageValue类型的目标值。
+- HPA动态伸缩的原理
+HPA在k8s中也由一个controller控制，controller会间隔循环HPA，检查每个HPA中监控的指标是否触发伸缩条件，默认的间隔时间为15s。一旦触发伸缩条件，controller会向k8s发送请求，修改伸缩对象（statefulSet、replicaController、replicaSet）子对象scale中控制pod数量的字段。k8s响应请求，修改scale结构体，然后会刷新一次伸缩对象的pod数量。伸缩对象被修改后，自然会通过list/watch机制增加或减少pod数量，达到动态伸缩的目的。
+- HPA伸缩过程叙述
+HPA的伸缩主要流程如下：
+
+1. 判断当前pod数量是否在HPA设定的pod数量区间中，如果不在，过小返回最小值，过大返回最大值，结束伸缩。
+2. 判断指标的类型，并向api server发送对应的请求，拿到设定的监控指标。一般来说指标会根据预先设定的指标从以下三个aggregated APIs中获取：metrics.k8s.io、custom.metrics.k8s.io、 external.metrics.k8s.io。其中metrics.k8s.io一般由k8s自带的metrics-server来提供，主要是cpu，memory使用率指标，另外两种需要第三方的adapter来提供。custom.metrics.k8s.io提供自定义指标数据，一般跟k8s集群有关，比如跟特定的pod相关。external.metrics.k8s.io同样提供自定义指标数据，但一般跟k8s集群无关。许多知名的第三方监控平台提供了adapter实现了上述api（如prometheus），可以将监控和adapter一同部署在k8s集群中提供服务，甚至能够替换原来的metrics-server来提供上述三类api指标，达到深度定制监控数据的目的。
+3. 根据获得的指标，应用相应的算法算出一个伸缩系数，并乘以目前pod数量获得期望pod数量。系数是指标的期望值与目前值的比值，如果大于1表示扩容，小于1表示缩容。指标数值有平均值（AverageValue）、平均使用率（Utilization）、裸值（Value）三种类型，每种类型的数值都有对应的算法。以下几点值得注意：如果系数有小数点，统一进一；系数如果未达到某个容忍值，HPA认为变化太小，会忽略这次变化，容忍值默认为0.1。
+HPA扩容算法是一个非常保守的算法。如果出现获取不到指标的情况，扩容时算最小值，缩容时算最大值；如果需要计算平均值，出现pod没准备好的情况，平均数的分母不计入该pod。
+一个HPA支持多个指标的监控，HPA会循环获取所有的指标，并计算期望的pod数量，并从期望结果中获得最大的pod数量作为最终的伸缩的pod数量。一个伸缩对象在k8s中允许对应多个HPA，但是只是k8s不会报错而已，事实上HPA彼此不知道自己监控的是同一个伸缩对象，在这个伸缩对象中的pod会被多个HPA无意义地来回修改pod数量，给系统增加消耗，如果想要指定多个监控指标，可以如上述所说，在一个HPA中添加多个监控指标。
+4. 检查最终的pod数量是否在HPA设定的pod数量范围的区间，如果超过最大值或不足最小值都会修改为最大值或最小值。然后向k8s发出请求，修改伸缩对象的子对象scale的pod数量，结束一个HPA的检查，获取下一个HPA，完成一个伸缩流程。
+
+
+
+- HPA的应用场景
+HPA的特性结合第三方的监控应用，使得部署在HPA伸缩对象（statefulSet、replicaController、replicaSet）上的服务有了非常灵活的自适应能力，能够在一定限度内复制多个副本来应对某个指标的急剧飙升，也可以在某个指标较小的情况下删除副本来让出计算资源给其他更需要资源的应用使用，维持整个系统的稳定。非常适合于一些流量波动大，机器资源吃紧，服务数量多的业务场景，如：电商服务、抢票服务、金融服务等。
+- k8s-prometheus-adapter
+前文说到，许多监控系统通过adapter实现了接口，给HPA提供指标数据。在这里我们具体介绍一下prometheus监控系统的adapter。
+prometheus是一个知名开源监控系统，具有数据维度多，存储高效，使用便捷等特点。用户可以通过丰富的表达式和内置函数，定制自己所需要的监控数据。
+prometheus-adapter在prometheus和api-server中起到了适配者的作用。prometheus-adapter接受从HPA中发来，通过apiserver aggregator中转的指标查询请求，然后根据内容发送相应的请求给prometheus拿到指标数据，经过处理后返回给HPA使用。prometheus可以同时实现metrics.k8s.io、custom.metrics.k8s.io、 external.metrics.k8s.io三种api接口，代替k8s自己的matrics-server，提供指标数据服务。
+prometheus-adapter部署能否成功的关键在于配置文件是否正确。配置文件中可以设定需要的指标以及对指标的处理方式，以下是一份简单的配置文件，加上注释以稍做解释。
+
+    # 指标规则，可以多个规则共存，上一个规则的结果会传给下一个规则
+    rules:
+        # 计算指标数据的表达式
+      - metricsQuery: sum(rate(<<.Series>>{<<.LabelMatchers>>}[5m])) by (<<.GroupBy>>)
+        # 指标重命名，支持正则表达式。这里表示删除指标名字中的"_seconds_total"
+        name:
+          as: ""
+          matches: (.*)_seconds_total$
+        # 指标与k8s资源通过标签关联，这里将指标通过标签与k8s的namspace和pod相互关联
+        resources:
+          overrides:
+            namespace:
+              resource: namespace
+            pod:
+              resource: pod
+        # 过滤指标条件
+        seriesFilters: []
+        # 指标查询表达式，可以根据标签等条件，筛选特定的指标
+        seriesQuery: '{namespace!="",pod!=""}'
+
+metricsQuery字段会在k8s请求时执行，其中，“<<” “>>”是go的模板语法，Series表示指标名称，LabelMatchers表示指标与k8s对象名称匹配的标签键值对，GroupBy表示指标数值归并的标签名。
+
+不太好理解，这里截取官方文档中的一个例子来进行说明，看了就应该明白了：
+
+    For instance, suppose we had a series http_requests_total (exposed ashttp_requests_per_second in the API) with labels service, pod,ingress, namespace, and verb. The first four correspond to Kubernetes resources. Then, if someone requested the metric pods/http_request_per_second for the pods pod1 and pod2 in the somens namespace, we’d have:
+    - Series: "http_requests_total"
+    - LabelMatchers: "pod=~\"pod1|pod2",namespace="somens"
+    - GroupBy: pod 
+
+resources字段是k8s资源对象与指标关联的重要字段，本质上是根据指标的标签值与k8s资源对象名称进行匹配，resources字段告诉系统，应该用指标的哪个标签的标签值来匹配k8s资源对象名称。有两个方法关联资源，一种是通过overrides，将特定的标签与k8s资源对象绑定起来，当k8s请求指标的时候，会将资源对象名称与这个特定的标签值进行比较，来分辨指标具体是哪个对象的；另一种是template，通过go语言模板语法将k8s资源对象名转化成标签名，进行匹配。
+
+第二种方法，不太好理解，同样截取官方文档中的一个例子来进行说明：
+
+    # any label `kube_<group>_<resource>` becomes <group>.<resource> in Kubernetes
+    resources:
+    template: "kube_<<.Group>>_<<.Resource>>"
+
+部署一个监控自定义指标的HPA
+
+部署prometheus应用，使其正常工作。可以使用官方的helm包快捷部署，之后的应用也基本以helm包的方式部署，不再赘述。
+
+部署需要伸缩的应用。这里我选择了一个简单的nginx服务，部署为deployment作为伸缩对象。
+
+
+
+在应用的命名空间下，部署提供自定义指标的应用。这里我选择了官方的prometheus-node-exporter，并以nodeport的方式暴露数据端口，作为自定义指标数据的来源。这个应用会以daemonSet的方式运行在k8s集群的每个node上，并对外开放在自己node上获取到的指标。
+
+
+
+
+在prometheus的界面上已经可以看到node-exporter暴露出来的指标了
+
+
+
+部署prometheus-adapter应用。在helm包的values中修改其配置文件，配置文件如
+
+    rules:
+        - metricsQuery: sum(rate(<<.Series>>{<<.LabelMatchers>>}[5m])) by (<<.GroupBy>>)
+          name:
+            as: ""
+            matches: (.*)_seconds_total$
+          resources:
+            template: <<.Resource>>
+          seriesFilters: []
+          seriesQuery: '{namespace!="",pod!=""}'
+        - metricsQuery: sum(rate(<<.Series>>{<<.LabelMatchers>>}[5m])) by (<<.GroupBy>>)
+          name:
+            as: ""
+            matches: (.*)_total$
+          resources:
+            template: <<.Resource>>
+          seriesFilters:
+          - isNot: (.*)_seconds_total$
+          seriesQuery: '{namespace!="",pod!=""}'
+        - metricsQuery: sum(<<.Series>>{<<.LabelMatchers>>}) by (<<.GroupBy>>)
+          name:
+            as: ""
+            matches: (.*)$
+          resources:
+            template: <<.Resource>>
+          seriesFilters:
+          - isNot: (.*)_total$
+          seriesQuery: '{namespace!="",pod!=""}'
+
+上述配置文件将secondstotal和_total结尾的指标用prometheus的内置函数进行了速率计算，并去掉对应的后缀作为指标名称。
+
+我们在k8s中利用kubectl查看指标是否能够获得到指标
+
+    kubectl get --raw /apis/custom.metrics.k8s.io/v1beta1/
+
+你会看到所有的你能够获得的指标名称，但是名字和数据已经和原来的指标有所不同了，因为我们在adapter的配置文件中做了一定程度的修改。
+
+然后我们获取一下node_cpu这个指标，看看是否能够正确地显示出来
+
+    kubectl get --raw /apis/custom.metrics.k8s.io/v1beta1/namespaces/my-nginx/pods/*/node_cpu | jq
+
+这个命令能够显示my-nginx这个namspace下的所有pod的node_cpu指标的数据，结果如下
+
+    {
+      "kind": "MetricValueList",
+     "apiVersion": "custom.metrics.k8s.io/v1beta1",
+      "metadata": {
+     "selfLink": "/apis/custom.metrics.k8s.io/v1beta1/namespaces/my-nginx/pods/%2A/node_cpu"
+      },
+     "items": [
+        {
+       "describedObject": {
+            "kind": "Pod",
+         "namespace": "my-nginx",
+            "name": "prometheus-node-exporter-b25zl",
+            "apiVersion": "/v1"
+          },
+          "metricName": "node_cpu",
+          "timestamp": "2019-10-29T03:33:47Z",
+          "value": "3822m"
+        }
+      ]
+    }
+
+ok，到这里，说明所有的组件工作正常，hpa能够顺利地得到这个指标。需要注意的是HPA和监控对象，伸缩对象一定要部署在同一个命名空间下，不然会获取不到相应的指标。部署hpa，其yaml文件如下
+
+    apiVersion: autoscaling/v2beta2
+    kind: HorizontalPodAutoscaler
+    metadata:
+      name: hpa-asdfvs
+      namespace: my-nginx
+    spec:
+      scaleTargetRef:
+        apiVersion: apps/v1beta1
+        kind: Deployment
+        name: my-nginx
+      minReplicas: 1
+      maxReplicas: 10
+      metrics:
+      - type: Object
+        object:
+          metric:
+            name: node_cpu
+          describedObject:
+            apiVersion: v1
+            kind: Pod
+            name: prometheus-node-exporter-b25zl
+          target:
+            type: Value
+            value: 9805m
+
+我们将根据prometheus-node-exporter这个pod的node_cpu这个指标来动态伸缩我们的nginx应用。
+
+我们来获取一下这个hpa
+
+    kubectl get horizontalPodAutoscaler -n my-nginx hpa-asdfvs -oyaml
+    apiVersion: autoscaling/v1
+    kind: HorizontalPodAutoscaler
+    metadata:
+      annotations:
+        autoscaling.alpha.kubernetes.io/conditions: '[{"type":"AbleToScale","status":"True","lastTransitionTime":"2019-10-29T02:54:50Z","reason":"ReadyForNewScale","message":"recommended
+          size matches current size"},{"type":"ScalingActive","status":"True","lastTransitionTime":"2019-10-29T03:05:24Z","reason":"ValidMetricFound","message":"the
+          HPA was able to successfully calculate a replica count from Pod metric node_cpu"},{"type":"ScalingLimited","status":"False","lastTransitionTime":"2019-10-29T02:54:50Z","reason":"DesiredWithinRange","message":"the
+          desired count is within the acceptable range"}]'
+        autoscaling.alpha.kubernetes.io/current-metrics: '[{"type":"Object","object":{"target":{"kind":"Pod","name":"prometheus-node-exporter-b25zl","apiVersion":"v1"},"metricName":"node_cpu","currentValue":"3822m"}}]'
+        autoscaling.alpha.kubernetes.io/metrics: '[{"type":"Object","object":{"target":{"kind":"Pod","name":"prometheus-node-exporter-b25zl","apiVersion":"v1"},"metricName":"node_cpu","targetValue":"9805m"}}]'
+        kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"autoscaling/v2beta2","kind":"HorizontalPodAutoscaler","metadata":{"annotations":{},"name":"hpa-asdfvs","namespace":"my-nginx"},"spec":{"maxReplicas":10,"metrics":[{"object":{"describedObject":{"apiVersion":"v1","kind":"Pod","name":"prometheus-node-exporter-b25zl"},"metric":{"name":"node_cpu"},"target":{"type":"Value","value":"9805m"}},"type":"Object"}],"minReplicas":1,"scaleTargetRef":{"apiVersion":"apps/v1beta1","kind":"Deployment","name":"my-nginx"}}}
+      creationTimestamp: "2019-10-29T02:54:45Z"
+      name: hpa-asdfvs
+      namespace: my-nginx
+      resourceVersion: "164701"
+      selfLink: "/apis/autoscaling/v1/namespaces/my-nginx/horizontalpodautoscalers/hpa-asdfvs"
+      uid: 76fa6a19-f9f7-11e9-8930-0242c5ccd054
+    spec:
+      maxReplicas: 10
+      minReplicas: 1
+      scaleTargetRef:
+        apiVersion: apps/v1beta1
+        kind: Deployment
+        name: my-nginx
+    status:
+      currentReplicas: 1
+      desiredReplicas: 1
+      lastScaleTime: "2019-10-29T03:06:10Z" 
+
+- 可以看到hpa以annotation的方式在v1版本工作，并将matrics字段写入了annotation中。在annotation的condition字段中，我们清楚地看到HPA已经获取到了这个指标。之后我们可以尝试降低target值来让pod扩展，或者增加target值来使pod缩减。到这里一个监控自定义指标的HPA就部署成功了。
