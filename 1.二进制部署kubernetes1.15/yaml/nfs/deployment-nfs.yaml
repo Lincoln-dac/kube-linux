@@ -29,5 +29,5 @@ spec:
       volumes:
         - name: nfs-client-root
           nfs:
-            server: 10.204.60.11
+            server: 10.204.51.64
             path: /app/nfs/prometheus
