@@ -18,7 +18,7 @@ spec:
         resources:
           requests:
             storage: 10Gi
-  baseImage: harbor.fcbox.com/prometheus/prometheus
+  baseImage: 10.204.57.39/prometheus/prometheus
   nodeSelector:
     network: esn
   replicas: 2
