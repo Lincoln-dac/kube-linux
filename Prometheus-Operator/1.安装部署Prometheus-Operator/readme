@@ -2,3 +2,21 @@
 wget https://github.com/coreos/prometheus-operator/archive/v0.23.2.tar.gz
 进入prometheus-operator-0.23 执行命令
 kubectl apply -f . 如果出现错误提醒，多执行几次 ，确保没有错误输出
+
+2.检查是否运行正常 kubectl get po -n monitoring
+
+NAME                                   READY   STATUS    RESTARTS   AGE
+alertmanager-main-0                    2/2     Running   0          21m
+alertmanager-main-1                    2/2     Running   0          21m
+grafana-7d745b675-h4n66                1/1     Running   0          174m
+kube-state-metrics-6f965c465c-5zhrc    4/4     Running   0          3h6m
+node-exporter-4w6g6                    2/2     Running   0          3h11m
+node-exporter-5dptl                    2/2     Running   0          3h11m
+node-exporter-7qqkp                    2/2     Running   0          3h11m
+node-exporter-9b2z5                    2/2     Running   0          3h11m
+node-exporter-qxtwr                    2/2     Running   0          3h11m
+prometheus-adapter-68698bc948-6hhs2    1/1     Running   0          161m
+prometheus-k8s-0                       3/3     Running   1          9m47s
+prometheus-k8s-1                       3/3     Running   1          9m32s
+prometheus-operator-6879cdc476-lhkzp   1/1     Running   0          21m
+
