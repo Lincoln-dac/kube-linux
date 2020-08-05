@@ -26,7 +26,7 @@ metadata:
     traefik.ingress.kubernetes.io/whitelist-source-range: "10.204.240.15"
 spec:
   rules:
-  - host: docker-helloworld-sit1.fcbox.com
+  - host: docker-helloworld-sit1.fc.com
     http:
       paths:
       - backend:
