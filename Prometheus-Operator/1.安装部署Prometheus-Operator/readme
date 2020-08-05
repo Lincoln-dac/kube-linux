@@ -1,1 +1,4 @@
-1
+1.下载prometheus-operator
+wget https://github.com/coreos/prometheus-operator/archive/v0.23.2.tar.gz
+进入prometheus-operator-0.23 执行命令
+kubectl apply -f . 如果出现错误提醒，多执行几次 ，确保没有错误输出
