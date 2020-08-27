@@ -14,9 +14,6 @@ systemctl restart flanneld && systemctl restart docker && systemct restart kubel
 kubectl get cs
 kubectl get ns
 
-
-
-
 export ETCDCTL_API=3
 export CA_FILE=/app/kubernetes/ssl/ca.pem
 export CERT_FILE=/app/kubernetes/ssl/kubernetes.pem
