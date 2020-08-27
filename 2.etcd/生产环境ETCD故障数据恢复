@@ -1,0 +1,56 @@
+生产环境ETCD故障数据恢复
+1.关闭kube-apiserver kube-controller-manager kube-scheduler
+2.关闭所有ETCD 节点systemctl stop etcd
+3.根据ETCD节点数 先备份原etcd数据目录下的问题，然后逐个恢复数据
+4.重启ETCD节点,检查集群是否正常
+5.重写k8s node网络配置信息，检查etcd配置是否存在
+6.重启kube-apiserver kube-controller-manager kube-schedule
+systemctl restart kube-apiserver
+systemctl restart kube-controller-manager
+systemctl restart kube-scheduler
+7.重启所有节点flanneld docker kubelet kube-proxy
+systemctl restart flanneld && systemctl restart docker && systemct restart kubelet && systemclt restart kube-proxy
+8.检查数据是否恢复
+kubectl get cs
+kubectl get ns
+
+
+
+
+export ETCDCTL_API=3
+export CA_FILE=/app/kubernetes/ssl/ca.pem
+export CERT_FILE=/app/kubernetes/ssl/kubernetes.pem
+export KEY_FILE=/app/kubernetes/ssl/kubernetes-key.pem  
+/etcd/bin/etcdctl  snapshot restore /root/snapshot.db \
+--name=infra1 --endpoints=https://10.204.243.82:2379 \
+--cacert=$CA_FILE --cert=$CERT_FILE  --key=$KEY_FILE \
+--initial-cluster infra1=https://10.204.243.82:2380,infra2=https://10.204.243.83:2380,infra3=https://10.204.243.84:2380 \
+--initial-advertise-peer-urls=https://10.204.243.82:2380 --initial-cluster-token=etcd-cluster --data-dir=/etcd/data/  
+
+
+export ETCDCTL_API=3
+export CA_FILE=/app/kubernetes/ssl/ca.pem
+export CERT_FILE=/app/kubernetes/ssl/kubernetes.pem
+export KEY_FILE=/app/kubernetes/ssl/kubernetes-key.pem  
+/etcd/bin/etcdctl  snapshot restore /root/snapshot.db \
+--name=infra2 --endpoints=https://10.204.243.83:2379 \
+--cacert=$CA_FILE --cert=$CERT_FILE  --key=$KEY_FILE \
+--initial-cluster infra1=https://10.204.243.82:2380,infra2=https://10.204.243.83:2380,infra3=https://10.204.243.84:2380 \
+--initial-advertise-peer-urls=https://10.204.243.83:2380 --initial-cluster-token=etcd-cluster --data-dir=/etcd/data/  
+
+export ETCDCTL_API=3
+export CA_FILE=/app/kubernetes/ssl/ca.pem
+export CERT_FILE=/app/kubernetes/ssl/kubernetes.pem
+export KEY_FILE=/app/kubernetes/ssl/kubernetes-key.pem  
+/etcd/bin/etcdctl  snapshot restore /root/snapshot.db \
+--name=infra3 --endpoints=https://10.204.243.84:2379 \
+--cacert=$CA_FILE --cert=$CERT_FILE  --key=$KEY_FILE \
+--initial-cluster infra1=https://10.204.243.82:2380,infra2=https://10.204.243.83:2380,infra3=https://10.204.243.84:2380 \
+--initial-advertise-peer-urls=https://10.204.243.84:2380 --initial-cluster-token=etcd-cluster --data-dir=/etcd/data/  
+
+export ETCDCTL_API=2
+/etcd/bin/etcdctl --endpoints=https://10.204.243.82:2379 --ca-file=/app/kubernetes/ssl/ca.pem --cert-file=/app/kubernetes/ssl/kubernetes.pem --key-file=/app/kubernetes/ssl/kubernetes-key.pem set /coreos.com/network/config  '{"Network":"172.29.0.0/16","SubnetLen":24,"Backend":{"Type":"host-gw"}}'
+/etcd/bin/etcdctl --ca-file=/app/kubernetes/ssl/ca.pem   --cert-file=/app/kubernetes/ssl/kubernetes.pem   --key-file=/app/kubernetes/ssl/kubernetes-key.pem set /coreos.com/network/subnets/172.29.84.0-24 '{"PublicIP":"10.204.243.84","BackendType":"host-gw"}'
+/etcd/bin/etcdctl --ca-file=/app/kubernetes/ssl/ca.pem   --cert-file=/app/kubernetes/ssl/kubernetes.pem   --key-file=/app/kubernetes/ssl/kubernetes-key.pem set /coreos.com/network/subnets/172.29.83.0-24 '{"PublicIP":"10.204.243.83","BackendType":"host-gw"}'
+/etcd/bin/etcdctl --ca-file=/app/kubernetes/ssl/ca.pem   --cert-file=/app/kubernetes/ssl/kubernetes.pem   --key-file=/app/kubernetes/ssl/kubernetes-key.pem set /coreos.com/network/subnets/172.29.82.0-24 '{"PublicIP":"10.204.243.82","BackendType":"host-gw"}'
+  
