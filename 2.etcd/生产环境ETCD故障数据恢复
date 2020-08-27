@@ -3,7 +3,7 @@
 2.关闭所有ETCD 节点systemctl stop etcd
 3.根据ETCD节点数 先备份原etcd数据目录下的问题，然后逐个恢复数据
 4.重启ETCD节点,检查集群是否正常
-5.重写k8s node网络配置信息，检查etcd配置是否存在
+5.重写k8s node网络配置信息，检查etcd配置是否存在(非必要）
 6.重启kube-apiserver kube-controller-manager kube-schedule
 systemctl restart kube-apiserver
 systemctl restart kube-controller-manager
