@@ -3,6 +3,7 @@ wget https://github.com/coreos/etcd/releases/download/v3.3.12/etcd-v3.3.12-linux
  IP 10.204.51.64/65/66 版本为3.3.1
 2.新建目录
 mkdir -p /etcd/{bin,conf,data}
+###分开etcd目录是为了防止 其他程序影响etcd,生产环境建议kubernetes的目录也单独出来，有条件最好单独划分逻辑磁盘
 将etcdctl和etcd程序拷贝到/etcd/bin下 并修改为可执行
 cd /etcd/bin/ && chmod +x etcdctl && chmod +x etcd
 3.修改etcd配置文件 /etcd/conf/etcd.conf
