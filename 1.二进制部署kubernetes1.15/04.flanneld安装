@@ -15,6 +15,7 @@ FLANNEL_OPTIONS="-etcd-cafile=/app/kubernetes/ssl/ca.pem -etcd-certfile=/app/kub
 ########
 --iface 为当前宿主机ip地址
 --subnet-lease-renew-margin 为pod 网络配置文件最大过期时间（存etcd）
+如果固定pod网段, 则上面参数无效，但无影响
 
 
 
