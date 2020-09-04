@@ -1,7 +1,7 @@
 主机IP 10.204.51.64
 1.apiserver
 cat /app/kubernetes/config/apiserver
-SSL="--token-auth-file=/app/kubernetes/ssl/token.csv --tls-cert-file=/app/kubernetes/ssl/kubernetes.pem  --tls-private-key-file=/app/kubernetes/ssl/kubernetes-key.pem --client-ca-file=/app/kubernetes/ssl/ca.pem --service-account-key-file=/app/kubernetes/ssl/ca-key.pem --etcd-cafile=/app/kubernetes/ssl/ca.pem --etcd-certfile=/app/kubernetes/ssl/kubernetes.pem --etcd-keyfile=/app/kubernetes/ssl/kubernetes-key.pem --proxy-client-cert-file=/app/kubernetes/ssl/proxy-client.pem --proxy-client-key-file=/app/kubernetes/ssl/proxy-client-key.pem --kubelet-certificate-authority=/app/kubernetes/ssl/ca.pem --kubelet-client-certificate=/app/kubernetes/ssl/kubernetes.pem --kubelet-client-key=/app/kubernetes/ssl/kubernetes-key.pem"
+SSL="--token-auth-file=/app/kubernetes/ssl/token.csv --tls-cert-file=/app/kubernetes/ssl/kubernetes.pem  --tls-private-key-file=/app/kubernetes/ssl/kubernetes-key.pem --client-ca-file=/app/kubernetes/ssl/ca.pem --service-account-key-file=/app/kubernetes/ssl/ca-key.pem --etcd-cafile=/app/kubernetes/ssl/ca.pem --etcd-certfile=/app/kubernetes/ssl/kubernetes.pem --etcd-keyfile=/app/kubernetes/ssl/kubernetes-key.pem  --kubelet-certificate-authority=/app/kubernetes/ssl/ca.pem --kubelet-client-certificate=/app/kubernetes/ssl/kubernetes.pem --kubelet-client-key=/app/kubernetes/ssl/kubernetes-key.pem"
 KUBE="--kubelet-timeout=60s --kubelet-port=10250"
 LOGS="--logtostderr=false --log-dir=/app/kubernetes/logs --v=2 --event-ttl=24h"
 ETCDMEMBER="--etcd-servers=https://10.204.51.64:2379,https://10.204.51.65:2379,https://10.204.51.66:2379"
