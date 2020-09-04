@@ -13,7 +13,7 @@ Documentation=https://github.com/GoogleCloudPlatform/kubernetes
 
 [Service]
 EnvironmentFile=-/app/kubernetes/config/scheduler
-ExecStart=/app/kubernetes/bin/kube-scheduler $KUBE_SCHEDULER_ARGS $CONFIGHPA
+ExecStart=/app/kubernetes/bin/kube-scheduler $KUBE_SCHEDULER_ARGS 
 Restart=on-failure
 LimitNOFILE=65536
 
