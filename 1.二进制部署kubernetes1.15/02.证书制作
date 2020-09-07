@@ -148,6 +148,7 @@ cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=kube
 cat > kube-controller-manager-csr.json <<EOF
 {
 "CN": "system:kube-controller-manager",
+"hosts": [],
 "key": {
 "algo": "rsa",
 "size": 2048
@@ -196,6 +197,7 @@ kubectl config use-context system:kube-controller-manager --kubeconfig=kube-cont
 cat > kube-scheduler-csr.json <<EOF
 {
 "CN": "system:kube-scheduler",
+"hosts": [],     
 "key": {
 "algo": "rsa",
 "size": 2048
