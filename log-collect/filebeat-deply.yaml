@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: filebeat
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+      app: filebeat
+  template:
+    metadata:
+      labels:
+        app: filebeat
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+             matchExpressions:
+             - key: app
+               operator: In
+               values:
+               - filebeat
+            topologyKey: "kubernetes.io/hostname"
+      containers:
+      - image: 10.204.57.39/common/filebeat:7.1.1
+        imagePullPolicy: Always
+        name: filebeat
+        volumeMounts:
+        - mountPath: /app/applogs/
+          name: logsdir
+        - mountPath: /etc/localtime
+          name: config
+          readOnly: true  
+      volumes:
+      - name: logsdir
+        hostPath:
+          path: /app/applogs/
+          type: Directory
+      - name: config
+        hostPath:
+          path: /etc/localtime

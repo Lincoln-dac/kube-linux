@@ -1,0 +1,12 @@
+# This my first spring-boot Dockerfile
+# Version 1.0
+FROM 10.204.57.39/common/centos:latest
+MAINTAINER lincoln
+#base env standard,ntp time
+ENV LANG en_US.UTF-8
+ADD filebeat.tar.gz /app
+ADD Python-3.5.7.tgz /app
+ADD start.sh /app/filebeat/
+RUN yum install -y  wget make gcc openssl-devel && yum clean all && echo "Asia/Shanghai" > /etc/timezone && useradd -u 800 mwopr  && mkdir -p /app/applogs && cd /app/Python-3.5.7 && ./configure && make && make install && pip3 install pyyaml && pip3 install pyinotify &&  mkdir /app/filebeat/logs && chmod +x /app/filebeat/start.sh && chown -R  mwopr:mwopr /app
+USER mwopr
+CMD [ "/app/filebeat/start.sh" ]
