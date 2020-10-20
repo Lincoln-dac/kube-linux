@@ -1,0 +1,2 @@
+NODE统计
+sum(kubelet_node_name)
