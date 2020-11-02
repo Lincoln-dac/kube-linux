@@ -1,0 +1,32 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: traefik2-dcn.fcbox.com
+  namespace: ingress-system
+spec:
+  entryPoints:
+    - web
+  routes:
+  - match: Host(`traefik2-dcn.ops.fcbox.com`)
+    kind: Rule
+    services:
+    - name: api@internal
+      kind: TraefikService
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: traefik-dashboard-tls
+  namespace: ingress-system
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - match: Host(`traefik2-dcn.ops.fcbox.com`)
+    kind: Rule
+    services:
+    - name: api@internal
+      kind: TraefikService
+  tls:
+    secretName: fc-tls
