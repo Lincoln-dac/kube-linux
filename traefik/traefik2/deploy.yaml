@@ -46,7 +46,6 @@ spec:
           - --metrics.prometheus=true
           - --ping=true
           - --metrics.prometheus.entrypoint=metrics
-          - --metrics.statsd=true
           - --entryPoints.metrics.address=:8082
           - --providers.kubernetesingress.disablepasshostheaders=true
           - --providers.kubernetescrd
