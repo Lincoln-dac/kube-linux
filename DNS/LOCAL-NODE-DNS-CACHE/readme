@@ -5,3 +5,20 @@ LOCAL-NODE-DNS-CACHE
 3.通过 kube-proxy 添加的 iptables 规则将其转换为 kube-dns/CoreDNS 端点。
 4.借助这种新架构，Pods 将可以访问在同一节点上运行的 dns 缓存代理，从而避免了 iptables DNAT 规则和连接跟踪。 本地缓存代理将查询 kube-dns 服务以获取集群主机名的缓存缺失（默认为 cluster.local 后缀）。
 5.修改kubelet dns IP 为169.254.20.10
+6.__PILLAR__DNS__SERVER__ ：表示 kube-dns 这个 Service 的 ClusterIP，可以通过命令 kubectl get svc -n kube-system | grep kube-dns | awk '{ print $3 }' 获取
+7.__PILLAR__LOCAL__DNS__：表示 DNSCache 本地的 IP，默认为 169.254.20.10
+8.__PILLAR__DNS__DOMAIN__：表示集群域，默认就是 cluster.local
+9.根据需求配置单个 Pod 的 dnsconfig 后重启。YAML 核心部分参考如下：
+需要将 nameserver 配置为169.254.20.10。
+为确保集群内部域名能够被正常解析，需要配置 searches。
+适当降低 ndots 值有利于加速集群外部域名访问。
+当 Pod 没有使用带有多个 dots 的集群内部域名的情况下，建议将值设为2
+dnsConfig:
+nameservers: ["169.254.20.10"]
+searches: 
+ - default.svc.cluster.local
+ - svc.cluster.local
+ - cluster.local
+options:
+ - name: ndots
+   value: "2" 
