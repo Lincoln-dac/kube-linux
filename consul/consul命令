@@ -28,3 +28,6 @@ consul services deregister -id=:service-id
 :service-id 为用户服务Id
 
 consul info
+
+
+curl -X PUT http://10.204.51.64:8500/v1/agent/service/deregister/service-docker-helloworld
