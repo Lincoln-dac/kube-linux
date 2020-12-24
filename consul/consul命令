@@ -22,6 +22,14 @@ server-3  10.204.51.66:8301  alive   acls=0,build=1.8.5:1e03567d,dc=shenzhen,exp
 consul reload
 重新加载配置
 
+查看datacenters
+consul catalog datacenters
+查看服务
+consul catalog services
+查看node
+consul catalog nodes
+ consul catalog nodes -detailed
+
 
 consul services deregister -id=:service-id
 注销服务
