@@ -1,9 +1,17 @@
 consul members
 members命令针对Consul客户端运行，该客户端通过gossip协议获取其信息。
 命令输出显示了数据中心的节点、IP端口、健康状态、角色、所在数据中心和版本信息。
+Node      Address            Status  Type    Build  Protocol  DC        Segment
+server-1  10.204.51.64:8301  alive   server  1.8.5  2         shenzhen  <all>
+server-2  10.204.51.65:8301  alive   server  1.8.5  2         shenzhen  <all>
+server-3  10.204.51.66:8301  alive   server  1.8.5  2         shenzhen  <all>
 
 consul members -detailed
 还可以用过 -detailed 参数获取更多信息
+Node      Address            Status  Tags
+server-1  10.204.51.64:8301  alive   acls=0,build=1.8.5:1e03567d,dc=shenzhen,expect=3,ft_fs=1,id=b07f6fbf-f27d-9f5d-2911-49e26825d97f,port=8300,raft_vsn=3,role=consul,segment=<all>,vsn=2,vsn_max=3,vsn_min=2,wan_join_port=8302
+server-2  10.204.51.65:8301  alive   acls=0,build=1.8.5:1e03567d,dc=shenzhen,expect=3,ft_fs=1,id=230d372f-ec81-5503-5f15-490c415bdc18,port=8300,raft_vsn=3,role=consul,segment=<all>,vsn=2,vsn_max=3,vsn_min=2,wan_join_port=8302
+server-3  10.204.51.66:8301  alive   acls=0,build=1.8.5:1e03567d,dc=shenzhen,expect=3,ft_fs=1,id=9bd65f61-e526-8b0a-e17a-06109a2ed552,port=8300,raft_vsn=3,role=consul,segment=<all>,vsn=2,vsn_max=3,vsn_min=2,wan_join_port=8302
 
  consul leave
 
