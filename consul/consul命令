@@ -27,7 +27,8 @@ consul services deregister -id=:service-id
 注销服务
 :service-id 为用户服务Id
 https://www.consul.io/commands/services/deregister
-
+注册服务
+curl -X PUT -d '{"id": "10.204.51.64","name": "10.204.51.64","address": "10.204.51.64","port": 9999,"tags": ["test","node","linux"],"checks": [{"http": "http://10.204.51.64:9999/metrics", "interval": "5s"}]}'  http://10.204.51.64:8500/v1/agent/service/register
 consul info
 
 
