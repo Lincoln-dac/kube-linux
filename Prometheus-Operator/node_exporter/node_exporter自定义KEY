@@ -1,0 +1,51 @@
+主机IP 10.204.51.64
+1.下载node_exporter
+2.配置service
+[Unit]
+Description=node_exporter
+After=network.target
+
+[Service]
+EnvironmentFile=-/app/node_exporter/config/node_exporter
+ExecStart=/app/node_exporter/bin/node_exporter $ARGS
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+
+
+cat /app/node_exporter/config/node_exporter
+
+ARGS="--web.listen-address=:9999 --web.telemetry-path=/metrics --log.level=info  --collector.textfile.directory=/app/node_exporter/config"
+
+
+3.自定义脚本
+cat /app/node_exporter/script/start.sh
+
+#!/bin/bash
+echo Logical_CPU_core_total  `cat /proc/cpuinfo| grep "processor"| wc -l`
+echo logined_users_total     `who | wc -l`;
+echo procs_total `ps aux|wc -l`
+echo procs_zombie       `ps axo pid=,stat=|grep Z|wc -l`
+
+
+/app/node_exporter/script/start.sh > /app/node_exporter/config/key.prom
+注意：文件必须以prom结尾
+cat  /app/node_exporter/config/key.prom
+Logical_CPU_core_total 16
+logined_users_total 3
+procs_total 319
+procs_zombie 0
+
+4.浏览器 打开 http://10.204.51.64:9999/metrics，可以查到新的自定义KEY
+5.加入到prothemues，修改promethues配置文件
+新增
+- job_name: 'node-exporter-test'
+  scrape_interval: 30s
+  static_configs:
+  - targets: ['10.204.51.64:9999']
+打开promethues控制，是否发现，查询
+
+
+
+
