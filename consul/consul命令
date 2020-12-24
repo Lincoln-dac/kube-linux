@@ -26,6 +26,7 @@ consul reload
 consul services deregister -id=:service-id
 注销服务
 :service-id 为用户服务Id
+https://www.consul.io/commands/services/deregister
 
 consul info
 
