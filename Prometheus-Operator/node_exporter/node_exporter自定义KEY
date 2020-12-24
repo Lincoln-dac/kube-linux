@@ -44,7 +44,7 @@ procs_zombie 0
   scrape_interval: 30s
   static_configs:
   - targets: ['10.204.51.64:9999']
-打开promethues控制，是否发现，查询
+打开promethues控制台，是否发现，查询
 
 
 
