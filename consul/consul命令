@@ -1,0 +1,22 @@
+consul members
+members命令针对Consul客户端运行，该客户端通过gossip协议获取其信息。
+命令输出显示了数据中心的节点、IP端口、健康状态、角色、所在数据中心和版本信息。
+
+consul members -detailed
+还可以用过 -detailed 参数获取更多信息
+
+ consul leave
+
+停止agent服务
+通过consul leave命令优雅停止服务，我们再打开一个从节点机器终端，运行该命令
+
+
+consul reload
+重新加载配置
+
+
+consul services deregister -id=:service-id
+注销服务
+:service-id 为用户服务Id
+
+consul info
