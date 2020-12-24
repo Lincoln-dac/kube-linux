@@ -1,0 +1,11 @@
+consul services register
+
+ consul services register -name=web
+ {
+  "Service": {
+    "Name": "web"
+  }
+}
+
+
+https://www.consul.io/commands/services/register
