@@ -1,0 +1,12 @@
+-server 以服务端模式运行，相应的还有客户端模式-client
+-ui 启动内置的Web UI
+-bootstrap-expect=3 集群最少节点数，类似zookeeper的配置一样，为了防止脑裂，一般为奇数
+-data-dir=/data/consul 数据存储目录
+-node=agent-1 集群的节点名称
+-client=0.0.0.0 指定客户端能访问的ip，类似于ip白名单。0.0.0.0表示不限制
+-bind=10.25.84.163 绑定了当前主机的IP地址
+-datacenter=dc1 数据中心名称
+-join agent启动时加入到代理服务器地址，不指定不会加入任何节点，可以在启动后通过consul join命令加入
+
+
+https://www.consul.io/docs/agent/options
