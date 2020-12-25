@@ -1,0 +1,23 @@
+1.新增prometheus job
+
+- job_name: 'consul'
+  consul_sd_configs:
+  - server: '10.204.51.64:8500'
+    services: []
+  relabel_configs:
+  - source_labels: [__meta_consul_tags]
+    regex: .*dev.*
+    action: keep
+解析：
+meta_cosul_tags 服务label有dev 都匹配
+2. 服务注册
+curl -X PUT -d '{"id": "10.204.51.66","name": "10.204.51.66","address": "10.204.51.66","port": 9999,"tags": ["dev"],"checks": [{"http": "http://10.204.51.66:9999/","interval": "5s"}]}'     http://10.204.51.64:8500/v1/agent/service/register
+curl -X PUT -d '{"id": "10.204.51.67","name": "10.204.51.67","address": "10.204.51.67","port": 9999,"tags": ["dev"],"checks": [{"http": "http://10.204.51.67:9999/","interval": "5s"}]}'     http://10.204.51.64:8500/v1/agent/service/register
+curl -X PUT -d '{"id": "10.204.51.68","name": "10.204.51.68","address": "10.204.51.68","port": 9999,"tags": ["dev"],"checks": [{"http": "http://10.204.51.68:9999/","interval": "5s"}]}'     http://10.204.51.64:8500/v1/agent/service/register
+
+结果
+consul (3/3 up) 
+Endpoint	                       State	Labels	                Last Scrape	Error
+http://10.204.51.66:9999/metrics UP	instance="10.204.51.66:9999"	72ms ago	
+http://10.204.51.67:9999/metrics UP	instance="10.204.51.67:9999"	6.762s ago	
+http://10.204.51.68:9999/metrics UP	instance="10.204.51.68:9999"	6.573s ago	
