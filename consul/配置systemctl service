@@ -1,0 +1,43 @@
+10.204.51.64 
+[Unit]
+Description=node_exporter
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/consul agent -server -ui -bootstrap-expect=3 -data-dir=/app/consul/data -node=server-1 -client=0.0.0.0 -bind=10.204.51.64 -datacenter=shenzhen -log-file=/app/consul/logs/consul -config-dir=/app/consul/config/
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+
+10.204.51.65
+
+[Unit]
+Description=node_exporter
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/consul agent -server -ui -bootstrap-expect=3 -data-dir=/app/consul/data -node=server-2 -client=0.0.0.0 -bind=10.204.51.65 -datacenter=shenzhen -join 10.204.51.64 -log-file=/app/consul/logs/consul -config-dir=/app/consul/config/
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+
+
+10.204.51.66
+
+[Unit]
+Description=node_exporter
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/consul agent -server -ui -bootstrap-expect=3 -data-dir=/app/consul/data -node=server-3 -client=0.0.0.0 -bind=10.204.51.66 -datacenter=shenzhen -join 10.204.51.64 -log-file=/app/consul/logs/consul.log -config-dir=/app/consul/config
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+
+systemctl daemold-reload
+systemctl restart consul
+
+
