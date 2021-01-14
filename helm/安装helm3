@@ -1,0 +1,10 @@
+从二进制版本
+每一个[版本](https://github.com/helm/helm/releases)helm提供多种操作系统的二进制版本。这些二进制版本可以手动下载和安装。
+下载[所需版本]
+https://github.com/helm/helm/releases
+  2. 打开包装
+tar -zxvf helm-v3.0.0-linux-amd64.tgz
+  3.helm在解压后的目录中找到二进制文件，然后将其移至所需的目标位置
+mv linux-amd64/helm /usr/local/bin/helm
+在客户端运行：
+helm help
