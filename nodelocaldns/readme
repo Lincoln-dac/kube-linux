@@ -1,2 +1,0 @@
-deploy node local dns
-将kubelet clusterDNS  改为169.254.20.10 重启pod
