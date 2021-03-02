@@ -1,1 +1,57 @@
-1.部署es 7
+1.部署es 7 集群
+节点1 10.204.51.64
+cat /app/elasticsearch-7.6.2/config/elasticsearch.yml
+cluster.name: skywalking
+node.name: 10.204.51.64
+path.data: /app/elasticsearch-7.6.2/data
+path.logs: /app/elasticsearch-7.6.2/logs
+bootstrap.memory_lock: true
+discovery.seed_hosts: ["10.204.51.65","10.204.51.66","10.204.51.64"]
+cluster.initial_master_nodes: ["10.204.51.64" ]
+node.master: true
+node.data: true
+network.host: 0.0.0.0
+http.port: 9200
+transport.tcp.port: 9300
+http.cors.enabled: true 
+http.cors.allow-origin: "*"
+
+节点2 10.204.51.65
+cat /app/elasticsearch-7.6.2/config/elasticsearch.yml
+cluster.name: skywalking
+node.name: 10.204.51.65
+path.data: /app/elasticsearch-7.6.2/data
+path.logs: /app/elasticsearch-7.6.2/logs
+bootstrap.memory_lock: true
+discovery.seed_hosts: ["10.204.51.65","10.204.51.66","10.204.51.64"]
+cluster.initial_master_nodes: ["10.204.51.64" ]
+node.master: true
+node.data: true
+network.host: 0.0.0.0
+http.port: 9200
+transport.tcp.port: 9300
+http.cors.enabled: true 
+http.cors.allow-origin: "*"
+
+
+节点2 10.204.51.65
+cat /app/elasticsearch-7.6.2/config/elasticsearch.yml
+cluster.name: skywalking
+node.name: 10.204.51.66
+path.data: /app/elasticsearch-7.6.2/data
+path.logs: /app/elasticsearch-7.6.2/logs
+bootstrap.memory_lock: true
+discovery.seed_hosts: ["10.204.51.65","10.204.51.66","10.204.51.64"]
+cluster.initial_master_nodes: ["10.204.51.64" ]
+node.master: true
+node.data: true
+network.host: 0.0.0.0
+http.port: 9200
+transport.tcp.port: 9300
+http.cors.enabled: true 
+http.cors.allow-origin: "*"
+
+curl -XGET http://10.204.51.64:9200/_cat/nodes?v
+
+
+
