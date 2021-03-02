@@ -62,7 +62,7 @@ cluster.routing.allocation.node_initial_primaries_recoveries: 16
 
 
 
-节点2 10.204.51.65
+节点3 10.204.51.66
 cat /app/elasticsearch-7.6.2/config/elasticsearch.yml
 cluster.name: skywalking
 node.name: 10.204.51.66
