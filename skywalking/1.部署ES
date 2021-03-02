@@ -15,6 +15,20 @@ http.port: 9200
 transport.tcp.port: 9300
 http.cors.enabled: true 
 http.cors.allow-origin: "*"
+transport.tcp.compress: true
+network.tcp.no_delay: true
+network.tcp.keep_alive: true
+network.tcp.reuse_address: true
+network.tcp.send_buffer_size: 256mb
+network.tcp.receive_buffer_size: 256mb
+cluster.fault_detection.leader_check.interval: 15s
+discovery.cluster_formation_warning_timeout: 90s
+cluster.join.timeout: 90s
+cluster.publish.timeout: 90s
+cluster.routing.allocation.cluster_concurrent_rebalance: 16
+cluster.routing.allocation.node_concurrent_recoveries: 16
+cluster.routing.allocation.node_initial_primaries_recoveries: 16
+
 
 节点2 10.204.51.65
 cat /app/elasticsearch-7.6.2/config/elasticsearch.yml
@@ -32,6 +46,20 @@ http.port: 9200
 transport.tcp.port: 9300
 http.cors.enabled: true 
 http.cors.allow-origin: "*"
+transport.tcp.compress: true
+network.tcp.no_delay: true
+network.tcp.keep_alive: true
+network.tcp.reuse_address: true
+network.tcp.send_buffer_size: 256mb
+network.tcp.receive_buffer_size: 256mb
+cluster.fault_detection.leader_check.interval: 15s
+discovery.cluster_formation_warning_timeout: 90s
+cluster.join.timeout: 90s
+cluster.publish.timeout: 90s
+cluster.routing.allocation.cluster_concurrent_rebalance: 16
+cluster.routing.allocation.node_concurrent_recoveries: 16
+cluster.routing.allocation.node_initial_primaries_recoveries: 16
+
 
 
 节点2 10.204.51.65
@@ -50,8 +78,27 @@ http.port: 9200
 transport.tcp.port: 9300
 http.cors.enabled: true 
 http.cors.allow-origin: "*"
+transport.tcp.compress: true
+network.tcp.no_delay: true
+network.tcp.keep_alive: true
+network.tcp.reuse_address: true
+network.tcp.send_buffer_size: 256mb
+network.tcp.receive_buffer_size: 256mb
+cluster.fault_detection.leader_check.interval: 15s
+discovery.cluster_formation_warning_timeout: 90s
+cluster.join.timeout: 90s
+cluster.publish.timeout: 90s
+cluster.routing.allocation.cluster_concurrent_rebalance: 16
+cluster.routing.allocation.node_concurrent_recoveries: 16
+cluster.routing.allocation.node_initial_primaries_recoveries: 16
+
 
 curl -XGET http://10.204.51.64:9200/_cat/nodes?v
 
+2.部署ES ui
+
+ wget https://github.com/lmenezes/cerebro/releases/download/v0.8.1/cerebro-0.8.1.tgz 
+ 解压执行
+../bin/cerebro
 
 
