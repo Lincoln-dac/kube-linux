@@ -4,4 +4,24 @@ cd skywalking-kubernetes/chart
 helm repo add elastic https://helm.elastic.co
 helm dep up skywalking
 
-2.
+2. cd skywalking-kubernetes/chart/skywalking
+修改values-my-es.yaml
+
+oap:
+  image:
+    tag: 8.3.0-es7      # Set the right tag according to the existing Elasticsearch version
+  storageType: elasticsearch7
+
+ui:
+  image:
+    tag: 8.3.0
+
+elasticsearch:
+  enabled: false
+  config:               # For users of an existing elasticsearch cluster,takes effect when `elasticsearch.enabled` is false
+    host: 10.204.51.64
+    port:
+      http: 9200
+    user: "admin"         # [optional]
+    password: "xxxxxx"     # [optional]
+
