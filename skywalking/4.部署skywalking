@@ -25,3 +25,6 @@ elasticsearch:
     user: "admin"         # [optional]
     password: "xxxxxx"     # [optional]
 
+
+执行部署命令
+helm install skywalking skywalking -n skywalking   -f ./skywalking/values-my-es.yaml
