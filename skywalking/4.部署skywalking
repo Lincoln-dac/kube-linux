@@ -1,0 +1,7 @@
+1.下载skywalking
+git clone https://github.com/apache/skywalking-kubernetes
+cd skywalking-kubernetes/chart
+helm repo add elastic https://helm.elastic.co
+helm dep up skywalking
+
+2.
