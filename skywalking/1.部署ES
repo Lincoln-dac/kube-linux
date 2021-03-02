@@ -95,6 +95,9 @@ cluster.routing.allocation.node_initial_primaries_recoveries: 16
 
 curl -XGET http://10.204.51.64:9200/_cat/nodes?v
 
+创建用户
+bin/elasticsearch-users useradd admin -p admin
+
 2.部署ES ui
 
  wget https://github.com/lmenezes/cerebro/releases/download/v0.8.1/cerebro-0.8.1.tgz 
