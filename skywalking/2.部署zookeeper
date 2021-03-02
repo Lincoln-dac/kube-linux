@@ -1,0 +1,52 @@
+节点1 10.204.51.64
+cat /app/zookeeper/conf/zoo.cfg
+tickTime=2000
+initLimit=5
+syncLimit=2
+dataDir=/app/zookeeper/data
+clientPort=2181
+clientPortAddress=10.204.51.64
+maxClientCnxns=100
+logDir=/app/zookeeper/logs
+autopurge.snapRetainCount=3
+autopurge.purgeInterval=5
+server.1=10.204.51.64:2888:3888
+server.2=10.204.51.65:2888:3888
+server.3=10.204.51.66:2888:3888
+
+节点2 10.204.51.65
+cat /app/zookeeper/conf/zoo.cfg
+tickTime=2000
+initLimit=5
+syncLimit=2
+dataDir=/app/zookeeper/data
+clientPort=2181
+clientPortAddress=10.204.51.65
+maxClientCnxns=100
+logDir=/app/zookeeper/logs
+autopurge.snapRetainCount=3
+autopurge.purgeInterval=5
+server.1=10.204.51.64:2888:3888
+server.2=10.204.51.65:2888:3888
+server.3=10.204.51.66:2888:3888
+
+节点3 10.204.51.66
+cat /app/zookeeper/conf/zoo.cfg
+tickTime=2000
+initLimit=5
+syncLimit=2
+dataDir=/app/zookeeper/data
+clientPort=2181
+clientPortAddress=10.204.51.66
+maxClientCnxns=100
+logDir=/app/zookeeper/logs
+autopurge.snapRetainCount=3
+autopurge.purgeInterval=5
+server.1=10.204.51.64:2888:3888
+server.2=10.204.51.65:2888:3888
+server.3=10.204.51.66:2888:3888
+
+
+/app/zookeeper/bin/zkServer.sh status
+
+
