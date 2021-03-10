@@ -12,7 +12,7 @@ oap:
     repository: mw/skywalking-oap-server
     tag: 8.3.0-es7      # Set the right tag according to the existing Elasticsearch version
   storageType: elasticsearch7 # 存储选择
-  replicas: 5 # oap 实例数
+  replicas: 3 # oap 实例数
   javaOpts: -Xmx8g -Xms8g
   resources:
     requests:
@@ -28,8 +28,8 @@ oap:
     SW_RECEIVER_JAEGER_PORT: 11800 # 可选 grpc 端口，默认是11800
     SW_CORE_REST_PORT: 12800  # 可选 server 的rest 通信端口 
     SW_KAFKA_FETCHER: default
-    SW_KAFKA_FETCHER_SERVERS: "push-kafka1.fcdc.fcbox.com:9092,push-kafka2.fcdc.fcbox.com:9092,push-kafka3.fcdc.fcbox.com:9092" # kafka broker 地址，两套环境中这里要一样
-    SW_KAFKA_FETCHER_PARTITIONS: 5     # partition 数量，线上可以加大，最好和oap  实例数量保持一致。 
+    SW_KAFKA_FETCHER_SERVERS: "kafka1:9092,kafka2:9092,kafka3:9092" # kafka broker 地址，两套环境中这里要一样
+    SW_KAFKA_FETCHER_PARTITIONS: 3     # partition 数量，线上可以加大，最好和oap  实例数量保持一致。 
     SW_KAFKA_FETCHER_PARTITIONS_FACTOR: 3 # 副本数量
     SW_TELEMETRY: prometheus    # 监控选择
     SW_PROMETHEUS_FETCHER: default
