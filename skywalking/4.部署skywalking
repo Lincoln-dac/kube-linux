@@ -9,21 +9,54 @@ helm dep up skywalking
 
 oap:
   image:
+    repository: mw/skywalking-oap-server
     tag: 8.3.0-es7      # Set the right tag according to the existing Elasticsearch version
-  storageType: elasticsearch7
+  storageType: elasticsearch7 # 存储选择
+  replicas: 5 # oap 实例数
+  javaOpts: -Xmx8g -Xms8g
+  resources:
+    requests:
+      cpu: "0.1"
+      memory: "2Gi"
+    limits:
+      cpu: "4"
+      memory: "12Gi"
+  env:
+    SW_NAMESPACE: skywalking     # 命令空间，也是es 中索引前缀，如果不一样，Es中索引重复，数据存储存储在两个地方
+    SW_CLUSTER: kubernetes         # 集群管理器
+    SW_CLUSTER_K8S_NAMESPACE: skywalking # k8s 命名空间
+    SW_RECEIVER_JAEGER_PORT: 11800 # 可选 grpc 端口，默认是11800
+    SW_CORE_REST_PORT: 12800  # 可选 server 的rest 通信端口 
+    SW_KAFKA_FETCHER: default
+    SW_KAFKA_FETCHER_SERVERS: "push-kafka1.fcdc.fcbox.com:9092,push-kafka2.fcdc.fcbox.com:9092,push-kafka3.fcdc.fcbox.com:9092" # kafka broker 地址，两套环境中这里要一样
+    SW_KAFKA_FETCHER_PARTITIONS: 5     # partition 数量，线上可以加大，最好和oap  实例数量保持一致。 
+    SW_KAFKA_FETCHER_PARTITIONS_FACTOR: 3 # 副本数量
+    SW_TELEMETRY: prometheus    # 监控选择
+    SW_PROMETHEUS_FETCHER: default
+    SW_PROMETHEUS_FETCHER_ENABLED_RULES: "self" # 监控 模板
+    SW_PROMETHEUS_FETCHER_ACTIVE: true  # 开启自监控
+    SW_HEALTH_CHECKER: default # 是否oap 之间检查，
 
 ui:
   image:
+    repository: mw/skywalking-ui
     tag: 8.3.0
-
+  resources:
+    requests:
+      cpu: "0.1"
+      memory: "1Gi"
+    limits:
+      cpu: "4"
+      memory: "4Gi"
 elasticsearch:
   enabled: false
+  clusterName: skywalking
   config:               # For users of an existing elasticsearch cluster,takes effect when `elasticsearch.enabled` is false
-    host: 10.204.51.64
+    host: es host ip # Es 地址
     port:
-      http: 9200
-    user: "admin"         # [optional]
-    password: "xxxxxx"     # [optional]
+      http: 9200 # Es 端口
+    user: ""         # [optional]
+    password: ""     # [optional]
 
 
 执行部署命令
