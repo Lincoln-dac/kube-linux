@@ -1,1 +1,4 @@
-skywalking 应用
+1.skywalking 应用
+2.es 地址需要修改
+3.skywalking image 需要修改，不修改使用默认docker hub
+4.https://github.com/apache/skywalking-kubernetes/blob/master/chart/skywalking/README.md
