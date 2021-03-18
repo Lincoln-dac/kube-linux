@@ -29,6 +29,6 @@ kubectl create clusterrolebinding kubernetes   --clusterrole=cluster-admin   --u
 kubectl create clusterrolebinding kubelet-bootstrap --clusterrole=system:node-bootstrapper --user=kubelet-bootstrap
 
 4.创建仓库私密
-kubectl create secret docker-registry imagesecret --docker-server=10.204.57.39 --docker-username=admin --docker-password=123456
+kubectl create secret docker-registry imagesecret --docker-server=10.204.57.39 --docker-username=admin --docker-password=123456(分不同namespace)
 
 
