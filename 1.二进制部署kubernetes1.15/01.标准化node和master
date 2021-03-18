@@ -31,7 +31,13 @@ cat > /etc/sysconfig/modules/br_netfilter.modules << EOF
 modprobe br_netfilter
 EOF
 3.关闭dnsmasq 加载模块
-systemctl disable --now dnsmasq
+systemctl disable --now dnsmasq 关闭默认路由
+vim /etc/sysconfig/network 增加内容
+NOZEROCONF=yes
+重启网络systemctl restart network 
+route -n  检查如下路由信息是否消失
+169.254.0.0     0.0.0.0         255.255.0.0     U     1002   0        0 eth0
+
 4.安装软件
 yum install epel-release -y
 yum install -y keepalived mtr telnet ipvsadm ipset wget keepalived  nfs-utils systemd  yum-plugin-ovl jq psmisc socat perl iotop iftop fuse fuse-devel
