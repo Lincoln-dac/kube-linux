@@ -121,4 +121,6 @@ chmod 755 /etc/sysconfig/modules/ipvs.modules && bash /etc/sysconfig/modules/ipv
 
 注意事项：
 1.安装软件有先后顺序
-2.ipvs影响后面的网络转发
+2.ipvs影响后面的k8s网络规则刷新,ipvs 模块需要加载成功
+3.高版本内核不支持keepalived组件
+
