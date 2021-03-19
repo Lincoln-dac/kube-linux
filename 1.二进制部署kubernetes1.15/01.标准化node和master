@@ -55,7 +55,7 @@ cat /etc/security/limits.conf
 *             soft    nproc     409600
 7.#参数优化 cat /etc/sysctl.conf
 fs.file-max = 65535600
-fs.inotify.max_user_watches=89100
+fs.inotify.max_user_watches= 89100
 fs.nr_open = 527069630
 kernel.pid_max = 131072
 kernel.sysrq = 1
