@@ -1,0 +1,31 @@
+一般情况下，我们自定义的一些监控项都是通过push到pushgateway上，再由prometheus从pushgateway pull。
+
+但是通过pushgateway推送数据时，如果推送过程中有重复的数据，prometheus从pushgateway pull数据时，会出现获取不到数据的情况。
+
+ 
+
+还有一种自定义监控项的方式是将监控采集到的数据写入本地文件中，然后由node_exporter读取该数据文件，这样自定义的监控项就可以被prometheus从node_exporter上pull到了。
+
+具体实现：
+
+1、node_exporter启动时需要添加参数：–collector.textfile.directory=xxx/。该参数定义一个数据文件目录，启动后默认会读取该目录下的数据文件
+
+2、node_exporter能读取到的数据文件是以.prom结尾的文件。
+
+数据格式：
+
+# HELP node_cpu_seconds_total Seconds the cpus spent in each mode.            # metric说明
+# TYPE node_cpu_seconds_total counter                                                              # metric value类型
+node_cpu_seconds_total{cpu="0",mode="idle"} 77699.77                                     # metric
+ 
+
+      注：如果没有写HELP和TYPE的话,系统会帮助生成一个简单的HELP描述和TYPE类型,如下：
+
+# HELP example_metric Metric read from /some/path/textfile/example.prom
+# TYPE example_metric untyped
+example_metric 1
+ 
+
+             但是如果有多个文件中出现相同的指标名称(example_metric),需要保证这些指标的HELP和TYPE都一致,否则采集将出错. 基本格式也可以参考node_exporter/metrics路径下显示的内容.
+
+3、prometheus server从node_exporter端pull数据
