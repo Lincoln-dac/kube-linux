@@ -2,13 +2,13 @@
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  name: traefik2-dcn.fcbox.com
+  name: traefik2-dcn.xxx.com
   namespace: ingress-system
 spec:
   entryPoints:
     - web
   routes:
-  - match: Host(`traefik2-dcn.ops.fcbox.com`)
+  - match: Host(`traefik2-dcn.ops.xxx.com`)
     kind: Rule
     services:
     - name: api@internal
@@ -23,7 +23,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-  - match: Host(`traefik2-dcn.ops.fcbox.com`)
+  - match: Host(`traefik2-dcn.ops.xxx.com`)
     kind: Rule
     services:
     - name: api@internal
