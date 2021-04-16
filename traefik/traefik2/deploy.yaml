@@ -24,7 +24,7 @@ spec:
       priorityClassName: cluster-core-pod-critical
       containers:
       - name: traefik
-        image: harbor.fcbox.com/common/traefik:2.2.7
+        image: harbor.xxxx.com/common/traefik:2.2.7
         env:
         - name: TZ
           value: "Asia/Shanghai"
