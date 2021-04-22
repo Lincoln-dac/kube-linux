@@ -1,0 +1,2 @@
+修改prometheus-prometheus.yaml
+新增retention: 7d
