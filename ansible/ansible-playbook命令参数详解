@@ -119,7 +119,7 @@ ptions:
              #run operations with su as this user (default=root)(deprecated, use become)
     -b, --become        
              #run operations with become (does not imply password prompting)
-             #
+             #切换成其他用户执行，值为yes或者no
     --become-method=BECOME_METHOD
              #privilege escalation method to use (default=sudo),valid choices: [ sudo | su | pbrun | pfexec | doas |dzdo | ksu | runas ]
              #
