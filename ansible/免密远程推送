@@ -1,0 +1,5 @@
+#生产 ssh密钥
+ssh-keygen
+#复制ssh
+ssh-copy-id remoteuser@remoterserverip
+ssh-keyscan remote_servers >> ~/.ssh/known_hosts
