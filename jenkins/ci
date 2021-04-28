@@ -1,0 +1,44 @@
+node {
+   def mvnHome
+    stage('Preparation') {
+        
+        /*-----------参数变量------------------*/
+            AppVersion="${sh(script: 'date +%Y%m%d%H%M%S',returnStdout:true).trim()}"   //默认版本，无需修改
+            label="uat1"       //打包参数
+            pom_file="hivebox-standard-courier/"        //打包是否需要子目录
+            testenv="sit1"     //测试环境类型（sit1,sit2,sit3,sit4）
+            
+            flag="${app_type == 'spring-boot' ? 'jar' : 'war'}"   //包类型，无需修改
+            
+        /*-----------参数变量------------------*/
+        
+            checkout([$class: 'GitSCM', branches: [[name: "${branch}"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '052c6273-dbdf-4601-845a-1a6cab5b91e3', url: "${git_url}"]]])
+            mvnHome = tool 'MAVEN'
+            
+   }
+   
+   stage('MAVEN Build') {
+      // Run the maven build
+
+            //构建包
+            withEnv(["MVN_HOME=$mvnHome"]) {
+            sh "\"$MVN_HOME/bin/mvn\" -f ./ -Dmaven.test.skip=true clean deploy -P ${label} -U"
+
+
+      }
+   }
+    
+    stage('image build and deploy') {
+        jobhome=env.WORKSPACE
+        sh "/app/dockerbuildimage/${testenv}/createnewpro.sh ${app_name} ${app_type}"
+
+            //打包镜像
+            sh "cp -r \"${jobhome}/${pom_file}/target/${app_name}.${flag}\" /app/dockerbuildimage/${testenv}/${app_type}/${app_name}"
+            sh "docker build -t 10.204.57.39/${app_type}/${app_name}-${testenv}:${AppVersion} /app/dockerbuildimage/${testenv}/${app_type}/${app_name}/"
+            sh "docker push 10.204.57.39/${app_type}/${app_name}-${testenv}:${AppVersion}"
+    //部署
+        
+        sh "/app/dockerbuildimage/${testenv}/${app_type}/${app_name}/deploy.sh $AppVersion N"
+		//sh "createnewpro.sh "
+   }
+}
