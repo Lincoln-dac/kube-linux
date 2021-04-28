@@ -1,18 +1,1 @@
-node {
-    
-   stage('Git Build') { 
-       //构建前清理工作空间
-       cleanWs()
-       sh "pwd && mkdir -p ./${app_name} && cd ${app_name} && pwd"
-       checkout([$class: 'GitSCM', branches: [[name: "${branch}"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '052c6273-dbdf-4601-845a-1a6cab5b91e3', url: "${git_url}"]]])
-    }
-   stage('Build') {
-       //打包当前目录所有文件并复制到部署目录下
-       sh "tar zcvf ${app_name}.tar.gz ${app_name}"
-       sh "cp ${app_name}.tar.gz /app/dockerbuildimage/sit2/middleware/package"
-	
-   }
-   stage('Results') {
-       sh "/app/dockerbuildimage/sit2/middleware/package/deploy.sh"
-   }
-}	
+jenkins know
