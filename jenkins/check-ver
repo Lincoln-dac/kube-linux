@@ -30,8 +30,8 @@ node {
         sh "/app/dockerbuildimage/${testenv}/createnewpro.sh ${app_name} ${app_type}"
             //打包镜像
             sh "cp -r \"${jobhome}/${pom_file}target/${app_name}.${flag}\" /app/dockerbuildimage/${testenv}/${app_type}/${app_name}"
-            sh "docker build -t harbor.fcbox.com/${app_type}/${app_name}:${AppVersion} /app/dockerbuildimage/${testenv}/${app_type}/${app_name}/"
-            sh "docker push harbor.fcbox.com/${app_type}/${app_name}:${AppVersion}"
+            sh "docker build -t xxx.com/${app_type}/${app_name}:${AppVersion} /app/dockerbuildimage/${testenv}/${app_type}/${app_name}/"
+            sh "docker push xxx.com/${app_type}/${app_name}:${AppVersion}"
             manager.addBadge('1',"   ${AppVersion}   ",'1')
     //部署
         
