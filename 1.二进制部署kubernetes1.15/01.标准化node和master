@@ -20,6 +20,7 @@ fi
 #关闭防火墙，swap,selinux
 systemctl stop firewalld NetworkManager
 systemctl disable firewalld NetworkManager
+swapoff -a
 setenforce 0
 sed -ri '/^[^#]*SELINUX=/s#=.+$#=disabled#' /etc/selinux/config
 sed -ri '/^[^#]*swap/s@^@#@' /etc/fstab
