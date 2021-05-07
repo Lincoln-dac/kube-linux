@@ -1,0 +1,12 @@
+修改grafana-deployment.yaml配置文件
+        volumeMounts:
+          name: grafana-storage
+          readOnly: false
+        - mountPath: /etc/grafana/provisioning/datasources
+      - name: grafana-storage
+        nfs:
+          server: nfs-server-ip
+          path: /app/nfs/prometheus/tsdb
+      - name: grafana-datasources
+      
+     kubectl apply -f grafana-deployment.yaml
