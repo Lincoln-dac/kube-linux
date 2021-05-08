@@ -1,0 +1,25 @@
+cat <<EOF | sudo tee /etc/yum.repos.d/influxdb.repo
+[influxdb]
+name = InfluxDB Repository - RHEL \$releasever
+baseurl = https://repos.influxdata.com/rhel/\$releasever/\$basearch/stable
+enabled = 1
+gpgcheck = 1
+gpgkey = https://repos.influxdata.com/influxdb.key
+EOF
+
+
+yum install influxdb -y
+
+systemctl enable influxdb
+systemctl start influxdb
+systemctl status influxdb
+
+mkdir -p /app/prometheus-federation/influxdb/{data,meta,wal
+
+修改/etc/influxdb/influxdb.conf 
+
+[meta]
+  dir = "/app/prometheus-federation/influxdb/meta"
+[data]
+  dir = "/app/prometheus-federation/influxdb/data"
+  wal-dir = "/app/prometheus-federation/influxdb/wal"
