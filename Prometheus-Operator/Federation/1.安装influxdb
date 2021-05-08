@@ -23,3 +23,23 @@ mkdir -p /app/prometheus-federation/influxdb/{data,meta,wal
 [data]
   dir = "/app/prometheus-federation/influxdb/data"
   wal-dir = "/app/prometheus-federation/influxdb/wal"
+  
+  chown -R influxd:influxd /app/prometheus-federation/influxdb
+
+
+influx -precision rfc3339
+
+influx -precision rfc3339
+创建数据库和用户：
+
+> create database telegraf
+> create user "admin" with password 'Admin123' with all privileges
+> show databases;
+name: databases
+name
+----
+telegraf
+_internal
+> use telegraf
+Using database telegraf
+> show measurements;
