@@ -23,8 +23,11 @@ mkdir -p /app/prometheus-federation/influxdb/{data,meta,wal
 [data]
   dir = "/app/prometheus-federation/influxdb/data"
   wal-dir = "/app/prometheus-federation/influxdb/wal"
-  
-  chown -R influxd:influxd /app/prometheus-federation/influxdb
+ 
+ #########
+ grep -v "#" /etc/influxdb/influxdb.conf |grep -v "^$"
+ ####
+ chown -R influxdb:influxdb /app/prometheus-federation/influxdb
 
 
 
