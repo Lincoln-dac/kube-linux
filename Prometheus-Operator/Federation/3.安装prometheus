@@ -119,3 +119,22 @@ scrape_configs:
       - targets:
         - 'prometheus-dev.xxx.com'
         - 'prometheus-sit.xxx.com'
+        
+        
+1.配置prometheus service
+[Unit]
+Description=node_exporter
+After=network.target
+
+[Service]
+#EnvironmentFile=-/app/node_exporter/config/node_exporter
+ExecStart=/app/prometheus-federation/prometheus-2.26.0.linux-amd64/prometheus --config.file=/app/prometheus-federation/prometheus-2.26.0.linux-amd64/prometheus.yml --log.level=info
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+
+##########
+
+
+
