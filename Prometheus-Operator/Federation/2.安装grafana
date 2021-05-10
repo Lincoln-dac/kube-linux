@@ -1,3 +1,6 @@
 wget https://dl.grafana.com/oss/release/grafana-7.1.0-1.x86_64.rpm
 yum localinstall grafana-7.1.0-1.x86_64.rpm  && yum install fontconfig freetype* urw-fonts -y
 grafana-cli plugins install grafana-piechart-panel
+
+systemctl restart  grafana-server
+systemctl status grafana-server
