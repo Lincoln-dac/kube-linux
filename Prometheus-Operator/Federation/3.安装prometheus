@@ -1,0 +1,121 @@
+1.修改prometheus.yml
+
+global:
+  scrape_interval:     30s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
+  evaluation_interval: 60s # Evaluate rules every 15 seconds. The default is every 1 minute.
+
+remote_write:
+  - url: "http://10.204.51.64:8086/api/v1/prom/write?db=telegraf"
+    basic_auth:
+      username: admin
+      password: Admin123
+remote_read:
+  - url: "http://10.204.51.64:8086/api/v1/prom/read?db=telegraf"
+    basic_auth:
+      username: admin
+      password: Admin123  
+
+# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+# A scrape configuration containing exactly one endpoint to scrape:
+# Here it's Prometheus itself.
+scrape_configs:
+  - job_name: 'federate'
+    scrape_interval: 30s
+    honor_labels: true
+    metrics_path: '/federate'
+    static_configs:
+      - targets:
+        - 'prometheus-dev.xxx.com'
+        - 'prometheus-sit.xxx.com'
+  - job_name: 'JVM'
+    scrape_interval: 30s
+    honor_labels: true
+    metrics_path: '/federate'
+    params:
+      'match[]':
+        - '{job="JVM"}' 
+    static_configs:
+      - targets:
+        - 'prometheus-dev.xxx.com'
+        - 'prometheus-sit.xxx.com'
+  - job_name: 'node-exporter'
+    scrape_interval: 30s
+    honor_labels: true
+    metrics_path: '/federate'
+    params:
+      'match[]':
+        - '{job="node-exporter"}'
+    static_configs:
+      - targets:
+        - 'prometheus-dev.xxx.com'
+        - 'prometheus-sit.xxx.com'
+  - job_name: 'kubernetes-service-endpoints'
+    scrape_interval: 30s
+    honor_labels: true
+    metrics_path: '/federate'
+    params:
+      'match[]':
+        - '{job="kubernetes-service-endpoints"}'
+    static_configs:
+      - targets:
+        - 'prometheus-dev.xxx.com'
+        - 'prometheus-sit.xxx.com'
+  - job_name: 'apiserver'
+    scrape_interval: 30s
+    honor_labels: true
+    metrics_path: '/federate'
+    params:
+      'match[]':
+        - '{job="apiserver"}'
+    static_configs:
+      - targets:
+        - 'prometheus-dev.xxx.com'
+        - 'prometheus-sit.xxx.com'
+  - job_name: 'kube-state-metrics'
+    scrape_interval: 30s
+    honor_labels: true
+    metrics_path: '/federate'
+    params:
+      'match[]':
+        - '{job="kube-state-metrics"}'
+    static_configs:
+      - targets:
+        - 'prometheus-dev.xxx.com'
+        - 'prometheus-sit.xxx.com'
+  - job_name: 'prometheus-k8s'
+    scrape_interval: 30s
+    honor_labels: true
+    metrics_path: '/federate'
+    params:
+      'match[]':
+        - '{job="prometheus-k8s"}'
+    static_configs:
+      - targets:
+        - 'prometheus-dev.xxx.com'
+        - 'prometheus-sit.xxx.com'            
+  - job_name: 'prometheus-operator'
+    scrape_interval: 30s
+    honor_labels: true
+    metrics_path: '/federate'
+    params:
+      'match[]':
+        - '{job="prometheus-operator"}'
+    static_configs:
+      - targets:
+        - 'prometheus-dev.xxx.com'
+        - 'prometheus-sit.xxx.com' 
+  - job_name: 'kubelet'
+    scrape_interval: 30s
+    honor_labels: true
+    metrics_path: '/federate'
+    params:
+      'match[]':
+        - '{job="kubelet"}'
+    static_configs:
+      - targets:
+        - 'prometheus-dev.xxx.com'
+        - 'prometheus-sit.xxx.com'
