@@ -127,3 +127,5 @@ scrape_configs:
         - 'prometheus-sit.xxx.com'
         
  
+########
+对于比较大的集群 建议将job全部拆开
