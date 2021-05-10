@@ -27,7 +27,6 @@ mkdir -p /app/prometheus-federation/influxdb/{data,meta,wal
   chown -R influxd:influxd /app/prometheus-federation/influxdb
 
 
-influx -precision rfc3339
 
 influx -precision rfc3339
 创建数据库和用户：
