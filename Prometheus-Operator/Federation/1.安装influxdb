@@ -45,3 +45,8 @@ _internal
 > use telegraf
 Using database telegraf
 > show measurements;
+
+
+##########
+prometheus基于文件夹目录存储
+--storage.tsdb.path=/app/prometheus-federation/prometheus-2.3.1.linux-amd64/data/
