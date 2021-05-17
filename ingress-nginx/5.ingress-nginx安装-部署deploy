@@ -105,4 +105,9 @@ spec:
       - hostPath:
           path: /app/applogs/nginx
         name: logs
-            
+##########
+说明：开启ingress nginx pod继承宿主机网络 占用80 443端口
+      日志落盘到宿主机 /app/applogs/nginx目录
+      部署在node 有node-role.kubernetes.io/nginx-ingress: nginx-ingress的标签 node上
+      
+
