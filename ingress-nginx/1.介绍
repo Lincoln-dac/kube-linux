@@ -1,1 +1,4 @@
-a
+1.ingress controller通过和kubernetes api交互，动态的去感知集群中ingress规则变化，
+2.然后读取它，按照自定义的规则，规则就是写明了哪个域名对应哪个service，生成一段nginx配置，
+3.再写到nginx-ingress-control的pod里，这个Ingress controller的pod里运行着一个Nginx服务，控制器会把生成的nginx配置写入/etc/nginx.conf文件中，
+4.然后reload一下使配置生效。以此达到域名分配置和动态更新的问题。
