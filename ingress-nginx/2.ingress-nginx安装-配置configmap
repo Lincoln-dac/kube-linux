@@ -1,6 +1,5 @@
-1 git clone https://github.com/kubernetes/ingress-nginx.git
-
-2修改configmap.yaml
+1.新建configmap.yaml文件
+###############
 kind: ConfigMap
 apiVersion: v1
 metadata:
@@ -46,3 +45,5 @@ metadata:
     app.kubernetes.io/part-of: ingress-nginx
 
 ---
+##############################
+3
