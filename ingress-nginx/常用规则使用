@@ -4,7 +4,7 @@
     kubernetes.io/ingress.class: "nginx" # 绑定ingress-class
     nginx.ingress.kubernetes.io/ssl-redirect: "false" # 关闭SSL跳转
 
- ###########
+###########
  配置白名单IP范围
   annotations:
     kubernetes.io/ingress.class: "nginx" # 绑定ingress-class
@@ -52,5 +52,7 @@ spec:
     nginx.ingress.kubernetes.io/limit-rpm(每分钟)
     nginx.ingress.kubernetes.io/limit-rate(每秒传输的字节数）
     
-  ###        
+############    
 https://github.com/kubernetes/ingress-nginx/blob/master/docs/user-guide/nginx-configuration/annotations.md
+
+
