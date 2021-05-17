@@ -1,8 +1,27 @@
 开启 TLS
  kubectl create secret tls www-example-com --key tls.key --cert tls.crt -n default
+ ################
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: demo-ingress
+  namespace: default
   annotations:
     kubernetes.io/ingress.class: "nginx" # 绑定ingress-class
     nginx.ingress.kubernetes.io/ssl-redirect: "false" # 关闭SSL跳转
+spec:
+  rules:
+  - host: www.example.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: demo-svc
+          servicePort: 8080
+  tls:
+  - secretName: www-example-com
+    hosts:
+    - www.example.com
 
 ###########
  配置白名单IP范围
