@@ -45,5 +45,4 @@ metadata:
     app.kubernetes.io/part-of: ingress-nginx
 
 ---
-##############################
-3
+
