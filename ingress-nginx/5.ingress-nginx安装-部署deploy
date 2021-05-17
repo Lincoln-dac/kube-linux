@@ -25,7 +25,7 @@ spec:
         prometheus.io/scrape: "true"
     spec:
       hostNetwork: true
-      terminationGracePeriodSeconds: 30
+      terminationGracePeriodSeconds: 10
       serviceAccountName: nginx-ingress-serviceaccount
       nodeSelector:
         kubernetes.io/os: linux
