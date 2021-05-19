@@ -1,0 +1,55 @@
+htpasswd -c auth admin
+kubectl create secret generic basic-auth --from-file=auth
+kubectl get secret basic-auth -o yaml
+
+annotations 新增以下内容到对应的ingress
+
+  annotations:
+    nginx.ingress.kubernetes.io/auth-type: basic
+    nginx.ingress.kubernetes.io/auth-secret: basic-auth
+    nginx.ingress.kubernetes.io/auth-realm: "Authentication Required - admin"
+
+
+
+例子：
+##############
+apiVersion: v1
+kind: Service
+metadata:
+  name: docker-helloworld-svc
+  annotations:
+spec:
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+  selector:
+    app: docker-helloworld
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: docker-helloworld-ingress
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/affinity: "cookie"
+    nginx.ingress.kubernetes.io/auth-type: basic
+    nginx.ingress.kubernetes.io/auth-secret: basic-auth
+    nginx.ingress.kubernetes.io/auth-realm: "Authentication Required - admin"
+    nginx.ingress.kubernetes.io/enable-access-log: "true"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+       access_log /var/log/nginx/docker.fcbox.com.access.log  upstreaminfo ;
+       error_log  /var/log/nginx/docker.com.error.log;
+spec:
+  rules:
+  - host: docker.com
+    http:
+      paths:
+      - backend:
+          serviceName: docker-helloworld-svc
+          servicePort: 8080
+  tls:
+  - secretName: https-443
+    hosts:
+    - docker.com
