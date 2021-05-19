@@ -1,1 +1,38 @@
-1
+1 ngress-nginx设置tcp/udp转发
+第一步，更改ingress-nginx的deployment启动参数，添加--tcp-services-configmap和--udp-services-configmap参数，开启tcp与udp的支持
+
+containers:
+- args:
+  - /nginx-ingress-controller
+  - --tcp-services-configmap=$(POD_NAMESPACE)/tcp-services
+  - --udp-services-configmap=$(POD_NAMESPACE)/udp-services
+
+
+cat svc.yaml 
+###########
+apiVersion: v1
+kind: Service
+metadata:
+  name: docker-helloworld-svc
+spec:
+  ports:
+  - name: proxied-tcp
+    port: 37125
+    targetPort: 1026
+    protocol: TCP
+  - name: http
+    port: 8080
+    targetPort: 8080
+  selector:
+    app: docker-helloworld
+    
+cat cm-tcp.yaml 
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tcp-services
+  namespace: ingress-nginx
+data:
+  "37125": "default/docker-helloworld-svc:37125"
+
