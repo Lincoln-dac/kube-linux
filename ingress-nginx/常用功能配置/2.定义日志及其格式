@@ -12,7 +12,7 @@ metadata:
 spec:
   tls:
     - hosts: 
-      - docker.fcbox.com
+      - docker.com
       secretName: https-443
   rules:
   - host: docker.fcbox.com
