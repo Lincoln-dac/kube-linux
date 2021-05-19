@@ -1,5 +1,4 @@
-   nginx-ingress作为K8S集群对外的流量入口，充当K8S集群内各个service的反向代理。日常工作中我们经常需要对服务进行版本更新升级，为此我们经常使用到的发布方式有滚动升级、分批暂停发布、蓝绿发布以及灰度发布等不同的发布操作。所以下面介绍下，通过配置nginx annotations来实现灰度发布。
-   
+
    ingress-nginx金丝雀
 
 apiVersion: extensions/v1beta1
