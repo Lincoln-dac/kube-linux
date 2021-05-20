@@ -22,8 +22,6 @@ spec:
           requests:
             storage: 10Gi
   baseImage: 10.204.57.39/prometheus/prometheus
-  nodeSelector:
-    network: esn
   replicas: 2
   retention: 7d
   secrets:
