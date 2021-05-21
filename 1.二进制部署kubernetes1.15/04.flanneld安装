@@ -10,7 +10,7 @@ cat /etc/sysconfig/flanneld
 # etcd config key.  This is the configuration key that flannel queries
 # For address range assignment
 FLANNEL_ETCD_PREFIX="/coreos.com/network"
-FLANNEL_OPTIONS="-etcd-cafile=/app/kubernetes/ssl/ca.pem -etcd-certfile=/app/kubernetes/ssl/kubernetes.pem -etcd-keyfile=/app/kubernetes/ssl/kubernetes-key.pem --iface=10.204.51.64 --subnet-file=/run/flannel/subnet.env --subnet-lease-renew-margin=1439 --ip-masq"
+FLANNEL_OPTIONS="-etcd-cafile=/app/kubernetes/ssl/ca.pem -etcd-certfile=/app/kubernetes/ssl/kubernetes.pem -etcd-keyfile=/app/kubernetes/ssl/kubernetes-key.pem --iface=10.204.51.64 --subnet-file=/run/flannel/subnet.env  --ip-masq"
 
 ########
 --iface 为当前宿主机ip地址
