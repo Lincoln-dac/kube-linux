@@ -1,0 +1,231 @@
+1.配置yum源
+cat >/etc/yum.repos.d/ceph.repo<<EOF
+[ceph]
+name=ceph
+baseurl=http://mirrors.aliyun.com/ceph/rpm-jewel/el7/x86_64/
+gpgcheck=0
+priority=1
+
+[ceph-noarch]
+name=cephnoarch
+baseurl=http://mirrors.aliyun.com/ceph/rpm-jewel/el7/noarch/
+gpgcheck=0
+priority=1
+
+[ceph-source]
+name=Ceph source packages
+baseurl=http://mirrors.163.com/ceph/rpm-jewel/el7/SRPMS
+enabled=0
+gpgcheck=1
+type=rpm-md
+gpgkey=http://mirrors.163.com/ceph/keys/release.asc
+priority=1
+EOF
+
+yum makecache
+
+
+2.在admin节点安装ceph-deploy
+# 安装 ceph-deploy
+yum install -y ceph-deploy
+3.所有节点上安装依赖
+yum install -y yum-utils && yum-config-manager --add-repo https://dl.fedoraproject.org/pub/epel/7/x86_64/ && yum install --nogpgcheck -y epel-release && rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7 && rm -f /etc/yum.repos.d/dl.fedoraproject.org*
+4.配置admin节点连接node节点
+  安装之后需要配置admin节点可以ssh无密码登录每个node节点和测试节点，用户需要有sudo权限
+# 在每一个node节点执行
+useradd ceph
+echo 'ceph' | passwd --stdin ceph
+echo "ceph ALL = (root) NOPASSWD:ALL" > /etc/sudoers.d/ceph
+chmod 0440 /etc/sudoers.d/ceph
+cat >>/etc/hosts<<EOF
+11.11.11.111 lab1
+11.11.11.112 lab2
+11.11.11.113 lab3
+11.11.11.113 lab4
+EOF
+
+5 在admin节点执行
+# 创建ceph用户，配置sshkey登录
+# 由于lab1节点作为node节点时已经创建过ceph用户
+# 第一条命令可能会出错，忽略即可
+useradd ceph
+su - ceph
+ssh-keygen
+ssh-copy-id ceph@lab1
+ssh-copy-id ceph@lab2
+ssh-copy-id ceph@lab3
+ssh-copy-id ceph@lab4
+
+6.在admin节点创建集群
+
+su - ceph
+mkdir /app/ceph/cephcluster
+ceph-deploy new lab1
+ls -l
+
+# 配置ceph.conf
+[global]
+
+#新增
+public network = 11.11.11.0/24
+cluster network = 11.11.11.0/24
+
+
+# 如下操作在所有node节点上执行
+yum install -y ceph ceph-radosgw
+# 部署monitor和生成keys
+
+ceph-deploy mon create-initial
+ls -l *.keyring
+# 复制文件到node节点
+ceph-deploy admin lab1 lab2 lab3
+# 添加osd 以磁盘方式
+# 本次实验采用此种方法
+# sdb 为虚拟机添加的磁盘设置名
+ceph-deploy osd create lab1:sdb lab2:sdb lab3:sdb
+ceph-deploy osd activate lab1:sdb lab2:sdb lab3:sdb
+# 添加osd 以文件目录方式
+ceph-deploy osd prepare lab1:/data/osd1 lab2:/data/osd1 lab3:/data/osd1
+ceph-deploy osd activate lab1:/data/osd1 lab2:/data/osd1 lab3:/data/osd1
+
+# 查看状态
+ssh lab1 sudo ceph health
+ssh lab1 sudo ceph -s
+
+7.清理集群
+# 如果安装过程出错，使用如下命令清理之后重新开始
+ceph-deploy purge lab1 lab2 lab3
+ceph-deploy purgedata lab1 lab2 lab3
+ceph-deploy forgetkeys
+rm ceph.*
+
+
+8.扩展集群---提高可用性
+在lab1上运行metadata server 为后续使用cephfs
+在lab2,lab3运行monitor和manager提高集群可用性
+在lab1上运行metadata server 为后续使用cephfs
+在lab2,lab3运行monitor和manager提高集群可用性
+
+
+# 为了使用CephFS，必须启动 metadata server
+ceph-deploy mds create lab1
+
+# 添加monitor
+ceph-deploy mon add lab2
+ceph-deploy mon add lab3
+ssh lab1 sudo ceph -s
+
+# 在monitor节点查看状态（需要以root用户或者sudo查看）
+ceph quorum_status --format json-pretty
+
+
+# 在monitor节点查看状态（需要以root用户或者sudo查看）
+ceph quorum_status --format json-pretty
+
+
+9.对象存储
+# 安装ceph
+yum install -y ceph
+
+# 复制相关文件到要使用ceph-client的机器
+ceph-deploy admin lab4
+
+# 测试
+# 存储文件
+echo 'hello ceph oject storage' > testfile.txt
+ceph osd pool create mytest 8
+rados put test-object-1 testfile.txt --pool=mytest
+
+# 查看读取文件
+rados -p mytest ls
+rados get test-object-1 testfile.txt.1 --pool=mytest
+cat testfile.txt.1
+
+# 查看文件位置
+ceph osd map mytest test-object-1
+
+# 删除文件
+rados rm test-object-1 --pool=mytest
+
+# 删除pool
+ceph osd pool rm mytest mytest --yes-i-really-really-mean-it
+
+10.块存储
+# 安装ceph
+yum install -y ceph
+
+# 复制相关文件到要使用ceph-client的机器
+ceph-deploy admin lab4
+
+# 创建块设备镜像
+rbd create foo --size 4096 --image-feature layering
+rbd info foo
+rados -p rbd ls
+
+# 映射镜像到块设备
+sudo rbd map foo --name client.admin
+
+# 使用块设备创建文件系统
+sudo mkfs.ext4 -m0 /dev/rbd/rbd/foo
+
+# 挂载使用
+sudo mkdir /mnt/ceph-block-device
+sudo mount /dev/rbd/rbd/foo /mnt/ceph-block-device
+cd /mnt/ceph-block-device
+echo 'hello ceph block storage' > testfile.txt
+
+# 清理
+cd ~
+sudo umount -lf /mnt/ceph-block-device
+sudo rbd unmap foo
+rbd remove foo
+rados -p rbd ls
+
+11.CephFS存储
+# 安装ceph
+yum install -y ceph ceph-fuse
+
+# 复制相关文件到要使用ceph-client的机器
+ceph-deploy admin lab4
+
+# CephFS需要使用两个Pool来分别存储数据和元数据
+ceph osd pool create fs_data 128
+ceph osd pool create fs_metadata 128
+ceph osd lspools
+
+# 创建一个CephFS
+ceph fs new cephfs fs_metadata fs_data
+
+# 查看
+ceph fs ls
+
+# 使用内核提供的功能 挂载CephFS
+# 由于可能会有bug，建议使用 4.0 以上的内核
+# 优点是性能比使用ceph-fuse更好
+# name，secret 为 /etc/ceph/ceph.client.admin.keyring 里的内容
+mkdir /mnt/mycephfs
+mount -t ceph lab1:6789,lab2:6789,lab3:6789:/ /mnt/mycephfs -o name=admin,secret=AQBoclRaiilZJBAACLjqg2OUOOB/FNa20UJXYA==
+df -h
+cd /mnt/mycephfs
+echo 'hello ceph CephFS' > hello.txt
+cd ~
+umount -lf /mnt/mycephfs
+rm -rf /mnt/mycephfs
+
+# 使用 ceph-fuse 挂载CephFS
+mkdir /mnt/mycephfs
+ceph-fuse -m lab1:6789 /mnt/mycephfs
+df -h
+cd /mnt/mycephfs
+echo 'hello ceph CephFS' > hello.txt
+cd ~
+umount -lf /mnt/mycephfs
+rm -rf /mnt/mycephfs
+
+# 清理
+# 停止 metadata server
+# 本次部署在lab1，去lab1停止服务
+systemctl stop ceph-mds@lab1
+ceph fs rm cephfs --yes-i-really-mean-it
+ceph osd pool delete fs_data fs_data --yes-i-really-really-mean-it
+ceph osd pool delete fs_metadata fs_metadata --yes-i-really-really-mean-it
