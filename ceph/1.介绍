@@ -12,6 +12,9 @@
 　　3.文件存储，通常意义是支持 POSIX 接口，它跟传统的文件系统如 Ext4 是一个类型的，但区别在于分布式存储提供了并行化的能力，如 Ceph 的 CephFS (CephFS是Ceph面向文件存储的接口)，但是有时候又会把 GlusterFS ，HDFS 这种非POSIX接口的类文件存储接口归入此类。当然 NFS、NAS也是属于文件系统存储；
 
 1.2 Ceph 组件介绍
+![image](https://github.com/Lincoln-dac/kubernetes-linux/blob/master/ceph/pic.png)
+
+
 Monitor， 负责监视整个集群的运行状况，信息由维护集群成员的守护程序来提供，各节点之间的状态、集群配置信息。Ceph monitor map主要包括OSD map、PG map、MDS map 和 CRUSH 等，这些 map 被统称为集群 Map。ceph monitor 不存储任何数据。下面分别开始介绍这些map的功能：
 
 Monitor map：包括有关monitor 节点端到端的信息，其中包括 Ceph 集群ID，监控主机名和IP以及端口。并且存储当前版本信息以及最新更改信息，通过 "ceph mon dump" 查看 monitor map。
