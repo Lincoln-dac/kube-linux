@@ -15,7 +15,7 @@ spec:
       - docker.com
       secretName: https-443
   rules:
-  - host: docker.fcbox.com
+  - host: docker.com
     http:
       paths:
       - backend:
