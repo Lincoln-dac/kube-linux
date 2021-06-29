@@ -1,0 +1,16 @@
+ cat mongo-svc.yaml
+ 
+ apiVersion: v1
+kind: Service
+metadata:
+  name: mongo
+  namespace: countly
+  labels:
+    name: mongo
+spec:
+  ports:
+  - port: 27017
+    targetPort: 27017
+  clusterIP: None
+  selector:
+    role: mongo
