@@ -1,1 +1,4 @@
 基于local PersistentVolume部署 mongodb sts yaml文件
+查看状态
+kubectl exec -it mongo-0 -n countly -- mongo 
+rs.status()
