@@ -1,0 +1,4 @@
+iptables -A INPUT -m state --state ESTABLISHED -j ACCEPT
+iptables -A INPUT -p tcp --dport 3306 -j ACCEPT
+iptables -A INPUT -p tcp --dport 50332 -j ACCEPT
+iptables -I INPUT -s 123.44.55.66 -j DROP
