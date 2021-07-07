@@ -1,0 +1,46 @@
+linux查看进程启动时间(运行多长时间)
+  
+
+ps -eo lstart 启动时间
+ps -eo etime   运行多长时间.
+ps -eo pid,lstart,etime | grep 5176
+ ps -eo pid,lstart,etime,cmd | grep 
+---------------------
+ps -C 进程名称  显示进程PID
+ps -C http
+
+
+查内存
+ps aux | awk '{print $6/1024 " MB\t\t" $11"\t"$NF}' | sort -nr|head -10
+
+
+方法一：
+$ iotop -oP
+命令的含义：只显示有I/O行为的进程
+测试结果：
+
+
+
+方法二：
+$ pidstat -d 1
+命令的含义：展示I/O统计，每秒更新一次
+测试结果：
+
+
+Linux系统定位进程在使用哪个 CPU 内核
+
+Linux系统定位进程在使用哪个 CPU 内核
+taskset -c -p <pid>
+如果一个进程使用 命令明确的被固定（pinned）到 CPU 的特定内核上，你可以使用 taskset 命令找出被固定的 CPU 内核
+taskset -c -p 11281
+如图 进程11281使用了4个内核cpu(我的机器是4核）没有明确固定进程到任何 CPU 内核，输出表明该进程可能会被安排在从0到3中的任何一个 CPU 内核。在这种情况下，taskset 不能识别该进程当前被分配给哪个 CPU 内核.
+
+ps -o pid,psr,comm -p <pid>
+ps -o pid,psr,comm -p 11281
+输出表示进程的 PID 为 11281目前在CPU 内核 0上运行着。如果该过程没有被固定，PSR 列会根据内核可能调度该进程到不同内核而改变显示。
+
+htop
+安装htop yum install -y htop
+启动 htop。按 键，进入"Columns"，在"Available Columns"下会添加 PROCESSOR。
+
+注意:所有以前使用的命令 taskset，和 top 分配CPU 内核的 为 0，1，2，...，N-1。然而，htop 分配 CPU 内核 从 1开始（直到 N）
