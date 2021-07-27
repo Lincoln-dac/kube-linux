@@ -28,8 +28,7 @@ cat /usr/lib/systemd/system/docker.service
 [Unit]
 Description=Docker Application Container Engine
 Documentation=https://docs.docker.com
-After=network.target
-After=flanneld.service
+After=network.target flanneld.service
 
 [Service]
 Type=notify
