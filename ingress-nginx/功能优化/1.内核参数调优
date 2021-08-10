@@ -1,0 +1,52 @@
+调大全连接队列的大小
+TCP 全连接队列的最大值取决于 somaxconn 和 backlog 之间的最小值，也就是 min(somaxconn, backlog)。在高并发环境下，如果队列过小，可能导致队列溢出，使得连接部分连接无法建立。要调大 Nginx Ingress 的连接队列，只需要调整 somaxconn 内核参数的值即可，但我想跟你分享下这背后的相关原理。Nginx 监听 socket 时没有读取 somaxconn，而是有自己单独的参数配置。在 nginx.conf 中 listen 端口的位置，还有个叫 backlog 参数可以设置，它会决定 nginx listen 的端口的连接队列大小。
+
+server {
+    listen  80  backlog=1024;
+    
+    
+  
+  
+  backlog 是 listen(int sockfd, int backlog) 函数中的 backlog 大小，Nginx 默认值是 511，可以通过修改配置文件设置其长度；还有 Go 程序标准库在 listen 时，默认直接读取 somaxconn 作为队列大小。就是说，即便你的 somaxconn 配的很高，nginx 所监听端口的连接队列最大却也只有 511，高并发场景下可能导致连接队列溢出。所以在这个在 Nginx Ingress 中， Nginx Ingress Controller 会自动读取 somaxconn 的值作为 backlog 参数写到生成的 nginx.conf 中: https://github.com/kubernetes/ingress-nginx/blob/controller-v0.34.1/internal/ingress/controller/nginx.go#L592 也就是说，Nginx Ingress 的连接队列大小只取决于 somaxconn 的大小，这个值在  Nginx Ingress 默认为 4096，建议给 Nginx Ingress 设为 65535:
+  sysctl -w net.core.somaxconn=65535
+  
+  
+  扩大源端口范围
+根据《linux中TCP三次握手与四次挥手介绍及调优》的介绍，我们知道客户端会占用端口。在高并发场景会导致 Nginx Ingress 使用大量源端口与upstream建立连接。源端口范围是在内核参数 net.ipv4.ip_local_port_range 中调整的。在高并发环境下，端口范围过小容易导致源端口耗尽，使得部分连接异常。Nginx Ingress 创建的 Pod 源端口范围默认是 32768-60999，建议将其扩大，调整为 1024-65535:
+
+sysctl -w net.ipv4.ip_local_port_range="1024 65535"
+TIME_WAIT
+根据《linux中TCP三次握手与四次挥手介绍及调优》的介绍，我们知道客户端会占用端口。当在 netns 中 TIME_WAIT 状态的连接就比较多的时候，源端口就会被长时间占用。因为而 TIME_WAIT 连接默认要等 2MSL 时长才释放，当这种状态连接数量累积到超过一定量之后可能会导致无法新建连接。所以建议给 Nginx Ingress 开启 TIME_WAIT 复用，即允许将 TIME_WAIT 连接重新用于新的 TCP 连接:
+
+sysctl -w net.ipv4.tcp_tw_reuse=1
+减小FIN_WAIT2状态的参数 net.ipv4.tcp_fin_timeout 的时间和减小TIME_WAIT 状态的参数net.netfilter.nf_conntrack_tcp_timeout_time_wait的时间 ，让系统尽快释放它们所占用的资源。
+
+sysctl -w net.ipv4.tcp_fin_timeout=15
+sysctl -w net.netfilter.nf_conntrack_tcp_timeout_time_wait=30
+调大增大处于 TIME_WAIT 状态的连接数
+Nginx一定要关注这个值，因为它对你的系统起到一个保护的作用，一旦端口全部被占用，服务就异常了。tcp_max_tw_buckets 能帮你降低这种情况的发生概率，争取补救时间。在只有 60000 多个端口可用的情况下，配置为：
+
+sysctl -w net.ipv4.tcp_max_tw_buckets = 55000
+调大最大文件句柄数
+Nginx 作为反向代理，对于每个请求，它会与 client 和 upstream server 分别建立一个连接，即占据两个文件句柄，所以理论上来说 Nginx 能同时处理的连接数最多是系统最大文件句柄数限制的一半。系统最大文件句柄数由 fs.file-max 这个内核参数来控制，默认值为 838860，建议调大:
+
+sysctl -w fs.file-max=1048576
+配置示例
+给 Nginx Ingress Controller 的 Pod 添加 initContainers 来设置内核参数:
+
+initContainers:
+      - name: setsysctl
+        image: busybox
+        securityContext:
+          privileged: true
+        command:
+        - sh
+        - -c
+        - |
+          sysctl -w net.core.somaxconn=65535
+          sysctl -w net.ipv4.ip_local_port_range="1024 65535"
+          sysctl -w net.ipv4.tcp_max_tw_buckets = 55000
+          sysctl -w net.ipv4.tcp_tw_reuse=1
+          sysctl -w fs.file-max=1048576
+          sysctl -w net.ipv4.tcp_fin_timeout=15
+          sysctl -w net.netfilter.nf_conntrack_tcp_timeout_time_wait=30
