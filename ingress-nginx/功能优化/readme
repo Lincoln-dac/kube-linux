@@ -1,1 +1,4 @@
-1
+优化nginx-ingress-controller并发性能：https://cloud.tencent.com/developer/article/1537695
+Nginx Ingress 配置参考:  https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/
+Tuning NGINX for Performance: https://www.nginx.com/blog/tuning-nginx/
+ngx_http_upstream_module 官方文档: http://nginx.org/en/docs/http/ngx_http_upstream_module.html
