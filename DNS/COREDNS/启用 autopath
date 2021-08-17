@@ -1,0 +1,12 @@
+启用 CoreDNS 的 autopath 插件可以避免每次域名解析经过多次请求才能解析到，原理是 CoreDNS 智能识别拼接过 search 的 DNS 解析，直接响应 CNAME 并附上相应的 ClusterIP，一步到位，可以极大减少集群内 DNS 请求数量。
+
+启用方法是修改 CoreDNS 配置:
+
+kubectl -n kube-system edit configmap coredns
+修改红框中圈出来的配置:
+
+
+
+加上 autopath @kubernetes。
+默认的 pods insecure 改成 pods verified。
+需要注意的是，启用 autopath 后，由于 coredns 需要 watch 所有的 pod，会增加 coredns 的内存消耗，根据情况适当调节 coredns 的 memory request 和 limit。
