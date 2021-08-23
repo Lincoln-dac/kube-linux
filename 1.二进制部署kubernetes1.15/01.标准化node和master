@@ -41,6 +41,10 @@ route -n  检查如下路由信息是否消失
 169.254.0.0     0.0.0.0         255.255.0.0     U     1002   0        0 eth0
 
 4.安装软件
+cd /etc/yum.repos.d/ &&  wget http://mirrors.aliyun.com/repo/Centos-7.repo -O Centos.repo
+yum clean all 
+yum makecache 
+yum update
 yum install epel-release -y
 yum install -y keepalived mtr telnet ipvsadm ipset wget keepalived  nfs-utils systemd  yum-plugin-ovl jq psmisc socat perl iotop iftop fuse fuse-devel
 yum install lrzsz ipvsadm ipset sysstat conntrack libseccomp systemd iftop nethogs iptstate  tuned nscd -y
