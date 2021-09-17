@@ -4,3 +4,7 @@ ceph -s
 
 ceph-deploy disk list ceph-nodel
 列出 VM 上的磁盘:
+
+rados lspools
+
+查看 RADOS池
