@@ -1,0 +1,6 @@
+ceph status 
+ceph -s
+检查集群状态
+
+ceph-deploy disk list ceph-nodel
+列出 VM 上的磁盘:
