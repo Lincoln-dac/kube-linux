@@ -8,3 +8,6 @@ ceph-deploy disk list ceph-nodel
 rados lspools
 
 查看 RADOS池
+
+查看池中的对象
+rados -p ceph-demo ls
