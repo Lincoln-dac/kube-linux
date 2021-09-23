@@ -1,0 +1,59 @@
+Kubernetes Scheduler在整个系统中承担了“承上启下”的重要功能， “承上”是指它负责接收Controller Manager创建的新Pod， 为其安排一个落脚的“家”———目标Node； “启下”是指安置工作完成后， 目标Node上的kubelet服务进程接管后继工作， 负责Pod生命周期中的“下半生”。
+
+具体来说， Kubernetes Scheduler的作用是将待调度的Pod（API新创建的Pod、 Controller Manager为补足副本而创建的Pod等） 按照特定的调度算法和调度策略绑定（Binding） 到集群中某个合适的Node上， 并将绑定信息写入etcd中。 在整个调度过程中涉及三个对象， 分别是待调度Pod列表、 可用Node列表， 以及调度算法和策略。 简单地说， 就是通过调度算法调度为待调度Pod列表中的每个Pod从Node列表中选择一个最适合的Node。
+
+随后， 目标节点上的kubelet通过API Server监听到KubernetesScheduler产生的Pod绑定事件， 然后获取对应的Pod清单， 下载Image镜像并启动容器。 完整的流程如图所示
+
+
+调度流程
+调度器是Kubernetes容器集群管理系统中加载并运行的调度程序，负责收集、统计分析容器集群管理系统中所有Node的资源使用情况，然后以此为依据将新建的Pod发送到优先级最高的可用Node上去建立。
+
+调度分为几个部分：
+
+首先是预选过程，过滤掉不满足条件的节点，这个过程称为Predicates；
+
+然后是优选过程，对通过的节点按照优先级排序，称之为Priorities；
+
+最后从中选择优先级最高的节点。如果中间任何一步骤有错误，就直接返回错误。
+
+预选阶段
+NoDiskConflict
+pod所需的卷是否和节点已存在的卷冲突，其实就是读取备选Pod的所有Volume信息（pod.Spec.Volumes）
+
+PodFitsResources
+判断备选节点的资源是否满足备选Pod的需求
+
+计算备选pod和节点中已存在pod的所有容器的需求资源（内存和CPU）的总和
+获得备选节点的状态信息，资源信息
+如果在备选pod和节点中已存在pod的所有容器的需求资源的总和超出了备选节点拥有的资源，则表明备选节点不适合备选pod
+PodSelectorMatches
+判断备选节点是否包含备选pod的标签选择器指定的标签
+
+如果Pod没有指定spec.nodeSelector标签选择器，则可以作为备选节点
+否则，获得备选节点的标签信息，判断节点是否包含备选Pod的标签选择器spec.nodeSelector所指定的标签，如果包含，则作为备选节点
+PodFitsHost
+判断备选Pod的spec.nodeName域所指定的节点名称和备选节点的名称是否一致，如果一致，则可以作为备选节点
+
+MatchInterPodAffinity
+节点亲和性筛选
+
+PodToleratesNodeTaints
+根据 taints 和 toleration 的关系判断Pod是否可以调度到节点上Pod是否满足节点容忍的一些条件。
+
+优选阶段
+此阶段会把预选阶段选出的节点再按照一系列的优选策略进行打分，最终选择得分最高的一个节点作为优选结果
+
+LeastRequestedPriority
+该策略用于从备选节点列表中选出资源消耗最小的节点
+
+BalancedResourceAllocation
+该策略不能单独使用，必须和LeastRequestedPriority组合使用，尽量选择在部署Pod后各项资源更均衡的机器。如果请求的资源（CPU或者内存）大于节点的capacity，那么该节点永远不会被调度到。
+
+SelectorSpreadPriority
+为了更好的容灾，对同属于一个service、replication controller或者replica的多个Pod副本，尽量调度到多个不同的节点上。如果指定了区域，调度器则会尽量把Pod分散在不同区域的不同节点上。当一个Pod的被调度时，会先查找Pod对于的service或者replication controller，然后查找service或replication controller中已存在的Pod，运行Pod越少的节点的得分越高
+
+TaintTolerationPriority
+使用 Pod 中 tolerationList 与 节点 Taint 进行匹配，配对成功的项越多，则得分越低。
+
+选定阶段
+最后，经过层层筛选，可能满足条件的节点有多个，那么选定阶段就得从多个节点中随机选定一个节点来进行调度
