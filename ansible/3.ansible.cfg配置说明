@@ -1,0 +1,58 @@
+Ansible默认安装好后有一个配置文件/etc/ansible/ansible.cfg，该配置文件中定义了ansible的主机的默认配置部分， 如默认是否需要输入密码、是否开启sudo认证、action_plugins插件的位置、hosts主机组的位置、是否开启log功能、默认端口、 key文件位置等等。
+具体如下：
+    [defaults]
+    # some basic default values...
+    hostfile       = /etc/ansible/hosts   \\指定默认hosts配置的位置
+    # library_path = /usr/share/my_modules/
+    remote_tmp     = $HOME/.ansible/tmp
+    pattern        = *
+    forks          = 5
+    poll_interval  = 15
+    sudo_user      = root  \\远程sudo用户
+    #ask_sudo_pass = True  \\每次执行ansible命令是否询问ssh密码
+    #ask_pass      = True  \\每次执行ansible命令时是否询问sudo密码
+    transport      = smart
+    remote_port    = 22
+    module_lang    = C
+    gathering = implicit
+    host_key_checking = False    \\关闭第一次使用ansible连接客户端是输入命令提示
+    log_path    = /var/log/ansible.log \\需要时可以自行添加。chown -R root:root ansible.log
+    system_warnings = False    \\关闭运行ansible时系统的提示信息，一般为提示升级
+    # set plugin path directories here, separate with colons
+    action_plugins     = /usr/share/ansible_plugins/action_plugins
+    callback_plugins   = /usr/share/ansible_plugins/callback_plugins
+    connection_plugins = /usr/share/ansible_plugins/connection_plugins
+    lookup_plugins     = /usr/share/ansible_plugins/lookup_plugins
+    vars_plugins       = /usr/share/ansible_plugins/vars_plugins
+    filter_plugins     = /usr/share/ansible_plugins/filter_plugins
+    fact_caching = memory
+    [accelerate]
+    accelerate_port = 5099
+    accelerate_timeout = 30
+    accelerate_connect_timeout = 5.0
+    # The daemon timeout is measured in minutes. This time is measured
+    # from the last activity to the accelerate daemon.
+    accelerate_daemon_timeout = 30
+如果在对之前未连接的主机进行连结时报错如下：
+ansible test -a 'uptime'
+    192.168.1.1| FAILED =>Using a SSH password instead of a key is not possible because HostKey checking is enabled and sshpass does not support this.Please add this host's fingerprint to your known_hosts file to manage this host.
+    192.168.1.2 | FAILED => Using a SSH password instead of a key is not possible because Host Key checking is enabled and sshpass does not support this.  Please add this host's fingerprint to your known_hosts file to manage this host.
+是由于在本机的~/.ssh/known_hosts文件中并有fingerprint key串，ssh第一次连接的时候一般会提示输入yes 进行确认为将key字符串加入到  ~/.ssh/known_hosts 文件中。
+方法1：
+在进行ssh连接时，可以使用-o参数将StrictHostKeyChecking设置为no，使用ssh连接时避免首次连接时让输入yes/no部分的提示。通过查看ansible.cfg配置文件，发现如下行：
+[ssh_connection]
+# ssh arguments to use
+# Leaving off ControlPersist will result in poor performance, so use
+# paramiko on older platforms rather than removing it
+#ssh_args = -o ControlMaster=auto -o ControlPersist=60s
+可以启用ssh_args 部分，使用下面的配置，避免上面出现的错误：
+ssh_args = -o ControlMaster=auto -o ControlPersist=60s -o StrictHostKeyChecking＝no
+方法2：
+在ansible.cfg配置文件中，也会找到如下配置：
+# uncomment this to disable SSH key host checking
+host_key_checking = False
+默认host_key_checking部分是注释的，通过找开该行的注释，同样也可以实现跳过ssh 首次连接提示验证部分。但在实际测试中，似乎并没有效果，建议使用方法1.
+其他部分
+默认ansible 执行的时候，并不会输出日志到文件，不过在ansible.cfg 配置文件中有如下行：
+log_path = /var/log/ansible.log
+默认log_path这行是注释的，打开该行的注释，所有的命令执行后，都会将日志输出到/var/log/ansible.log文件。
