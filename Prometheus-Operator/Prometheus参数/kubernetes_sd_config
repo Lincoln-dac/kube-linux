@@ -1,0 +1,1589 @@
+ Kubernetes SD配置允许从Kubernetes的REST API检索抓取目标，并始终与集群状态保持同步。可以将以下角色类型之一配置为发现目标：
+
+node
+
+      node角色为每个群集节点发现一个目标，其地址默认为Kubelet的HTTP端口。 目标地址默认为Kubernetes节点对象的第一个现有地址，按照NodeInternalIP，NodeExternalIP，NodeLegacyHostIP和NodeHostName的地址类型顺序。可用的元标签：
+
+Bash
+__meta_kubernetes_node_name: node对象的名称。
+__meta_kubernetes_node_label_<labelname>: 来自节点对象的每个标签。
+__meta_kubernetes_node_labelpresent_<labelname>: 对于节点对象中的每个标签，为true。
+__meta_kubernetes_node_annotation_<annotationname>: 来自节点对象的每个注释。
+__meta_kubernetes_node_annotationpresent_<annotationname>: 对于来自节点对象的每个注释，为true。
+__meta_kubernetes_node_address_<address_type>: 每个节点地址类型的第一个地址（如果存在）。
+      此外，该节点的实例标签将设置为从API服务器检索到的节点名称。
+
+service 
+
+      service角色发现每个服务的每个服务端口的目标。 这通常用于监视服务的黑盒。 该地址将设置为服务的Kubernetes DNS名称以及相应的服务端口。可用的元标签：
+
+Bash
+__meta_kubernetes_namespace: service对象的名称空间。
+__meta_kubernetes_service_annotation_<annotationname>: 来自service对象的每个注释。
+__meta_kubernetes_service_annotationpresent_<annotationname>: service对象的每个注释为“ true”。
+__meta_kubernetes_service_cluster_ip: service的群集IP地址。（不适用于外部名称类型的服务）
+__meta_kubernetes_service_external_name: service的DNS名称。（适用于外部名称类型的服务）
+__meta_kubernetes_service_label_<labelname>: service对象中的每个标签。
+__meta_kubernetes_service_labelpresent_<labelname>: 对于service对象的每个标签为true。
+__meta_kubernetes_service_name: service对象的名称。
+__meta_kubernetes_service_port_name: service服务端口的名称。
+__meta_kubernetes_service_port_protocol: 目标service端口的协议。
+pod
+
+       容器角色发现所有容器并将其容器公开为目标。 对于容器的每个声明的端口，将生成一个目标。 如果容器没有指定的端口，则会为每个容器创建无端口目标，以通过重新标记手动添加端口。可用的元标签：
+
+Bash
+__meta_kubernetes_namespace: pod对象的名称空间。
+__meta_kubernetes_pod_name: 容器对象的名称。
+__meta_kubernetes_pod_ip: 容器对象的容器IP。
+__meta_kubernetes_pod_label_<labelname>: 来自pod对象的每个标签。
+__meta_kubernetes_pod_labelpresent_<labelname>: 对于来自pod对象的每个标签，为true。
+__meta_kubernetes_pod_annotation_<annotationname>: 来自pod对象的每个注释。
+__meta_kubernetes_pod_annotationpresent_<annotationname>: 对于Pod对象中的每个注释，为true。
+__meta_kubernetes_pod_container_init: 如果容器是InitContainer，则为true
+__meta_kubernetes_pod_container_name: 目标地址指向的容器的名称。
+__meta_kubernetes_pod_container_port_name: 容器端口的名称。
+__meta_kubernetes_pod_container_port_number: 容器端口号。
+__meta_kubernetes_pod_container_port_protocol: 容器端口的协议。
+__meta_kubernetes_pod_ready:  为Pod的就绪状态设置为true或false。
+__meta_kubernetes_pod_phase: 在生命周期中设置为Pending, Running, Succeeded, Failed or Unknown。
+__meta_kubernetes_pod_node_name: Pod调度到的节点的名称
+__meta_kubernetes_pod_host_ip: Pod对象的当前主机IP。
+__meta_kubernetes_pod_uid: Pod对象的UID。
+__meta_kubernetes_pod_controller_kind: Pod控制器的对象种类。
+__meta_kubernetes_pod_controller_name: Pod控制器的名称。
+endpoints
+
+      端点角色从列出的服务端点中发现目标。 对于每个端点地址，每个端口都发现一个目标。 如果端点由Pod支持，则该Pod的所有其他未绑定到端点端口的容器端口也将被发现为目标。可用的元标签：
+
+Bash
+__meta_kubernetes_namespace: endpoints 对象的名称空间。
+__meta_kubernetes_endpoints_name: 端点对象的名称
+对于直接从端点列表中发现的所有目标（未从基础容器额外推断出的所有目标），将附加以下标签：
+    __meta_kubernetes_endpoint_hostname: 端点的主机名。
+    __meta_kubernetes_endpoint_node_name: hosting端点的节点的名称。
+    __meta_kubernetes_endpoint_ready: 为端点的就绪状态设置为true或false。
+    __meta_kubernetes_endpoint_port_name: 端点端口的名称。
+    __meta_kubernetes_endpoint_port_protocol: 端点端口的协议。
+    __meta_kubernetes_endpoint_address_target_kind: 端点地址目标的种类。
+    __meta_kubernetes_endpoint_address_target_name: 端点地址目标的名称。
+如果端点属于服务，则会附加角色：服务发现的所有标签。对于由容器支持的所有目标，将附加角色的所有标签：pod discovery。
+ingress
+
+     ingress角色发现每个入口的每个路径的目标。 这通常对黑盒监视入口很有用。 该地址将设置为入口规范中指定的主机。可用的元标签：
+
+Bash
+__meta_kubernetes_namespace: ingress对象的名称空间。
+__meta_kubernetes_ingress_name: ingress对象的名称。
+__meta_kubernetes_ingress_label_<labelname>: 来自ingress对象的每个标签。
+__meta_kubernetes_ingress_labelpresent_<labelname>: 对于来自ingress对象的每个标签，为true。
+__meta_kubernetes_ingress_annotation_<annotationname>: 来自ingress对象的每个注释。
+__meta_kubernetes_ingress_annotationpresent_<annotationname>: 对于来自ingress对象的每个注释，为true。
+__meta_kubernetes_ingress_scheme: 入口的协议方案，如果设置了TLS配置，则为https。 默认为http。
+__meta_kubernetes_ingress_path: 入口规范的路径。 默认为/。
+请参阅以下有关Kubernetes发现的配置选项：
+
+Bash
+#访问Kubernetes API的信息。
+
+#API服务器地址。如果保留为空，则Prometheus被假定为在集群内部运行，并且将自动发现API服务器，并使用Pod的CA证书和承载令牌文件位于/var/run/secrets/kubernetes.io/serviceaccount/。
+[ api_server: <host> ]
+
+#应该发现的实体的Kubernetes角色。
+role: <role>
+#用于向API服务器进行身份验证的可选身份验证信息。请注意，“ basic_auth”，“ bearer_token”和“ bearer_token_file”选项是互斥的。
+#password和password_file是互斥的。
+#可选的HTTP基本身份验证信息。
+basic_auth:
+  [ username: <string> ]
+  [ password: <secret> ]
+  [ password_file: <string> ]
+
+#可选的承载令牌认证信息。
+[ bearer_token: <secret> ]
+
+#可选的承载令牌文件认证信息。
+[ bearer_token_file: <filename> ]
+
+#可选的代理URL。
+[ proxy_url: <string> ]
+
+#TLS配置。
+tls_config:
+  [ <tls_config> ]
+
+#可选的名称空间发现。 如果省略，则使用所有名称空间。
+namespaces:
+  names:
+    [ - <string> ]
+其中<role>必须是endpoints, service, pod, node, or ingress。
+
+有关为Kubernetes配置Prometheus的详细示例，请参见此示例Prometheus配置文件：https://github.com/prometheus/prometheus/blob/release-2.13/documentation/examples/prometheus-kubernetes.yml
+
+可能希望查看第三方Prometheus Operator，它可以自动在Kubernetes上设置Prometheus：https://github.com/coreos/prometheus-operator
+
+二、完整的部署流程
+2.1 Prometheus部署
+# kubectl create namespace prometheus
+
+Bash
+namespace/prometheus created
+Prometheus:
+
+#vim prometheus-rbac.yaml   
+
+Bash
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: prometheus
+rules:
+- apiGroups: [""]
+  resources:
+  - nodes
+  - nodes/proxy
+  - services
+  - endpoints
+  - pods
+  verbs: ["get", "list", "watch"]
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses
+  verbs: ["get", "list", "watch"]
+- nonResourceURLs: ["/metrics"]
+  verbs: ["get"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: prometheus
+  namespace: prometheus
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: prometheus
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: prometheus
+subjects:
+- kind: ServiceAccount
+  name: prometheus
+  namespace: prometheus
+博文来自：www.51niux.com
+
+#prometheus.rbac.yml定义了Prometheus容器访问k8s apiserver所需的ServiceAccount、ClusterRole以及ClusterRoleBinding。
+
+下面是针对上面的配置文件详解：
+
+Bash
+apiVersion: rbac.authorization.k8s.io/v1   #指定api版本，此值必须在kubectl apiversion中，RBAC 使用 rbac.authorization.k8s.io API 组来驱动鉴权操作，允许管理员通过 Kubernetes API 动态配置策略。
+kind: ClusterRole    #指定创建资源的角色为ClusterRole，ClusterRole对象可以授予整个集群范围内资源访问权限
+metadata:   ##资源的元数据/属性
+    # 此处的 "namespace" 被省略掉是因为 ClusterRoles 是没有命名空间的。
+  name: prometheus   #资源的名字，在同一个namespace中必须唯一
+rules:
+- apiGroups: [""]  # "" 指定核心 API 组
+#ClusterRole 可以授予的权限和 Role 相同，但是因为 ClusterRole 属于集群范围，所以它也可以授予以下访问权限：集群范围资源 （比如 nodes）,非资源端点（比如 “/healthz”）
+  resources:
+  - nodes
+  - nodes/proxy
+  - services
+  - endpoints
+  - pods
+  verbs: ["get", "list", "watch"]  #允许读取在“核心”API Group中定义的那些资源
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses
+  verbs: ["get", "list", "watch"]  #允许读取在“extensions”API Group中定义的ingresses
+- nonResourceURLs: ["/metrics"]  #允许在非资源端点 “/metrics” 上发起 “GET”请求（必须在 ClusterRole 绑定 ClusterRoleBinding 才生效）
+  verbs: ["get"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: prometheus
+  namespace: prometheus
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: prometheus
+roleRef:  #roleRef 里的内容决定了实际创建绑定的方法。kind 可以是 Role 或 ClusterRole，name 将引用你要指定的 Role 或 ClusterRole 的名称
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole   
+  name: prometheus   ## 这里的名称必须与你想要绑定的 Role 或 ClusterRole 名称一致
+subjects:
+- kind: ServiceAccount
+  name: prometheus
+  namespace: prometheus
+# kubectl create -f  prometheus-rbac.yaml
+
+Bash
+clusterrole.rbac.authorization.k8s.io/prometheus created
+serviceaccount/prometheus created
+clusterrolebinding.rbac.authorization.k8s.io/prometheus created
+# vim prometheus-config-configmap.yaml
+
+Bash
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: prometheus
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval:     15s
+      evaluation_interval: 15s
+    scrape_configs:
+        #这里可以很直观的看到是采集apiservers的监控指标的这里采集地址是https://master主机:6443/metrics
+    - job_name: 'kubernetes-apiservers'
+      kubernetes_sd_configs:
+      - role: endpoints
+      scheme: https
+      tls_config:
+        ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+      bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+      relabel_configs:
+      - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+        action: keep
+        regex: default;kubernetes;https
+       
+    - job_name: 'kubernetes-nodes'
+      kubernetes_sd_configs:
+      - role: node
+      scheme: https
+      tls_config:
+        ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+      bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+      relabel_configs:
+      - action: labelmap
+        regex: __meta_kubernetes_node_label_(.+)
+      - target_label: __address__
+        replacement: kubernetes.default.svc:443
+      - source_labels: [__meta_kubernetes_node_name]
+        regex: (.+)
+        target_label: __metrics_path__
+        replacement: /api/v1/nodes/${1}/proxy/metrics
+
+    - job_name: 'kubernetes-cadvisor'
+      kubernetes_sd_configs:
+      - role: node
+      scheme: https
+      tls_config:
+        ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+      bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+      relabel_configs:
+      - action: labelmap
+        regex: __meta_kubernetes_node_label_(.+)
+      - target_label: __address__
+        replacement: kubernetes.default.svc:443
+      - source_labels: [__meta_kubernetes_node_name]
+        regex: (.+)
+        target_label: __metrics_path__
+        replacement: /api/v1/nodes/${1}/proxy/metrics/cadvisor
+        
+    - job_name: 'kubernetes-service-endpoints'
+      kubernetes_sd_configs:
+      - role: endpoints
+      relabel_configs:
+      - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
+        action: keep
+        regex: true
+      - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+        action: replace
+        target_label: __scheme__
+        regex: (https?)
+      - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
+        action: replace
+        target_label: __metrics_path__
+        regex: (.+)
+      - source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
+        action: replace
+        target_label: __address__
+        regex: ([^:]+)(?::\d+)?;(\d+)
+        replacement: $1:$2
+      - action: labelmap
+        regex: __meta_kubernetes_service_label_(.+)
+      - source_labels: [__meta_kubernetes_namespace]
+        action: replace
+        target_label: kubernetes_namespace
+      - source_labels: [__meta_kubernetes_service_name]
+        action: replace
+        target_label: kubernetes_name
+
+    - job_name: 'kubernetes-services'
+      kubernetes_sd_configs:
+      - role: service
+      metrics_path: /probe
+      params:
+        module: [http_2xx]
+      relabel_configs:
+      - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_probe]
+        action: keep
+        regex: true
+      - source_labels: [__address__]
+        target_label: __param_target
+      - target_label: __address__
+        replacement: blackbox-exporter.example.com:9115
+      - source_labels: [__param_target]
+        target_label: instance
+      - action: labelmap
+        regex: __meta_kubernetes_service_label_(.+)
+      - source_labels: [__meta_kubernetes_namespace]
+        target_label: kubernetes_namespace
+      - source_labels: [__meta_kubernetes_service_name]
+        target_label: kubernetes_name
+
+    - job_name: 'kubernetes-ingresses'
+      kubernetes_sd_configs:
+      - role: ingress
+      relabel_configs:
+      - source_labels: [__meta_kubernetes_ingress_annotation_prometheus_io_probe]
+        action: keep
+        regex: true
+      - source_labels: [__meta_kubernetes_ingress_scheme,__address__,__meta_kubernetes_ingress_path]
+        regex: (.+);(.+);(.+)
+        replacement: ${1}://${2}${3}
+        target_label: __param_target
+      - target_label: __address__
+        replacement: blackbox-exporter.example.com:9115
+      - source_labels: [__param_target]
+        target_label: instance
+      - action: labelmap
+        regex: __meta_kubernetes_ingress_label_(.+)
+      - source_labels: [__meta_kubernetes_namespace]
+        target_label: kubernetes_namespace
+      - source_labels: [__meta_kubernetes_ingress_name]
+        target_label: kubernetes_name
+
+    #这里并非pods的系统监控指标,这里其实是采集的一些特殊的开启了web监听端口提供监控指标的pod    
+    - job_name: 'kubernetes-pods'
+      kubernetes_sd_configs:
+      - role: pod
+      relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+        action: keep
+        regex: true
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+        action: replace
+        target_label: __metrics_path__
+        regex: (.+)
+      - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+        action: replace
+        regex: ([^:]+)(?::\d+)?;(\d+)
+        replacement: $1:$2
+        target_label: __address__
+      - action: labelmap
+        regex: __meta_kubernetes_pod_label_(.+)
+      - source_labels: [__meta_kubernetes_namespace]
+        action: replace
+        target_label: kubernetes_namespace
+      - source_labels: [__meta_kubernetes_pod_name]
+        action: replace
+        target_label: kubernetes_pod_name
+#prometheus-config-configmap.yaml定义了prometheus的配置文件，以configmap的形式使用。
+
+#下面是针对上面的一些配置进行的注释说明：
+
+Bash
+# 用于发现API SERVER
+    - job_name: 'kubernetes-apiservers'
+#发现endpoints，它是从列出的服务端点发现目标，这个endpoints来自于Kubernetes中的service，每一个service都有对应的endpoints，
+#这里是一个列表可以是一个IP:PORT也可以是多个，这些IP:PORT就是service通过标签选择器选择的POD的IP和端口。
+#所以endpoints角色就是用来发现server对应的pod的IP的kubernetes会有一个默认的service，
+#通过找到这个service的endpoints就找到了api server的IP:PORT，那endpoints有很多，我怎么知道哪个是api server呢这个就靠source_labels指定的标签名称了。    
+      kubernetes_sd_configs:
+      - role: endpoints
+#通过什么形式来连接，默认是https      
+      scheme: https
+# 下面这个ca_file和token_file的路径都是默认的，你可能默认设置能用么？其实可以，因为每一个运行起来的POD kubernetes都会为其
+# 创建一个serviceaccout的Secret并且挂载到下面的目录上，里面就有ca.crt和token这两个文件，你可以自己启动一个POD，然后通过
+# kubectl describe pods 来查看，一定会在Volumes下面有一个default-token-XXX的东西，并且Mounts里面有下面的目录。      
+      tls_config:
+        ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+      bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+# 下面的含义是源标签__meta_kubernetes_namespace等如果其值为default;kubernetes;https标签顺序和值要对应。换句话说就是
+# 当__meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name三者对应的
+# 值为default、kubernetes、https则进行保留，而且该endpoints对应的地址为api server的地址。
+# 
+# __meta_kubernetes_namespace 端点对象的命名空间，在不同对象上这个标签的含义不同，在角色是endpoints中这个是端点对象的名称空间
+# __meta_kubernetes_service_name 端点对象的服务名称
+# __meta_kubernetes_endpoint_port_name 端点的端口名称
+# 
+# kubernetes默认在default名称空间有一个叫做kubernetes的service，所以这个service的有3个设置对应的就是下面三个标签
+# __meta_kubernetes_namespace 值为default
+# __meta_kubernetes_service_name 值为kubernetes
+# __meta_kubernetes_endpoint_port_name 值为https      
+      relabel_configs:
+      - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+        action: keep
+        regex: default;kubernetes;https
+
+#配置针对kubelet的服务发现以及对标签的处理，是获取kubelet上/metrics接口数据来获取node的资源使用情况        
+    - job_name: 'kubernetes-nodes'
+      kubernetes_sd_configs:
+# 使用node角色，它使用默认的kubelet提供的http端口来发现集群中每个node节点。那具体地址是什么呢？
+# 地址类型有四种NodeInternalIP, NodeExternalIP, NodeLegacyHostIP 和 NodeHostName，默认为这四个中第一个可用的地址。
+# 那么这里为什么使用node角色呢？因为node角色就是用来发现kubelet的
+# __meta_kubernetes_node_name：节点对象的名字
+# __meta_kubernetes_node_label_<labelname>：表示节点对象上的每一个标签
+# __meta_kubernetes_node_annotation_<annotationname>：表示节点对象上的每一个annotation
+# __meta_kubernetes_node_address_<address_type>：如果存在，那么将是每一个节点地址类型的第一个地址
+# Node模式，Prometheus会自动发现Kubernetes中所有Node节点的信息并作为监控的目标Target。 
+# 而这些Target的访问地址实际上就是Kubelet的访问地址，并且Kubelet实际上直接内置了对Promtheus的支持      
+      - role: node
+      scheme: https
+      tls_config:
+        ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+      bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+      relabel_configs:
+# 保留(.+)匹配到的内容，去掉__meta_kubernetes_node_label_，实际上就是把(.+)当做新标签，然后老标签的值给这个新标签，
+# 这里没有设置source_labels，则表示匹配所有标签      
+      - action: labelmap
+        regex: __meta_kubernetes_node_label_(.+)
+#下面就是将replacement: 中的值kubernetes.default.svc:443赋予给__address__标签
+      - target_label: __address__
+        replacement: kubernetes.default.svc:443
+#下面就是将__meta_kubernetes_node_name的值变成${1}的形式传给replacement:中的$1，然后赋给标签__metrics_path__   
+      - source_labels: [__meta_kubernetes_node_name]
+        regex: (.+)
+        target_label: __metrics_path__
+        replacement: /api/v1/nodes/${1}/proxy/metrics  
+
+#抓取服务端点，整个这个任务都是用来发现node-exporter和kube-state-metrics-service的，这里用的是endpoints角色，
+#这是通过这两者的service来发现的后端endpoints。另外需要说明的是如果满足采集条件，那么在service、POD中定义的labels也会被采集进去        
+    - job_name: 'kubernetes-service-endpoints'
+      kubernetes_sd_configs:
+      - role: endpoints
+      relabel_configs:
+# 重新打标仅抓取到的具有 "prometheus.io/scrape: true" 的annotation的端点，意思是说如果某个service具有prometheus.io/scrape = true annotation声明则抓取
+# annotation本身也是键值结构，所以这里的源标签设置为键，而regex设置值，当值匹配到regex设定的内容时则执行keep动作也就是保留，其余则丢弃.
+# node-exporter这个POD的service里面就有一个叫做prometheus.io/scrape = true的annotations所以就找到了node-exporter这个POD    
+      - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
+        action: keep
+        regex: true
+#重新设置scheme匹配源标签__meta_kubernetes_service_annotation_prometheus_io_scheme也就是prometheus.io/scheme annotation
+# 如果源标签的值匹配到regex则把值替换为__scheme__对应的值        
+      - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+        action: replace
+        target_label: __scheme__
+        regex: (https?)
+# 应用中自定义暴露的指标，也许你暴露的API接口不是/metrics这个路径，那么你可以在这个POD对应的service中做一个
+# "prometheus.io/path = /mymetrics" 声明，下面的意思就是把你声明的这个路径赋值给__metrics_path__
+# 其实就是让prometheus来获取自定义应用暴露的metrices的具体路径，不过这里写的要和service中做好约定
+# 如果service中这样写 prometheus.io/app-metrics-path: '/metrics' 那么你这里就要__meta_kubernetes_service_annotation_prometheus_io_app_metrics_path这样写        
+      - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
+        action: replace
+        target_label: __metrics_path__
+        regex: (.+)
+# 暴露自定义的应用的端口，就是把地址和你在service中定义的 "prometheus.io/port = <port>" 声明做一个拼接
+# 然后赋值给__address__，这样prometheus就能获取自定义应用的端口，然后通过这个端口再结合__metrics_path__来获取
+# 指标，如果__metrics_path__值不是默认的/metrics那么就要使用上面的标签替换来获取真正暴露的具体路径        
+      - source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
+        action: replace
+        target_label: __address__
+        regex: ([^:]+)(?::\d+)?;(\d+)
+        replacement: $1:$2
+# 下面主要是为了给样本添加额外信息        
+      - action: labelmap
+        regex: __meta_kubernetes_service_label_(.+)
+      - source_labels: [__meta_kubernetes_namespace]
+        action: replace
+        target_label: kubernetes_namespace
+      - source_labels: [__meta_kubernetes_service_name]
+        action: replace
+        target_label: kubernetes_name
+        
+# 下面是自动发现service，不过如果要想监控service则需要安装blackbox-exporter        
+    - job_name: 'kubernetes-services'
+      kubernetes_sd_configs:
+      - role: service
+      metrics_path: /probe
+# 生成__param_module="http_2xx"的label，如果是TCP探测则使用 module: [tcp_connect]      
+      params:
+        module: [http_2xx]
+      relabel_configs:
+# 为了让service可以被探测到，那需要在service的annotation中增加 prometheus.io/scrape: true 声明
+# 也就是只保留prometheus.io/scrape: true的service      
+      - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_probe]
+        action: keep
+        regex: true
+# 用__address__这个label的值创建一个名为__param_target的label为blackbox-exporter,值为内部service的访问地址，作为blackbox-exporter采集用        
+      - source_labels: [__address__]
+        target_label: __param_target
+# 用blackbox-exporter的service地址值”prometheus-blackbox-exporter:9115"替换原__address__的值        
+      - target_label: __address__
+        replacement: blackbox-exporter.example.com:9115
+      - source_labels: [__param_target]
+        target_label: instance
+# 下面主要是为了给样本添加额外信息        
+      - action: labelmap
+        regex: __meta_kubernetes_service_label_(.+)
+      - source_labels: [__meta_kubernetes_namespace]
+        target_label: kubernetes_namespace
+      - source_labels: [__meta_kubernetes_service_name]
+        target_label: kubernetes_name  
+        
+# 下面是对ingresses监控，不过如果要想监控ingresses则需要安装blackbox-exporter
+    - job_name: 'kubernetes-ingresses'
+      kubernetes_sd_configs:
+      - role: ingress
+      
+# 抓取POD进行监控
+    - job_name: 'kubernetes-pods'
+      kubernetes_sd_configs:
+      - role: pod
+      relabel_configs:
+# POD的 annotation 中含有"prometheus.io/scrape: true" 的则保留，意思就是会被Prometheus抓取，不具有这个的POD则不会被抓取      
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+        action: keep
+        regex: true
+# 获取POD的 annotation 中定义的"prometheus.io/path: XXX"定义的值，这个值就是你的程序暴露符合prometheus规范的metrics的地址
+# 如果你的metrics的地址不是 /metrics 的话，通过这个标签，那么这里就会把这个值赋值给 __metrics_path__这个变量，因为prometheus
+# 是通过这个变量获取路径然后进行拼接出来一个完整的URL，并通过这个URL来获取metrics值的，
+#因为prometheus默认使用的就是 http(s)://X.X.X.X/metrics这样一个路径来获取的。        
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+        action: replace
+        target_label: __metrics_path__
+        regex: (.+)
+# 这里是端口信息，因为你的程序很有可能在容器中并不是以80端口运行的，那么就需要做一个拼接http(s)://x.x.x.x:xx/metrics
+# __address__在prometheus中代表的就是实例的IP地址，而POD中的annotation 中定义的"prometheus.io/port: XX"就是你程序
+# 被访问到的端口，最终在prometheus中将会被显示为 instance=X.X.X.X:XX这样        
+      - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+        action: replace
+        regex: ([^:]+)(?::\d+)?;(\d+)
+        replacement: $1:$2
+        target_label: __address__
+# 下面主要是为了给样本添加额外信息         
+      - action: labelmap
+        regex: __meta_kubernetes_pod_label_(.+)
+      - source_labels: [__meta_kubernetes_namespace]
+        action: replace
+        target_label: kubernetes_namespace
+      - source_labels: [__meta_kubernetes_pod_name]
+        action: replace
+        target_label: kubernetes_pod_name
+博文来自：www.51niux.com
+
+#prometheus是如何识别apiserver的呢？举个例子：
+
+# kubectl describe svc kubernetes
+
+Bash
+Name:              kubernetes  #__meta_kubernetes_service_name
+Namespace:         default     #__meta_kubernetes_namespace
+Labels:            component=apiserver
+                   provider=kubernetes
+Annotations:       <none>
+Selector:          <none>
+Type:              ClusterIP
+IP:                10.96.0.1
+Port:              https  443/TCP  #__meta_kubernetes_endpoint_port_name
+TargetPort:        6443/TCP
+Endpoints:         192.168.1.135:6443
+Session Affinity:  None
+Events:            <none>
+# kubectl apply -f prometheus-config-configmap.yaml
+
+Bash
+configmap/prometheus-config created
+# vim prometheus-dep.yaml
+
+Bash
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus-dep
+  namespace: prometheus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus-dep
+  template:
+    metadata:
+      labels:
+        app: prometheus-dep
+    spec:
+      containers:
+      - image: prom/prometheus:v2.16.0
+        imagePullPolicy: IfNotPresent 
+        name: prometheus
+        command:
+        - "/bin/prometheus"
+        args:
+        - "--config.file=/etc/prometheus/prometheus.yml"
+        - "--storage.tsdb.path=/prometheus"
+        #- "--storage.tsdb.retention=1d"  #storage.tsdb.retention: 已被废弃，改为使用storage.tsdb.retention.time
+        - "--storage.tsdb.retention.time=1d"
+        ports:
+        - containerPort: 9090
+          protocol: TCP
+        volumeMounts:
+        - mountPath: "/prometheus"
+          name: data
+        - mountPath: "/etc/prometheus"
+          name: config-volume
+        resources:
+          requests:
+            cpu: 1000m
+            memory: 1000Mi
+          limits:
+            cpu: 2000m
+            memory: 4000Mi
+      serviceAccountName: prometheus
+      imagePullSecrets:
+        - name: regsecret
+      volumes:
+      - name: data
+        emptyDir: {}
+      - name: config-volume
+        configMap:
+          name: prometheus-config
+prometheus-dep.yaml定义了prometheus的部署，这里使用–storage.tsdb.retention参数，监控数据只保留1天，因为最终监控数据会统一汇总。 limits资源限制根据集群大小进行适当调整。
+
+# kubectl apply -f  prometheus-dep.yaml
+
+Bash
+deployment.apps/prometheus-dep created
+# vim prometheus-svc.yaml
+
+Bash
+kind: Service
+apiVersion: v1
+metadata:
+  name: prometheus-svc
+  namespace: prometheus
+spec:
+  type: NodePort
+  ports:
+  - port: 9090
+    targetPort: 9090
+    nodePort: 30090
+  selector:
+    app: prometheus-dep
+prometheus-svc.yaml定义Prometheus的Service，需要将Prometheus以NodePort、LoadBalancer或Ingress暴露到集群外部，这样外部的Prometheus才能访问它。这里采用的NodePort，所以只需要访问集群中有外网地址的任意一台服务器的30090端口就可以使用prometheus。
+
+#注意：但是上面只是一个例子，实际场景呢可以用LoadBalancer，这样就不会因为Pod重启漂移而导致你的nodeip发送变化，而你接收端要进行变更，但是呢如果你担心你这个pod乱飘导致其他Node节点资源不足，可以绑定到某个Node上，这样就可以用NodePort方式了。
+
+# kubectl create -f prometheus-svc.yaml
+
+Bash
+service/prometheus-svc created
+2.2 kube-state-metrics
+prometheus部署成功后，接着再部署kube-state-metrics作为prometheus的一个exporter来使用，提供deployment、daemonset、cronjob等服务的监控数据。
+
+# vim kube-state-metrics-rbac.yaml
+
+Bash
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kube-state-metrics
+  namespace: prometheus
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+# kubernetes versions before 1.8.0 should use rbac.authorization.k8s.io/v1beta1
+kind: Role
+metadata:
+  namespace: prometheus
+  name: kube-state-metrics-resizer
+rules:
+- apiGroups: [""]
+  resources:
+  - pods
+  verbs: ["get"]
+- apiGroups: ["extensions"]
+  resources:
+  - deployments
+  resourceNames: ["kube-state-metrics"]
+  verbs: ["get", "update"]
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+# kubernetes versions before 1.8.0 should use rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: kube-state-metrics
+rules:
+- apiGroups: [""]
+  resources:
+  - configmaps
+  - secrets
+  - nodes
+  - pods
+  - services
+  - resourcequotas
+  - replicationcontrollers
+  - limitranges
+  - persistentvolumeclaims
+  - persistentvolumes
+  - namespaces
+  - endpoints
+  verbs: ["list", "watch"]
+- apiGroups: ["extensions"]
+  resources:
+  - daemonsets
+  - deployments
+  - replicasets
+  verbs: ["list", "watch"]
+- apiGroups: ["apps"]
+  resources:
+  - statefulsets
+  verbs: ["list", "watch"]
+- apiGroups: ["batch"]
+  resources:
+  - cronjobs
+  - jobs
+  verbs: ["list", "watch"]
+- apiGroups: ["autoscaling"]
+  resources:
+  - horizontalpodautoscalers
+  verbs: ["list", "watch"]
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+# kubernetes versions before 1.8.0 should use rbac.authorization.k8s.io/v1beta1
+kind: RoleBinding
+metadata:
+  name: kube-state-metrics
+  namespace: prometheus
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: kube-state-metrics-resizer
+subjects:
+- kind: ServiceAccount
+  name: kube-state-metrics
+  namespace: prometheus
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+# kubernetes versions before 1.8.0 should use rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: kube-state-metrics
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kube-state-metrics
+subjects:
+- kind: ServiceAccount
+  name: kube-state-metrics
+  namespace: prometheus
+kube-state-metrics-rbac.yaml定义了kube-state-metrics访问k8s apiserver所需的ServiceAccount和ClusterRole及ClusterRoleBinding。
+
+# kubectl create -f  kube-state-metrics-rbac.yaml
+
+Bash
+serviceaccount/kube-state-metrics created
+role.rbac.authorization.k8s.io/kube-state-metrics-resizer created
+clusterrole.rbac.authorization.k8s.io/kube-state-metrics created
+rolebinding.rbac.authorization.k8s.io/kube-state-metrics created
+clusterrolebinding.rbac.authorization.k8s.io/kube-state-metrics created
+# vim kube-state-metrics-dep.yaml
+
+Bash
+apiVersion: apps/v1
+# Kubernetes versions after 1.9.0 should use apps/v1
+# Kubernetes versions before 1.8.0 should use apps/v1beta1 or extensions/v1beta1
+# addon-resizer描述：https://github.com/kubernetes/autoscaler/tree/master/addon-resizer
+kind: Deployment
+metadata:
+  name: kube-state-metrics
+  namespace: prometheus
+spec:
+  selector:
+    matchLabels:
+      k8s-app: kube-state-metrics
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        k8s-app: kube-state-metrics
+    spec:
+      serviceAccountName: kube-state-metrics
+      containers:
+      - name: kube-state-metrics
+        image: quay.io/coreos/kube-state-metrics:v1.9.5
+        ports:
+        - name: http-metrics
+          containerPort: 8080
+        - name: telemetry
+          containerPort: 8081
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          initialDelaySeconds: 5
+          timeoutSeconds: 5
+      - name: addon-resizer
+          #因为你知道的网络原因，这里使用阿里云的镜像源
+        #image: gcr.io/bskiba-gke-dev/addon-resizer:1.8.7
+        image: registry.cn-hangzhou.aliyuncs.com/google_containers/addon-resizer:1.8.7
+        resources:
+          limits:
+            cpu: 100m
+            memory: 30Mi
+          requests:
+            cpu: 100m
+            memory: 30Mi
+        env:
+          - name: MY_POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: MY_POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+        command:
+          - /pod_nanny
+          - --container=kube-state-metrics
+          - --cpu=100m
+          - --extra-cpu=1m
+          - --memory=100Mi
+          - --extra-memory=2Mi
+          - --threshold=5
+          - --deployment=kube-state-metrics
+kube-state-metrics-dep.yaml定义了kube-state-metrics的部署。
+
+插件伸缩 Addon Resizer: Addon resizer 是一个很有趣的小插件。如果用户在上述的场景中使用了Metrics Server，Metrics Server的资源占用量会随着集群中的Pod数量的不断增长而不断上升。Addon resizer 容器会以Sidecar的形式监控与自己同一个Pod内的另一个容器（在本例中是Metrics Server）并且垂直的扩展或收缩这个容器。Addon resizer能依据集群中节点的数量线性地扩展Metrics Server，以保证其能够有能力提供完整的metrics API服务。官网github地址：https://github.com/kubernetes/autoscaler/tree/master/addon-resizer
+
+# kubectl create -f  kube-state-metrics-dep.yaml
+
+Bash
+deployment.apps/kube-state-metrics created
+# vim kube-state-metrics-svc.yaml
+
+Bash
+apiVersion: v1
+kind: Service
+metadata:
+  name: kube-state-metrics
+  namespace: prometheus
+  labels:
+    k8s-app: kube-state-metrics
+  annotations:
+    prometheus.io/scrape: 'true'
+spec:
+  ports:
+  - name: http-metrics
+    port: 8080
+    targetPort: http-metrics
+    protocol: TCP
+  - name: telemetry
+    port: 8081
+    targetPort: telemetry
+    protocol: TCP
+  selector:
+    k8s-app: kube-state-metrics
+kube-state-metrics-svc.yaml定义了kube-state-metrics的暴露方式，这里只需要使用默认的ClusterIP就可以了，因为它只提供给集群内部的promethes访问。
+
+# kubectl create -f  kube-state-metrics-svc.yaml
+
+Bash
+service/kube-state-metrics created
+k8s集群中的prometheus监控到这儿就已经全部OK了，接下来还需要做的是汇总数据、展示数据及告警规则配置。
+
+2.3 部署-数据汇总（注意后面哪些是可以不做的哈，只是列出用pod如何做）
+#个人还是推荐在物理机或者ECS机器上面部署prometheus-server用联邦模式进行k8s集群的数据采集和用altermanager集群模式进行报警。
+
+prometheus-server：
+
+       prometheus-server和前面prometheus的步骤基本相同，需要针对configmap、数据存储时间（一般为30d）、svc类型做些许改变，同时增加 rule.yaml。
+
+      prometheus-server不需要kube-state-metrics。prometheus-server可以部署在任意k8s集群，或者部署在K8s集群外部都可以。
+
+      prometheus-rbac.yaml (内容和上面的一致，namespace为prometheus-server)
+
+# kubectl create namespace prometheus-server
+
+Bash
+namespace/prometheus-server created
+# vim prometheus-server-rbac.yaml
+
+Bash
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: prometheus-server
+rules:
+- apiGroups: [""]
+  resources:
+  - nodes
+  - nodes/proxy
+  - services
+  - endpoints
+  - pods
+  verbs: ["get", "list", "watch"]
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses
+  verbs: ["get", "list", "watch"]
+- nonResourceURLs: ["/metrics"]
+  verbs: ["get"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: prometheus-server
+  namespace: prometheus-server
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: prometheus-server
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: prometheus-server
+subjects:
+- kind: ServiceAccount
+  name: prometheus-server
+  namespace: prometheus-server
+# kubectl create -f  prometheus-server-rbac.yaml
+
+Bash
+clusterrole.rbac.authorization.k8s.io/prometheus-server created
+serviceaccount/prometheus-server created
+clusterrolebinding.rbac.authorization.k8s.io/prometheus-server created
+# vim prometheus-server-config-configmap.yaml
+
+Bash
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-server-config
+  namespace: prometheus-server
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 30s
+      scrape_timeout: 30s
+      evaluation_interval: 30s
+    alerting:
+      alertmanagers:
+      - static_configs:
+        - targets:
+          - alertmanager-svc.prometheus-server.svc.cluster.local:80
+        scheme: http
+        timeout: 10s
+    rule_files:
+    - "/etc/prometheus/rule/rule.yml"
+    scrape_configs:
+    - job_name: federate_test01
+      honor_labels: true
+      params:
+        match[]:
+        - '{job=~"kubernetes-.*"}'
+      scrape_interval: 30s
+      scrape_timeout: 30s
+      metrics_path: /federate
+      scheme: http
+      static_configs:
+      - targets:
+        - 192.168.1.137:31090  #这里就是被采集的部署在k8s集群内部的prometheus的9090端口暴露在外面的svc的IP和端口
+        labels:
+          k8scluster: offline_51niux_k8s
+博文来自：www.51niux.com
+
+注意下面的labels，这个是自己定义的，它的作用在于给每一条刮取过来的监控数据都加上一个 k8scluster: offline_51niux_k8s 的Key-Value，offline一般指定为集群环境。这样我们可以在多个集群数据中区分该条数据是属于哪一个k8s集群，这对于后面的展示和告警都非常有利。
+
+# vim prometheus-server-rule-configmap.yaml
+
+Bash
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-server-rule-config
+  namespace: prometheus-server
+data:
+  rule.yml: |
+    groups:
+    - name: kubernetes
+      rules:
+      - alert: PodDown
+        expr: kube_pod_status_phase{phase="Unknown"} == 1 or kube_pod_status_phase{phase="Failed"} == 1
+        for: 1m
+        labels:
+          severity: error
+          service: prometheus_bot
+          receiver_group: "{{ $labels.k8scluster}}_{{ $labels.namespace }}"
+        annotations:
+          summary: Pod Down
+          k8scluster: "{{ $labels.k8scluster}}"
+          namespace: "{{ $labels.namespace }}"
+          pod: "{{ $labels.pod }}"
+          container: "{{ $labels.container }}"
+
+      - alert: PodRestart
+        expr: changes(kube_pod_container_status_restarts_total{pod !~ "analyzer.*"}[10m]) > 0
+        for: 1m
+        labels:
+          severity: error
+          service: prometheus_bot
+          receiver_group: "{{ $labels.k8scluster}}_{{ $labels.namespace }}"
+        annotations:
+          summary: Pod Restart
+          k8scluster: "{{ $labels.k8scluster}}"
+          namespace: "{{ $labels.namespace }}"
+          pod: "{{ $labels.pod }}"
+          container: "{{ $labels.container }}"
+
+      - alert: NodeUnschedulable
+        expr: kube_node_spec_unschedulable == 1
+        for: 5m
+        labels:
+          severity: error
+          service: prometheus_bot
+          receiver_group: "{{ $labels.k8scluster}}_{{ $labels.namespace }}"
+        annotations:
+          summary: Node Unschedulable
+          k8scluster: "{{ $labels.k8scluster}}"
+          node: "{{ $labels.node }}"
+
+      - alert: NodeStatusError
+        expr: kube_node_status_condition{condition="Ready", status!="true"} == 1
+        for: 5m
+        labels:
+          severity: error
+          service: prometheus_bot
+          receiver_group: "{{ $labels.k8scluster}}_{{ $labels.namespace }}"
+        annotations:
+          summary: Node Status Error
+          k8scluster: "{{ $labels.k8scluster}}"
+          node: "{{ $labels.node }}"
+
+      - alert: DaemonsetUnavailable
+        expr: kube_daemonset_status_number_unavailable > 0
+        for: 5m
+        labels:
+          severity: error
+          service: prometheus_bot
+          receiver_group: "{{ $labels.k8scluster}}_{{ $labels.namespace }}"
+        annotations:
+          summary: Daemonset Unavailable
+          k8scluster: "{{ $labels.k8scluster}}"
+          namespace: "{{ $labels.namespace }}"
+          daemonset: "{{ $labels.daemonset }}"
+
+      - alert: JobFailed
+        expr: kube_job_status_failed == 1
+        for: 5m
+        labels:
+          severity: error
+          service: prometheus_bot
+          receiver_group: "{{ $labels.k8scluster}}_{{ $labels.namespace }}"
+        annotations:
+          summary: Job Failed
+          k8scluster: "{{ $labels.k8scluster}}"
+          namespace: "{{ $labels.namespace }}"
+          job: "{{ $labels.exported_job }}"
+rule.yaml定义了告警规则。此文件中定义了 PodDown、PodRestart、NodeUnschedulable、NodeStatusError、DaemonsetUnavailable、JobFailed 共6条规则。
+
+# vim prometheus-server-dep.yaml
+
+Bash
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus-server-dep
+  namespace: prometheus-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus-server-dep
+  template:
+    metadata:
+      labels:
+        app: prometheus-server-dep
+    spec:
+      containers:
+      - image: prom/prometheus:v2.16.0
+        name: prometheus-server
+        command:
+        - "/bin/prometheus"
+        args:
+        - "--config.file=/etc/prometheus/config/prometheus.yml"
+        - "--storage.tsdb.path=/prometheus"
+        - "--web.console.libraries=/usr/share/prometheus/console_libraries"
+        - "--web.console.templates=/usr/share/prometheus"
+        - "--storage.tsdb.retention=30d"
+        - "--web.enable-lifecycle"
+        ports:
+        - containerPort: 9090
+          protocol: TCP
+        volumeMounts:
+        - name: "data"
+          mountPath: "/prometheus"
+        - name: "server-config-volume"
+          mountPath: "/etc/prometheus/config"
+        - name: "rule-config-volume"
+          mountPath: "/etc/prometheus/rule"
+        resources:
+          requests:
+            cpu: 250m
+            memory: 100Mi
+      serviceAccountName: prometheus-server
+      volumes:
+      - name: data
+        #emptyDir: {} #volumes.data这里使用的是emptyDir，这样其实不妥，应该单独挂载一块盘来存储汇总数据。可使用pv实现。
+        hostPath:
+          path:  /data/prometheus
+      - name: server-config-volume
+        configMap:
+          name: prometheus-server-config
+      - name: rule-config-volume
+        configMap:
+          name: prometheus-server-rule-config
+      nodeSelector:
+        service-type: prometheus
+#mkdir /data/prometheus   -p  #实际场景这应该是一个挂载盘哈，但是你怎么知道它飘到哪个node节点呢？那就需要设置跟节点绑定了。
+
+# chmod 777 /data/prometheus  #不授权的话有下面的错误：
+
+Bash
+component=activeQueryTracker msg="Error opening query log file" file=/prometheus/queries.active err="open /prometheus/queries.active: permission denied"
+panic: Unable to create mmap-ed active query log
+# kubectl create -f  prometheus-server-dep.yaml
+
+Bash
+deployment.apps/prometheus-server-dep created
+#如果Pod启动有问题可以使用：# kubectl describe pods 容器名   -n prometheus-server 或者# kubectl logs pods 容器名   -n prometheus-server排查一下问题。
+
+# vim prometheus-server-svc.yaml
+
+Bash
+kind: Service
+apiVersion: v1
+metadata:
+  name: prometheus-server-svc
+  namespace: prometheus-server
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 9090
+  selector:
+    app: prometheus-server-dep
+ # kubectl create -f  prometheus-server-svc.yaml
+
+Bash
+service/prometheus-server-svc created
+到这儿，数据采集和数据汇总就已经OK了。Prometheus-server部署成功之后，在浏览器中可以看到监控数据汇总信息了。
+
+2.4 告警配置
+# vim alertmanager-config-configmap.yaml
+
+Bash
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alertmanager-config
+  namespace: prometheus
+data:
+  config.yml: |
+    global:
+        resolve_timeout: 5m
+
+        route:
+          receiver: default
+          group_wait: 30s
+          group_interval: 5m
+          repeat_interval: 4h
+          group_by: ['alertname', 'k8scluster', 'node', 'container', 'exported_job', 'daemonset']
+          routes:
+          - receiver: send_msg_warning
+                group_wait: 60s
+                match:
+                  severity: warning
+
+        receivers:
+        - name: default
+          webhook_configs:
+          - url: 'http://msg.x.com/xxx/'
+                send_resolved: true
+                http_config:
+                  bearer_token: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+
+        - name: send_msg_warning
+          webhook_configs:
+          - url: 'http://msg.x.com/xxx/'
+                send_resolved: true
+                http_config:
+                  bearer_token: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+# kubectl create -f alertmanager-config-configmap.yaml
+
+Bash
+configmap/alertmanager-config created
+alertmanager-config-configmap.yaml定义了alertmanager的配置文件
+
+route：路由。分级匹配，然后交给指定 receivers，其中route.group_by中的k8scluster是prometheus-server-config.yaml中自定义的标签
+
+receivers：发送。这里使用webhook方式发送给自研的send_msg模块
+
+email、wechat、webhook、slack等发送方式配置请见官网文档：https://prometheus.io/docs/alerting/configuration/
+
+# kubectl create namespace alertmanager
+
+Bash
+namespace/alertmanager created
+# vim alertmanager-dep.yaml
+
+Bash
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alertmanager-dep
+  namespace: alertmanager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: alertmanager-dep
+  template:
+    metadata:
+      labels:
+        app: alertmanager-dep
+    spec:
+      containers:
+      - image: prom/alertmanager:v0.20.0
+        name: alertmanager
+        args:
+                - "--config.file=/etc/alertmanager/config.yml"
+                - "--storage.path=/alertmanager"
+                - "--data.retention=720h"
+        volumeMounts:
+        - mountPath: "/alertmanager"
+          name: data
+        - mountPath: "/etc/alertmanager"
+          name: config-volume
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+          limits:
+            cpu: 500m
+            memory: 2500Mi
+      volumes:
+      - name: data
+        emptyDir: {}
+      - name: config-volume
+        configMap:
+          name: alertmanager-config
+# kubectl create -f alertmanager-dep.yaml
+
+Bash
+deployment.apps/alertmanager-dep created
+alertmanager-dep.yaml定义了Alertmanager的部署。
+
+博文来自：www.51niux.com
+
+三、采集的各项指标的含义(可直接忽略就是蛋疼的整理了下，大部分用不到，需要再网上查)
+# kubectl get --raw /metrics  #从kube-apiserver拿到metrics信息
+
+3.1 job="kubernetes-apiservers"
+Bash
+apiserver_admission_controller_admission_latencies_seconds_bucket   #apiserver准入控制器准入等待时间单位秒bucket,里面还有不同标签有2000多项
+apiserver_request_latencies_bucket  #apiserver请求等待时间bucket，里面还有不同的label有2000多项
+apiserver_response_sizes_bucket  #apiserver响应大小bucket，里面还有不同的label有800多项
+apiserver_request_latencies_summary  #apiserver请求延迟summary，里面有不同的label有400多项
+apiserver_admission_step_admission_latencies_seconds_bucket  #apiserver允许step允许等待时间单位为秒bucket，有400多不同label的项。 
+apiserver_admission_controller_admission_latencies_seconds_count  #apiserver接纳控制器接纳等待时间秒数，有400多不同label的项。
+apiserver_admission_controller_admission_latencies_seconds_sum  #apiserver准入控制器准入等待时间秒数总和,有400多不同label项。
+apiserver_request_count  #apiserver请求计数，有不到400个不同label项。
+reflector_list_duration_seconds  #reflector list持续时间单位为秒，有不到300个不同的label项。
+reflector_items_per_list  #reflector items每个清单，有不到300个不同的label项。
+reflector_watch_duration_seconds  #reflector watch持续时间单位为秒，有不到300个不同的label项。
+reflector_items_per_watch  #有不到300个不同的label项。
+apiserver_admission_step_admission_latencies_seconds_summary  #apiserver允许step允许等待时间秒摘要，有200多个不同的label项。
+apiserver_request_latencies_summary_sum  #apiserver请求延迟汇总，有不到200个不同的label项。
+apiserver_request_latencies_summary_count  #apiserver请求延迟次数汇总，有不到200个不同的label项。
+apiserver_request_latencies_sum  #apiserver请求延迟总和，有不到200个不同的label项。
+apiserver_request_latencies_count  #apiserver请求延迟次数总和，有不到200个不同的label项。
+apiserver_response_sizes_count  #apiserver响应大小计数，有不到200个不同的label项。
+apiserver_response_sizes_sum  #apiserver响应大小总和，有100多个不同的label项。
+reflector_items_per_list_count   #有不到100个不同的label项。
+reflector_last_resource_version  #有不到100个不同的label项。
+reflector_lists_total  #有不到100个不同的label项。
+reflector_items_per_watch_count  #有不到100个不同的label项。
+reflector_watch_duration_seconds_count  #有不到100个不同的label项。
+reflector_list_duration_seconds_sum  #有不到100个不同的label项。
+reflector_items_per_watch_sum  #有不到100个不同的label项。
+reflector_watch_duration_seconds_sum  #有不到100个不同的label项。
+reflector_watches_total  #有不到100个不同的label项。
+reflector_short_watches_total  #有不到100个不同的label项。
+reflector_items_per_list_sum  #有不到100个不同的label项。
+reflector_list_duration_seconds_count  #有不到100个不同的label项。
+apiserver_admission_step_admission_latencies_seconds_sum  #有不到100个不同的label项。
+apiserver_admission_step_admission_latencies_seconds_summary_count  #有不到100个不同的label项。
+apiserver_admission_step_admission_latencies_seconds_count  #有不到100个不同的label项。
+apiserver_admission_step_admission_latencies_seconds_summary_sum  #有不到100个不同的label项。
+rest_client_request_latency_seconds_bucket  #有不到100个不同的label项。
+apiserver_longrunning_gauge  #有50个不同的label项。
+etcd_object_counts  #etcd对象计数，有50个不同的label项。
+apiserver_registered_watchers  #apiserver注册watchers，有不到50个不同的label项。
+apiserver_storage_data_key_generation_latencies_microseconds_bucket  #apiserver存储数据密钥生成延迟微秒级bucket，有不到20个不同的label项。
+apiserver_client_certificate_expiration_seconds_bucket #apiserver客户端证书到期秒数bucket，有不到20个不同的label项。
+rest_client_requests_total  #其余客户端请求总数，有8个不同的label项。
+grpc_client_started_total  #grpc客户端启动总数，有6个不同的label项。
+grpc_client_msg_sent_total  #grpc客户端msg发送总计,有6个不同的label项。
+rest_client_request_latency_seconds_sum  #其余客户端请求延迟秒数总和,有6个不同的label项。
+rest_client_request_latency_seconds_count  #其余客户端请求延迟秒数,有6个不同的label项。
+grpc_client_handled_total  #grpc客户端处理的总计，有5个不同的label项。
+apiserver_audit_level_total  #apiserver审核级别总计，有4个不同的label项。
+admission_quota_controller_queue_latency  #准入配额控制器队列延迟，有3个不同的label项。
+autoregister_queue_latency  #自动注册队列延迟，有3个不同的label项。
+crdEstablishing_queue_latency  #crd建立队列延迟，有3个不同的label项。
+autoregister_work_duration  #自动注册工作时间，有3个不同的label项。
+http_response_size_bytes  #http响应大小字节，有3个不同的label项。
+etcd_request_cache_get_latencies_summary  #etcd请求缓存获取延迟summary，有3个不同的label项。
+APIServiceRegistrationController_work_duration  #APIServiceRegistrationController工作持续时间，有3个不同的label项
+APIServiceOpenAPIAggregationControllerQueue1_work_duration  #APIServiceOpenAPIAggregationControllerQueue1的工作时间，有3个不同的label项
+APIServiceRegistrationController_queue_latency  #APIServiceRegistrationController队列延迟，有3个不同的label项
+DiscoveryController_queue_latency  #DiscoveryController队列延迟，有3个不同的label项
+AvailableConditionController_work_duration  #AvailableConditionController工作时间，有3个不同的label项
+APIServiceOpenAPIAggregationControllerQueue1_queue_latency  #APIServiceOpenAPIAggregationControllerQueue1队列延迟，有3个不同的label项
+etcd_request_cache_add_latencies_summary  #etcd请求缓存add延迟summary，有3个不同的label项
+http_request_size_bytes  #http请求大小字节，有3个不同的label项
+AvailableConditionController_queue_latency  #AvailableConditionController队列延迟，有3个不同的label项
+DiscoveryController_work_duration  #DiscoveryController的工作时间，有3个不同的label项
+http_request_duration_microseconds  #http请求持续时间微秒，有3个不同的label项
+admission_quota_controller_work_duration  #admission_quota控制器的持续工作时间，有3个不同的label项
+crdEstablishing_work_duration  #crd建立连接的工作时间，有3个不同的label项
+apiserver_current_inflight_requests  #apiserver当前进行中的请求，有两个不同的label项
+get_token_fail_count  #get token失败计数
+scrape_duration_seconds  #采集时间单位为秒
+APIServiceRegistrationController_depth  #APIServiceRegistrationController深度
+AvailableConditionController_queue_latency_count  #AvailableConditionController队列延迟计数
+AvailableConditionController_retries  #AvailableConditionController重试
+AvailableConditionController_work_duration_count  #AvailableConditionController工作持续时间计数
+admission_quota_controller_work_duration_count  #admission_quota_controller工作持续时间计数
+apiserver_client_certificate_expiration_seconds_sum  #apiserver客户端证书到期秒数总和
+AvailableConditionController_work_duration_sum  #AvailableConditionController工作持续时间总和
+etcd_helper_cache_miss_count  #etcd helper缓存未命中计数
+DiscoveryController_queue_latency_count  #DiscoveryController队列延迟计数
+APIServiceOpenAPIAggregationControllerQueue1_depth  #APIServiceOpenAPIAggregationControllerQueue1深度
+APIServiceRegistrationController_adds
+admission_quota_controller_adds
+etcd_request_cache_get_latencies_summary_count  #etcd请求缓存获取延迟汇总计数
+http_request_duration_microseconds_sum  #http请求持续时间微秒总和
+autoregister_work_duration_count  #自动注册工作时间计数
+APIServiceOpenAPIAggregationControllerQueue1_queue_latency_count  #APIServiceOpenAPIAggregationControllerQueue1队列延迟计数
+autoregister_queue_latency_sum  #自动注册队列延迟总和
+autoregister_retries  #自动注册重试
+DiscoveryController_work_duration_count  #DiscoveryController工作持续时间计数
+APIServiceRegistrationController_queue_latency_sum  #APIServiceRegistrationController队列延迟总和
+APIServiceOpenAPIAggregationControllerQueue1_adds
+AvailableConditionController_depth
+AvailableConditionController_queue_latency_sum
+APIServiceRegistrationController_work_duration_count
+apiserver_audit_event_total  #apiserver审核事件总计
+etcd_request_cache_add_latencies_summary_count
+etcd_helper_cache_entry_count
+apiserver_storage_data_key_generation_failures_total  #apiserver存储数据密钥生成失败总数
+DiscoveryController_adds
+admission_quota_controller_queue_latency_count
+admission_quota_controller_work_duration_sum
+etcd_helper_cache_hit_count
+up
+kubernetes_build_info  #kubernetes构建信息
+http_response_size_bytes_count
+crdEstablishing_retries
+process_resident_memory_bytes
+http_response_size_bytes_sum
+DiscoveryController_retries  #DiscoveryController重试
+admission_quota_controller_queue_latency_sum
+AvailableConditionController_adds
+etcd_request_cache_get_latencies_summary_sum
+http_request_size_bytes_count
+process_start_time_seconds
+APIServiceOpenAPIAggregationControllerQueue1_retries
+admission_quota_controller_depth
+apiserver_storage_envelope_transformation_cache_misses_total
+autoregister_work_duration_sum
+crdEstablishing_work_duration_sum
+apiserver_client_certificate_expiration_seconds_count
+DiscoveryController_queue_latency_sum
+APIServiceOpenAPIAggregationControllerQueue1_queue_latency_sum
+apiserver_storage_data_key_generation_latencies_microseconds_sum
+autoregister_depth
+APIServiceOpenAPIAggregationControllerQueue1_work_duration_count
+crdEstablishing_queue_latency_sum
+apiserver_storage_data_key_generation_latencies_microseconds_count
+DiscoveryController_work_duration_sum
+etcd_request_cache_add_latencies_summary_sum
+APIServiceOpenAPIAggregationControllerQueue1_work_duration_sum
+scrape_samples_scraped
+APIServiceRegistrationController_queue_latency_count
+APIServiceRegistrationController_retries
+APIServiceRegistrationController_work_duration_sum
+3.2 job="kubernetes-cadvisor"
+查看信息类型地址：https://github.com/google/cadvisor/blob/master/metrics/testdata/prometheus_metrics
+
+Bash
+container_tasks_state  #gauge类型，容器特定状态的任务数,根据不同的pod_name和state有600+的不同label.
+container_memory_failures_total  #counter类型，内存分配失败的累积计数,根据不同的pod_name和state有600+的不同label.
+container_network_receive_errors_total  #counter类型，容器网络接收时遇到的累计错误数。
+container_network_transmit_bytes_total  #counter类型，容器发送传输的累计字节数。
+container_network_transmit_packets_dropped_total  #counter类型，容器传输时丢弃的累计包数
+container_network_transmit_packets_total  #counter类型，传输数据包的累计计数
+container_network_transmit_errors_total  #counter类型，传输时遇到的累积错误数
+container_network_receive_bytes_total  #counter类型，收到的累计字节数
+container_network_receive_packets_dropped_total  #counter类型，接收时丢弃的累计数据包数
+container_network_receive_packets_total  #counter类型，收到的累计数据包数
+container_spec_cpu_period  #gauge类型，容器的CPU period。
+container_spec_memory_swap_limit_bytes  #容器swap内存交换限制字节
+container_memory_failcnt  #counter类型，内存使用次数达到限制
+container_spec_memory_reservation_limit_bytes  #容器规格内存预留限制字节
+container_spec_cpu_shares  #gauge类型，
+container_spec_memory_limit_bytes  #容器规格内存限制字节
+container_memory_max_usage_bytes  #gauge类型，以字节为单位记录的最大内存使用量
+container_cpu_load_average_10s  #gauge类型，最近10秒钟内的容器CPU平均负载值。
+container_memory_rss  #gauge类型，容器RSS的大小（以字节为单位）
+container_start_time_seconds  #gauge类型，从Unix纪元开始的容器开始时间（以秒为单位）。
+container_memory_mapped_file  #gauge类型，内存映射文件的大小（以字节为单位）
+container_cpu_user_seconds_total  #conter类型，累计CPU user 时间（以秒为单位）
+container_memory_cache  #gauge类型，内存的cache字节数。
+container_memory_working_set_bytes  #gague类型，当前工作集（以字节为单位）
+container_cpu_system_seconds_total  #conter类型，累计CPU system时间（以秒为单位）
+container_memory_swap  #gauge类型，容器交换使用量（以字节为单位）
+container_memory_usage_bytes  #gauge类型，当前内存使用情况（以字节为单位），包括所有内存，无论何时访问
+container_last_seen  #gauge类型，上一次export看到此容器的时间
+container_fs_writes_total  #counter类型，累计写入次数
+container_fs_reads_total   #counter类型，类型读取次数
+container_cpu_usage_seconds_total  #counter类型，累计消耗CPU的总时间
+container_fs_reads_bytes_total  #容器读取的总字节数
+container_fs_writes_bytes_total  #容器写入的总字节数
+container_fs_sector_reads_total  #counter类型，扇区已完成读取的累计计数
+container_fs_inodes_free  #gauge类型，可用的Inode数量
+container_fs_io_current  #gauge类型，当前正在进行的I/O数
+container_fs_io_time_weighted_seconds_total  #counter类型，累积加权I/O时间（以秒为单位）
+container_fs_usage_bytes  #gauge类型，此容器在文件系统上使用的字节数
+container_fs_limit_bytes  #gauge类型，此容器文件系统上可以使用的字节数
+container_fs_inodes_total  #gauge类型，inode数
+container_fs_sector_writes_total  #counter类型，扇区写入累计计数
+container_fs_io_time_seconds_total  #counter类型，I/O花费的秒数累计
+container_fs_writes_merged_total  #counter类型，合并的累计写入数
+container_fs_reads_merged_total  #counter类型，合并的累计读取数
+container_fs_write_seconds_total  #counter类型，写花费的秒数累计
+container_fs_read_seconds_total   #counter类型，读花费的秒数累计
+container_cpu_cfs_periods_total  #counter类型，执行周期间隔时间数
+container_cpu_cfs_throttled_periods_total  #counter类型，节流周期间隔数
+container_cpu_cfs_throttled_seconds_total  #counter类型，容器被节流的总时间
+container_spec_cpu_quota  #gauge类型，容器的CPU配额
+machine_memory_bytes  #gauge类型，机器上安装的内存量
+scrape_samples_post_metric_relabeling
+cadvisor_version_info
+scrape_duration_seconds
+machine_cpu_cores  #gauge类型，机器上的CPU核心数
+container_scrape_error  #gauge类型，如果获取容器指标时出错，则为1，否则为0
+scrape_samples_scraped
+3.3 job="kubernetes-nodes"
+Bash
+storage_operation_duration_seconds_bucket
+kubelet_runtime_operations_latency_microseconds  #summary类型，（不建议使用）运行时操作的延迟（以微秒为单位）。 按操作类型细分
+rest_client_request_latency_seconds_bucket
+kubelet_docker_operations_latency_microseconds  #summary类型，（不建议使用）Docker操作的延迟（以微秒为单位）。 按操作类型细分。
+kubelet_runtime_operations  #counter类型，（不建议使用）按操作类型划分的运行时操作累计数。
+kubelet_runtime_operations_latency_microseconds_count
+apiserver_storage_data_key_generation_latencies_microseconds_bucket
+kubelet_runtime_operations_latency_microseconds_sum
+apiserver_client_certificate_expiration_seconds_bucket
+kubelet_docker_operations_latency_microseconds_sum
+kubelet_docker_operations  #counter类型，（已弃用）按操作类型分类的Docker操作的累计数量。
+kubelet_docker_operations_latency_microseconds_count
+rest_client_requests_total  #counter类型，HTTP请求数，按状态码，方法和主机划分。
+kubelet_cgroup_manager_latency_microseconds  #summary类型，（不建议使用）cgroup Manager操作的延迟（以微秒为单位）。 按方法细分。
+storage_operation_duration_seconds_sum
+storage_operation_duration_seconds_count
+kubelet_network_plugin_operations_latency_microseconds  #summary类型，(不建议使用）网络插件操作的延迟（以微秒为单位）。 按操作类型细分。
+volume_manager_total_volumes  #gauge类型，Volume Manager中的卷数
+kubelet_pod_worker_latency_microseconds  #summary类型，（不建议使用）延迟（以微秒为单位）以同步单个Pod。 按操作类型细分：创建，更新或同步
+kubelet_docker_operations_errors  #counter类型，（已弃用）按操作类型分类的Docker操作错误累计数。
+kubelet_runtime_operations_errors  #counter类型，（不建议使用）按操作类型累计的运行时操作错误数。
+rest_client_request_latency_seconds_count
+rest_client_request_latency_seconds_sum
+http_request_size_bytes  #summary类型，HTTP请求大小（以字节为单位）。
+kubelet_pleg_relist_latency_microseconds  #summary类型，（已弃用）重新列出PLEG中的Pod的延迟（以微秒为单位）。
+kubelet_pod_worker_start_latency_microseconds  #summary类型，（已弃用）从看到容器到开始工作的等待时间（以微秒为单位）。
+kubelet_cgroup_manager_latency_microseconds_sum
+kubelet_network_plugin_operations_latency_microseconds_sum
+http_request_duration_microseconds  #summary类型，HTTP请求延迟（以微秒为单位）。
+kubelet_cgroup_manager_latency_microseconds_count
+http_response_size_bytes  #summary类型，HTTP响应大小（以字节为单位）。
+kubelet_pod_start_latency_microseconds  #summary类型，（已弃用）单个Pod从挂起到运行的延迟（以微秒为单位）。
+kubelet_containers_per_pod_count  #histogram类型，每个pod的容器数。
+kubelet_network_plugin_operations_latency_microseconds_count
+kubelet_pleg_relist_interval_microseconds  #summary类型，（已弃用）在PLEG中重新上市之间的间隔（以微秒为单位）。
+kubelet_pod_worker_latency_microseconds_sum
+kubelet_pod_worker_latency_microseconds_count
+storage_operation_errors_total  #counter类型，存储操作错误总数。
+process_resident_memory_bytes  #gauge类型，驻留内存大小（以字节为单位）。
+kubelet_certificate_manager_client_expiration_seconds  #gauge类型，证书生命周期的量度。 该值是证书自UTC 1970年1月1日起过期的秒数。
+kubelet_running_container_count  #gauge类型，当前正在运行的容器数
+http_request_size_bytes_sum
+kubelet_pleg_relist_latency_microseconds_count
+http_request_duration_microseconds_count
+kubelet_pod_worker_start_latency_microseconds_count
+kubelet_pleg_relist_interval_microseconds_sum
+scrape_samples_scraped
+process_open_fds
+kubelet_pod_worker_start_latency_microseconds_sum
+apiserver_storage_data_key_generation_failures_total  #counter类型，失败的数据加密密钥（DEK）生成操作的总数。
+http_request_size_bytes_count
+kubelet_running_pod_count  #gauge类型，当前运行的pod数
+kubelet_node_config_error  #gauge类型，如果节点遇到与配置相关的错误，则此指标为true（1），否则为false（0）。
+kubelet_pod_start_latency_microseconds_count
+apiserver_storage_data_key_generation_latencies_microseconds_count
+kubelet_pleg_relist_latency_microseconds_sum
+process_virtual_memory_bytes
+scrape_samples_post_metric_relabeling
+process_start_time_seconds
+kubelet_pod_start_latency_microseconds_sum
+apiserver_client_certificate_expiration_seconds_sum
+kubelet_containers_per_pod_count_count
+http_response_size_bytes_count
+kubernetes_build_info
+http_response_size_bytes_sum
+apiserver_audit_event_total  #counter类型，生成审计事件的计数器，并将其发送到审计后端。
+kubelet_containers_per_pod_count_sum
+kubelet_pleg_relist_interval_microseconds_count
+apiserver_storage_envelope_transformation_cache_misses_total  #counter类型，访问密钥解密密钥（KEK）时缓存未命中总数。
+scrape_duration_seconds
+apiserver_storage_data_key_generation_latencies_microseconds_sum
+http_request_duration_microseconds_sum
+apiserver_client_certificate_expiration_seconds_count
+3.4 job="kubernetes-pods"
+#这里部署的是nginx_ingress_controller  下面是查询这些metric类型和意思的网址：
+
+https://github.com/kubernetes/ingress-nginx/blob/master/internal/ingress/metric/collectors/nginx_status_test.go
+
+https://www.gitmemory.com/issue/kubernetes/ingress-nginx/2924/483591581
+
+Bash
+nginx_ingress_controller_nginx_process_connections  #gauge类型，状态为{active, reading, writing, waiting}的当前客户端连接数
+nginx_ingress_controller_nginx_process_connections_total  #counter类型，状态为{accepted, handled（已接受，已处理）}的连接总数
+nginx_ingress_controller_config_last_reload_successful  #gauge类型，nginx_ingress_controller_config最后一次加载成功的时间
+nginx_ingress_controller_nginx_process_write_bytes_total #counter类型，nginx_ingress_controller nginx进程写入字节总数
+nginx_ingress_controller_config_hash  #gauge类型，实际正在运行配置散列
+nginx_ingress_controller_config_last_reload_successful_timestamp_seconds   #gauge类型，上一次成功重新配置的时间戳。
+nginx_ingress_controller_nginx_process_num_procs  #gauge类型，进程数
+nginx_ingress_controller_nginx_process_oldest_start_time_seconds  #gauge类型，从1970/01/01开始的秒数
+nginx_ingress_controller_nginx_process_virtual_memory_bytes  #guage类型，正在使用的内存字节数
+nginx_ingress_controller_success  #counter类型，Ingress控制器重新加载操作的累积数量
+nginx_ingress_controller_nginx_process_read_bytes_total  #counter类型，读取的字节数
+nginx_ingress_controller_nginx_process_cpu_seconds_total  #counter类似，CPU使用时间（以秒为单位）
+nginx_ingress_controller_nginx_process_requests_total  #counter类型，客户请求总数
+nginx_ingress_controller_nginx_process_resident_memory_bytes  #gauge类型，正在使用的内存字节数
+3.5 job="kubernetes-service-endpoints"
+coredns的查看指标地址：https://github.com/DataDog/integrations-core/blob/master/coredns/tests/fixtures/metrics.txt
