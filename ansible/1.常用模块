@@ -189,3 +189,24 @@ owner：解压后文件或目录的属主
 - unarchive: src=foo.tgz dest=/var/lib/foo
 - unarchive: src=/tmp/foo.zip dest=/usr/local/bin copy=no
 - unarchive: src=https://example.com/example.zip dest=/usr/local/bin copy=no
+
+
+十四:scripts 模块
+script 模块: 执行脚本. 只需要调用 ansible 的宿主机存放的脚本文件就可以在选择主机上面执行脚本.
+
+Demo
+
+# shell
+cat /tmp/deniss.sh                                                                                                                               
+#!/bin/bash
+echo "测试 shell"
+ansible k3s-cluster -m script -a '/tmp/deniss.sh'
+
+# python
+cat /tmp/deniss.py
+#!/usr/bin/python
+import sys
+
+print ('Deniss_Wang' )
+print (sys.version)
+ansible k3s-cluster -m script -a '/tmp/deniss.py'
