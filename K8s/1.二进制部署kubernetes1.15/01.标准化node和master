@@ -50,7 +50,7 @@ cat /etc/security/limits.conf
 *    soft    nofile    131072
 *    hard    nofile    131072
 6.cat /etc/security/limits.d/20-nproc.conf
-新增
+修改
 *             soft    nproc     409600
 7.#参数优化 cat /etc/sysctl.conf
 fs.file-max = 65535600
