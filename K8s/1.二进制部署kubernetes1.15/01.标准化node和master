@@ -27,6 +27,7 @@ systemctl disable --now dnsmasq
 关闭默认路由
 vim /etc/sysconfig/network 增加内容
 NOZEROCONF=yes
+NETWORKING_IPV6=no
 重启网络systemctl restart network 
 route -n  检查如下路由信息是否消失
 169.254.0.0     0.0.0.0         255.255.0.0     U     1002   0        0 eth0
