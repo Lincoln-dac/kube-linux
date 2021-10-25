@@ -15,14 +15,8 @@ fi
 
 2.重启服务器
 #关闭防火墙，swap,selinux
-systemctl stop firewalld NetworkManager
-systemctl disable firewalld NetworkManager
-swapoff -a
-setenforce 0
-sed -ri '/^[^#]*SELINUX=/s#=.+$#=disabled#' /etc/selinux/config
-sed -ri '/^[^#]*swap/s@^@#@' /etc/fstab
-cat /etc/fstab
-cat /etc/selinux/config
+systemctl stop firewalld NetworkManager && systemctl disable firewalld NetworkManager && swapoff -a && setenforce 0
+sed -ri '/^[^#]*SELINUX=/s#=.+$#=disabled#' /etc/selinux/config && sed -ri '/^[^#]*swap/s@^@#@' /etc/fstab && cat /etc/fstab && cat /etc/selinux/config
 确保虚拟内存关闭 seliunx关闭
 开启br_netfilter模块
 cat > /etc/sysconfig/modules/br_netfilter.modules << EOF
