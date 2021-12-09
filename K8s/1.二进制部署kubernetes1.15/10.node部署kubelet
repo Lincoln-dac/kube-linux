@@ -53,7 +53,7 @@ containerLogMaxFiles: 10
 
   
 cat /app/kubernetes/config/kubelet
-KUBELET_ARGS=" --pod-infra-container-image=10.204.57.39/common/pause-amd64:3.0 --runtime-cgroups=/systemd/system.slice --bootstrap-kubeconfig=/app/kubernetes/ssl/bootstrap.kubeconfig --kubeconfig=/app/kubernetes/ssl/kubelet.kubeconfig --cert-dir=/app/kubernetes/ssl --image-pull-progress-deadline=15m --root-dir=/app/kubernetes/data/kubelet  "
+KUBELET_ARGS=" --kube-api-qps=100 --pod-infra-container-image=10.204.57.39/common/pause-amd64:3.0 --runtime-cgroups=/systemd/system.slice --bootstrap-kubeconfig=/app/kubernetes/ssl/bootstrap.kubeconfig --kubeconfig=/app/kubernetes/ssl/kubelet.kubeconfig --cert-dir=/app/kubernetes/ssl --image-pull-progress-deadline=15m --root-dir=/app/kubernetes/data/kubelet  "
 LOGS="--logtostderr=false --v=2 --log-dir=/app/kubernetes/logs"
 CONFIG="--config=/app/kubernetes/config/kubelet-config.yaml"
 HOSTNAME="--hostname-override=10.204.51.64"
