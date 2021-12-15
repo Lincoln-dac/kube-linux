@@ -49,7 +49,10 @@ nodefs.available:  "10%"
 nodefs.inodesFree: "5%"
 imagefs.available: "15%"
 containerLogMaxSize: "20Mi"
-containerLogMaxFiles: 10
+containerLogMaxFiles: "10"
+registry-burst: "50"
+registry-qps: "100"
+
 
   
 cat /app/kubernetes/config/kubelet
