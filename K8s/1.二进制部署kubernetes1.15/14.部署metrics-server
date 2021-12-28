@@ -86,7 +86,7 @@ metrics.k8s.io/v1beta1
 # kubectl get apiservices.apiregistration.k8s.io|grep metrics
 v1beta1.metrics.k8s.io                 kube-system/metrics-server   True        3d19h
  
-# kubectl get apiservices.apiregistration.k8s.io v1beta1.metrics.k8s.io -oyaml
+# kubectl get apiservices.apiregistration.k8s.io v1beta1.metrics.k8s.io -o yaml
 apiVersion: apiregistration.k8s.io/v1
 kind: APIService
 metadata:
