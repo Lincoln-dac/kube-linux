@@ -62,6 +62,7 @@ cat  > ca-csr.json << EOF
     }
 }
 EOF
+执行
 cfssl gencert -initca ca-csr.json | cfssljson -bare ca -
 4:生成server证书
 cat > kubernetes-csr.json << EOF
@@ -95,6 +96,7 @@ cat > kubernetes-csr.json << EOF
     ]
 }
 EOF
+执行
 cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=kubernetes  kubernetes-csr.json | cfssljson -bare kubernetes  
 5:生成admin证书
 [root@k8s-master01 ssl]# cat admin-csr.json 
@@ -117,7 +119,8 @@ cat > admin-csr.json << EOF
     ]
 }
 EOF
- 
+######
+执行
 cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=kubernetes  admin-csr.json  | cfssljson -bare admin
 6:生成kube-proxy证书
 [root@k8s-master01 ssl]# cat kube-proxy-csr.json 
@@ -140,7 +143,8 @@ cat > kube-proxy-csr.json  << EOF
         ]
     }
 EOF
- 
+######
+执行 
 cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=kubernetes  kube-proxy-csr.json  | cfssljson -bare kube-proxy
 
 7.配置kube-controller-manager证书
