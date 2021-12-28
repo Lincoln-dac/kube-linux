@@ -94,6 +94,6 @@ NAME           STATUS   ROLES   AGE   VERSION
 10.204.51.64   Ready    node    87s   v1.15.0
 
 创建拉取镜像的harobr仓库secret
-kubectl create secret docker-registry harborsecret --docker-server=10.204.57.39 --docker-username='admin' --docker-password='123456'  
+kubectl create secret docker-registry harborsecret --docker-server=10.204.57.39 --docker-username='admin' --docker-password='123456'  (分不同NS）
 
   
