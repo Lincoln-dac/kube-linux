@@ -11,3 +11,9 @@ rados lspools
 
 查看池中的对象
 rados -p ceph-demo ls
+
+检查仲裁状态，查看mon添加是否成功
+
+ceph quorum_status --format json-pretty
+
+ceph osd lspools
