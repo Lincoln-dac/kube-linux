@@ -1,0 +1,21 @@
+Resolving The Problem
+The two tools collect data from different sources and they are also referring to different metrics.
+
+kubectl top pod uses memory working set: you can compare the output of the kubectl top with the value of the metric "container_memory_working_set_bytes" in Prometheus.
+
+If you run this query in Prometheus:
+
+container_memory_working_set_bytes{pod_name=~"<pod-name>", container_name=~"<container-name>", container_name!="POD"}
+
+you will get value in bytes that almost matches the output of kubectl top pods.
+
+This value is collected by cAdvisor.
+
+Docker stats instead collects metric directly from operating system and specifically from the /sys/fs/cgroup/memory special files.
+
+Docker stats shows as memory usage the result of  usage_in_bytes - cache.
+
+This may still not match perfectly the value showed by docker stats, because the docker cli also subtracts shared memory from the value before it is displayed, but this is how it works.
+
+
+https://www.ibm.com/support/pages/kubectl-top-pods-and-docker-stats-show-different-memory-statistics
