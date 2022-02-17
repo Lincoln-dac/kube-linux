@@ -1,5 +1,5 @@
 
-升级内核
+1.升级内核
 curl -o /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo
 
 export Kernel_Version=4.14.15-1
@@ -14,14 +14,16 @@ if [ $(cat /etc/default/grub |grep 'ipv6.disable=1' |grep GRUB_CMDLINE_LINUX|wc 
 fi
 
 2.重启服务器
-#关闭防火墙，swap,selinux
+#关闭防火墙，swap,selinux,清除所有iptables规则
 systemctl stop firewalld NetworkManager && systemctl disable firewalld NetworkManager && swapoff -a && setenforce 0
 sed -ri '/^[^#]*SELINUX=/s#=.+$#=disabled#' /etc/selinux/config && sed -ri '/^[^#]*swap/s@^@#@' /etc/fstab && cat /etc/fstab && cat /etc/selinux/config
+iptables -F
 确保虚拟内存关闭 seliunx关闭
 开启br_netfilter模块
 cat > /etc/sysconfig/modules/br_netfilter.modules << EOF
 modprobe br_netfilter
 EOF
+
 3.关闭dnsmasq 加载模块(如果有）
 systemctl disable --now dnsmasq 
 关闭默认路由
@@ -43,6 +45,7 @@ tuned-adm profile throughput-performance
 开启系统dns本地缓存优化（nscd）
 vi /etc/nscd.conf (修改这行，默认是yes）
         enable-cache            hosts           yes
+        
 5修改打开文件数
 cat /etc/security/limits.conf
 *    soft    nproc    65536
@@ -52,6 +55,7 @@ cat /etc/security/limits.conf
 6.cat /etc/security/limits.d/20-nproc.conf
 修改
 *             soft    nproc     409600
+
 7.#参数优化 cat /etc/sysctl.conf
 fs.file-max = 65535600
 fs.inotify.max_user_instances=524288
@@ -93,12 +97,10 @@ vm.max_map_count= 655360
 vm.overcommit_memory= 1
 vm.panic_on_oom= 0
 vm.swappiness = 0
-
-
-
-#-------------
+-------------
 sysctl -p
 如果有报错，处理掉报错
+
 8.开启ipvs模块
 cat > /etc/sysconfig/modules/ipvs.modules <<EOF
 #!/bin/bash
@@ -115,6 +117,7 @@ chmod 755 /etc/sysconfig/modules/ipvs.modules && bash /etc/sysconfig/modules/ipv
 ##
 如果无输出，则ipvs 模块没有加载成功
 ####
+
 9.所有节点配置 ntpdate 时间同步
 10.所有节点创建 mkdir -p /app/kubernetes/{bin,logs,config,data,ssl} &&  mkdir -p /app/kubernetes/data/kubelet
 11.增加k8s文件安全性 chmod -R 700 /app/kubernetes
