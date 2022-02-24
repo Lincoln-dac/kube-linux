@@ -77,7 +77,7 @@ ETCDDATA：为etcd数据目录（初次搭建etcd集群过程中,建议清空目
 --quota-backend-bytes：etcd DB最大大小，默认是2G，这里改为8G
 #####
 4.修改etcd.service 
-cat 
+cat /usr/lib/systemd/system/etcd.service
 [Unit]
 Description=Etcd Server
 After=network.target
