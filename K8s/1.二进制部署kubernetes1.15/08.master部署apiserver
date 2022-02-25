@@ -9,7 +9,7 @@ COMMON="--apiserver-count=2  --service-node-port-range=30000-50000 --enable-boot
 IP="--bind-address=0.0.0.0 --secure-port=6443 --insecure-port=0 --advertise-address=0.0.0.0 --insecure-bind-address=0.0.0.0 --service-cluster-ip-range=172.17.0.0/16 "
 
 
-cat 
+cat /usr/lib/systemd/system/kube-apiserver.service
 [Unit]
 Description=Kubernetes API Server
 Documentation=https://github.com/kubernetes/kubernetes
