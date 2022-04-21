@@ -1,0 +1,6 @@
+1.
+kubectl apply -f  clusterrolebinding.yaml
+kubectl apply -f  clusterrole.yaml
+kubectl apply -f  deployment-nfs.yaml IP
+kubectl apply -f  serviceaccount.yaml
+需要修改deployment-nfs.yaml 对应nfs 服务器IP 前提条件是 配置好nfs服务器 和对应目录权限 一般777 
