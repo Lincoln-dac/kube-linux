@@ -1,0 +1,43 @@
+apiVersion: monitoring.coreos.com/v1
+kind: Prometheus
+metadata:
+  labels:
+    prometheus: k8s
+  name: k8s
+  namespace: monitoring
+spec:
+  alerting:
+    alertmanagers:
+    - name: alertmanager-main
+      namespace: monitoring
+      port: web
+  storage:
+    volumeClaimTemplate:
+      spec:
+        storageClassName: prometheus-data-db
+        resources:
+          requests:
+            storage: 10Gi
+  baseImage: 10.204.57.39/common/prometheus
+  replicas: 1
+  retention: 7d
+  secrets:
+  - etcd-certs
+  resources:
+    requests:
+      memory: "6000Mi"
+      cpu: "2"
+    limits:
+      memory: "12000Mi"
+      cpu: "8"       
+  ruleSelector:
+    matchLabels:
+      prometheus: k8s
+      role: alert-rules
+  additionalScrapeConfigs:
+    name: additional-configs
+    key: prometheus-additional.yaml
+  serviceAccountName: prometheus-k8s
+  serviceMonitorNamespaceSelector: {}
+  serviceMonitorSelector: {}
+  version: v2.3.1
