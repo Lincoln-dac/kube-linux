@@ -1,4 +1,4 @@
-1.下载prometheus-operator
+prometheus-operator安装部署
 wget https://github.com/coreos/prometheus-operator/archive/v0.23.2.tar.gz
 
 
