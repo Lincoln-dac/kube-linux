@@ -23,7 +23,7 @@ metadata:
     kubernetes.io/ingress.class: traefik
 spec:
   rules:
-  - host: prometheus-sit.fcbox.com
+  - host: prometheus-sit.test.com
     http:
       paths:
       - backend:
