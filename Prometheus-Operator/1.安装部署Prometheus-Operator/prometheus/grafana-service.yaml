@@ -20,7 +20,7 @@ metadata:
     kubernetes.io/ingress.class: traefik
 spec:
   rules:
-  - host: grafana-sit.fcbox.com
+  - host: grafana-sit.test.com
     http:
       paths:
       - backend:
