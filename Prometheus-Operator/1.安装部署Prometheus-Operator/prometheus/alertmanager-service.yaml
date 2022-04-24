@@ -27,7 +27,7 @@ metadata:
     kubernetes.io/ingress.class: traefik
 spec:
   rules:
-  - host: altermanager-sit.fcbox.com
+  - host: altermanager-sit.test.com
     http:
       paths:
       - backend:
