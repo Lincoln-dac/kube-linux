@@ -7,3 +7,5 @@ v1.7.2	                    ✓	          ✓	              ✓	              -	 
 v1.8.0	                    ✓	          ✓	              ✓	              ✓	              -
 v1.9.8	                    ✓	          ✓	              ✓	              ✓	              ✓
 master	                    ✓	          ✓	              ✓	              ✓	              ✓
+2.设置账号权限
+kubectl create clusterrolebinding kube-state-metrics-admin-binding --clusterrole=cluster-admin  --user=system:serviceaccount:monitoring:kube-state-metrics
