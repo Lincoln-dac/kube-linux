@@ -1,0 +1,9 @@
+1.正常情况下， 升级k8s之后，很多监控项会消失，需要升级对应的kube-state-metrics，
+kube-state-metrics支持版本
+kube-state-metrics	Kubernetes 1.12	Kubernetes 1.13	Kubernetes 1.14	Kubernetes 1.15	Kubernetes 1.16
+v1.5.0	                    ✓	          -	              -	              -	              -
+v1.6.0	                    ✓	          ✓	              -	              -	              -
+v1.7.2	                    ✓	          ✓	              ✓	              -	              -
+v1.8.0	                    ✓	          ✓	              ✓	              ✓	              -
+v1.9.8	                    ✓	          ✓	              ✓	              ✓	              ✓
+master	                    ✓	          ✓	              ✓	              ✓	              ✓
