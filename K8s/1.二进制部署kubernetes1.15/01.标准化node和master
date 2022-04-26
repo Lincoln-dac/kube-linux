@@ -38,7 +38,7 @@ route -n  检查如下路由信息是否消失
 cd /etc/yum.repos.d/ &&  wget http://mirrors.aliyun.com/repo/Centos-7.repo -O Centos.repo
 yum clean all && yum makecache  
 yum install epel-release -y
-yum install -y keepalived mtr telnet ipvsadm ipset wget   nfs-utils systemd  yum-plugin-ovl jq psmisc socat perl iotop iftop fuse fuse-devel nload
+yum install -y keepalived mtr telnet ipvsadm ipset wget   nfs-utils systemd  yum-plugin-ovl jq psmisc socat perl iotop iftop fuse fuse-devel nload lscpu
 yum install lrzsz ipvsadm ipset sysstat conntrack libseccomp systemd iftop nethogs iptstate  tuned nscd -y
 调整cpu模式
 tuned-adm profile throughput-performance
