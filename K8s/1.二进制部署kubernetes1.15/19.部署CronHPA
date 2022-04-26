@@ -8,5 +8,65 @@ kubectl apply -f config/deploy/deploy.yaml
 3.测试
 
 kubectl apply -f examples/deployment_cronhpa.yaml 
+4.查看
+kubectl get cronhorizontalpodautoscalers.autoscaling.alibabacloud.com
+NAME             AGE
+cronhpa-sample   39s
+
+kubectl describe cronhorizontalpodautoscalers.autoscaling.alibabacloud.com cronhpa-sample
+###########
+Name:         cronhpa-sample
+Namespace:    default
+Labels:       controller-tools.k8s.io=1.0
+Annotations:  kubectl.kubernetes.io/last-applied-configuration:
+                {"apiVersion":"autoscaling.alibabacloud.com/v1beta1","kind":"CronHorizontalPodAutoscaler","metadata":{"annotations":{},"labels":{"controll...
+API Version:  autoscaling.alibabacloud.com/v1beta1
+Kind:         CronHorizontalPodAutoscaler
+Metadata:
+  Creation Timestamp:  2022-04-26T07:00:48Z
+  Generation:          4
+  Resource Version:    146328621
+  Self Link:           /apis/autoscaling.alibabacloud.com/v1beta1/namespaces/default/cronhorizontalpodautoscalers/cronhpa-sample
+  UID:                 77402954-f076-4fa3-a471-840a87d44128
+Spec:
+  Jobs:
+    Name:         scale-down
+    Schedule:     30 */1 * * * *
+    Target Size:  1
+    Name:         scale-up
+    Schedule:     01 */1 * * * *
+    Target Size:  3
+  Scale Target Ref:
+    API Version:  apps/v1
+    Kind:         Deployment
+    Name:         nginx-deployment-basic
+Status:
+  Conditions:
+    Job Id:           73a8c930-7a3d-4eba-b420-ff2641501512
+    Last Probe Time:  2022-04-26T07:01:30Z
+    Message:          cron hpa job scale-down executed successfully. current replicas:3, desired replicas:1.
+    Name:             scale-down
+    Run Once:         false
+    Schedule:         30 */1 * * * *
+    State:            Succeed
+    Target Size:      1
+    Job Id:           fc9f1399-de3d-4d5a-aa35-c646fd24a012
+    Last Probe Time:  2022-04-26T07:01:01Z
+    Message:          cron hpa job scale-up executed successfully. current replicas:2, desired replicas:3.
+    Name:             scale-up
+    Run Once:         false
+    Schedule:         01 */1 * * * *
+    State:            Succeed
+    Target Size:      3
+  Scale Target Ref:
+    API Version:  apps/v1
+    Kind:         Deployment
+    Name:         nginx-deployment-basic
+Events:
+  Type    Reason   Age   From                         Message
+  ----    ------   ----  ----                         -------
+  Normal  Succeed  54s   CronHorizontalPodAutoscaler  cron hpa job scale-up executed successfully. current replicas:2, desired replicas:3.
+  Normal  Succeed  25s   CronHorizontalPodAutoscaler  cron hpa job scale-down executed successfully. current replicas:3, desired replicas:1.
+####
 
 https://github.com/AliyunContainerService/kubernetes-cronhpa-controller
