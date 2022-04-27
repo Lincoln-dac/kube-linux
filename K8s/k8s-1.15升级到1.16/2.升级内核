@@ -6,6 +6,8 @@ Redhat Enterprise Linux:
 RHEL 7: 3.10.0–1062.8.1.el7+
 RHEL 8: 4.18.0–147.2.1.el8_1+
 
-2.编译内核RPM 包
+2.编译内核RPM 包 ，由于很多老内核的rpm 官方不再维护，这里手动编译出rpm包
 下载内核源码
  wget https://mirrors.edge.kernel.org/pub/linux/kernel/v4.x/linux-4.14.276.tar.gz --no-check-certificate
+ 3.安装依赖包
+yum install -y  rpm-build rpm-devel rpmlint make python bash coreutils diffutils patch rpmdevtools ncurses-devel elfutils-libelf-devel openssl-devel bc
