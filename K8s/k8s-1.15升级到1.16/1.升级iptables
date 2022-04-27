@@ -15,6 +15,9 @@ cp iptables /sbin
 cp iptables-restore /sbin/
 cp iptables-save /sbin/
 
+验证
+iptables -V
+
 
 
 参考文献
