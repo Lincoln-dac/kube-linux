@@ -1,0 +1,11 @@
+1.新内核解决很多k8s性能问题，建议升级到下面版本以上
+
+Linux-stable: 4.14.154+, 4.19.84+, 5.3.9+
+Ubuntu: 4.15.0–67+, 5.3.0–24+
+Redhat Enterprise Linux:
+RHEL 7: 3.10.0–1062.8.1.el7+
+RHEL 8: 4.18.0–147.2.1.el8_1+
+
+2.编译内核RPM 包
+下载内核源码
+ wget https://mirrors.edge.kernel.org/pub/linux/kernel/v4.x/linux-4.14.276.tar.gz --no-check-certificate
