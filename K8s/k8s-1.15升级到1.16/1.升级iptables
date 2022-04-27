@@ -14,3 +14,10 @@ cd /usr/local/sbin
 cp iptables /sbin
 cp iptables-restore /sbin/
 cp iptables-save /sbin/
+
+
+
+参考文献
+###
+https://www.netfilter.org/pub/iptables/
+https://www.weave.works/blog/racy-conntrack-and-dns-lookup-timeouts
