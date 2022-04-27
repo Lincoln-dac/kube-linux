@@ -1,0 +1,16 @@
+1.由于1.16以上版本kube-proxy 强制开启 random-fully 对应的iptables必须升级，
+2.根据官网信息，iptables-1.6.0开始支持random-fully  但是发现 安装1.6.0之后，kube-proxy都会报错，升级到1.6.2 则不会 这里升级到1.6.2
+3.升级iptables 1.6.2
+yum install libnftnl-devel libmnl-devel autoconf automake libtool bison flex  libnetfilter_conntrack-devel libnetfilter_queue-devel libpcap-devel -y
+export LC_ALL=C
+wget wget https://www.netfilter.org/projects/iptables/files/iptables-1.6.2.tar.bz2
+tar -xvf iptables-1.6.2.tar.bz2
+cd iptables-1.6.2
+ ./autogen.sh
+ ./configure
+ make -j4
+ make install
+cd /usr/local/sbin
+cp iptables /sbin
+cp iptables-restore /sbin/
+cp iptables-save /sbin/
