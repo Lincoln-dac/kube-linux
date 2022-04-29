@@ -1,0 +1,14 @@
+linux查看进程启动时间(运行多长时间)
+  
+
+ps -eo lstart 启动时间
+ps -eo etime   运行多长时间.
+ps -eo pid,lstart,etime | grep 5176
+ ps -eo pid,lstart,etime,cmd | grep 
+---------------------
+ps -C 进程名称  显示进程PID
+ps -C http
+
+
+查内存
+ps aux | awk '{print $6/1024 " MB\t\t" $11"\t"$NF}' | sort -nr|head -10
