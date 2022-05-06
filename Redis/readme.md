@@ -1,4 +1,4 @@
-![image](https://github.com/Lincoln-dac/kube-linux/blob/master/pic/10dfa9ec8a1363275bbc06295e9092e508fac704.png)
+
 
 ![image](https://github.com/Lincoln-dac/kube-linux/blob/master/pic/79da7093ed998a99d9abe91e610b74e7.webp)
 #########
