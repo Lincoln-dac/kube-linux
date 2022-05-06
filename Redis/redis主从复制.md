@@ -1,5 +1,5 @@
 主从复制原理
-
+![image](https://github.com/Lincoln-dac/kube-linux/blob/master/pic/v2-e189fefabf47452bb5855d6bb06e9e08_720w.jpg)
 
 从服务器连接主服务器，发送SYNC命令；
 主服务器接收到SYNC命名后，开始执行BGSAVE命令生成RDB文件并使用缓冲区记录此后执行的所有写命令；
