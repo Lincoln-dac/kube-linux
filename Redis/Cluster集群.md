@@ -1,5 +1,7 @@
 redis的哨兵模式基本已经可以实现高可用，读写分离 ，但是在这种模式下每台redis服务器都存储相同的数据，很浪费内存，所以在redis3.0上加入了cluster模式，实现的redis的分布式存储，也就是说每台redis节点上存储不同的内容。
 
+![image](https://github.com/Lincoln-dac/kube-linux/blob/master/pic/v2-b1e71951facd61a9ff2fd84e67bdf6a2_720w.jpg)
+
 Redis-Cluster采用无中心结构,它的特点如下：
 
 所有的redis节点彼此互联(PING-PONG机制),内部使用二进制协议优化传输速度和带宽。
