@@ -1,2 +1,18 @@
-1.删除从节点
+1.删除8008从节点
 /app/redis-cluster/bin/redis-cli -a K6CJDjjnE9d0OxRjYNKZ --cluster del-node 192.168.0.61:8008 e1ec98aa87327564e4e9bf71edbde0fae0aace7c
+
+2.删除8007主节点
+/app/redis-cluster/bin/redis-cli -a K6CJDjjnE9d0OxRjYNKZ --cluster reshard 10.204.51.64:8007
+
+How many slots do you want to move (from 1 to 16384)? 4096
+What is the receiving node ID? 97b4b86843d0dbf3a95019d7d3c00da41963bec4
+Please enter all the source node IDs.
+  Type 'all' to use all the nodes as source nodes for the hash slots.
+  Type 'done' once you entered all the source nodes IDs.
+Source node 1:2728a594a0498e98e4b83a537e19f9a0a3790f38
+(ps:这里是需要数据源，也就是我们的8007节点id)
+Source node 2:done
+(ps:这里直接输入done 开始生成迁移计划)
+ ... ...
+Do you want to proceed with the proposed reshard plan (yes/no)? Yes
+(ps:这里输入yes开始迁移)
