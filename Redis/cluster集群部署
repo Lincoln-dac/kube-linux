@@ -1,1 +1,10 @@
-wget http://download.redis.io/releases/redis-5.0.2.tar.gz
+1.编译
+mkdir -p  /app/redis-cluster/{bin,conf,data,logs,pid)
+
+wget http://download.redis.io/releases/redis-5.0.2.tar.gz && tar zxvf redis-5.0.2.tar.gz
+cd redis-5.0.2/  && make 
+cp src/redis-server /app/redis-cluster/bin/
+cp src/redis-cli /app/redis-cluster/bin/
+2.创建目录
+mkdir -p /app/redis-cluster/data/800{1..6}
+
