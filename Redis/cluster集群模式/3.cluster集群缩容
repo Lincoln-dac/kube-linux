@@ -1,5 +1,5 @@
 1.删除8008从节点
-/app/redis-cluster/bin/redis-cli -a K6CJDjjnE9d0OxRjYNKZ --cluster del-node 192.168.0.61:8008 e1ec98aa87327564e4e9bf71edbde0fae0aace7c
+/app/redis-cluster/bin/redis-cli -a K6CJDjjnE9d0OxRjYNKZ --cluster del-node 10.204.51.64:8008 e1ec98aa87327564e4e9bf71edbde0fae0aace7c
 
 2.删除8007主节点
 /app/redis-cluster/bin/redis-cli -a K6CJDjjnE9d0OxRjYNKZ --cluster reshard 10.204.51.64:8007
@@ -16,3 +16,18 @@ Source node 2:done
  ... ...
 Do you want to proceed with the proposed reshard plan (yes/no)? Yes
 (ps:这里输入yes开始迁移)
+3.查看集群状态
+
+[root@k8s-node64 redis-cluster]#  /app/redis-cluster/bin/redis-cli -a K6CJDjjnE9d0OxRjYNKZ -c -h 10.204.51.64 -p 8001
+Warning: Using a password with '-a' or '-u' option on the command line interface may not be safe.
+10.204.51.64:8001> cluster nodes
+c49a8f4f5f2483b965329d2b1765a8b2dceb6bce 10.204.51.64:8006@18006 slave 8f1792dedb990c865d48cffb014705c361807a90 0 1651914509265 8 connected
+b05c898f1f7598ea9bd2f1ef8c8868aecbcd4dce 10.204.51.64:8004@18004 slave 35c6c25eb5da1da925daf80c4c07c07978732ad8 0 1651914510268 4 connected
+97b4b86843d0dbf3a95019d7d3c00da41963bec4 10.204.51.64:8003@18003 master - 0 1651914509000 10 connected 0-1364 5461-6826 10923-16383
+e1ec98aa87327564e4e9bf71edbde0fae0aace7c 10.204.51.64:8008@18008 slave 97b4b86843d0dbf3a95019d7d3c00da41963bec4 0 1651914511271 10 connected
+38b337d60c8d7ed6371f4289e39a0fd377cdc044 10.204.51.64:8007@18007 master - 0 1651914508000 9 connected
+b576e28c14f1bf0fc9884871641a81e771938885 10.204.51.64:8005@18005 slave 97b4b86843d0dbf3a95019d7d3c00da41963bec4 0 1651914512275 10 connected
+8f1792dedb990c865d48cffb014705c361807a90 10.204.51.64:8001@18001 myself,master - 0 1651914510000 8 connected 1365-5460
+35c6c25eb5da1da925daf80c4c07c07978732ad8 10.204.51.64:8002@18002 master - 0 1651914509000 2 connected 6827-10922
+
+4.删除8007主节点
