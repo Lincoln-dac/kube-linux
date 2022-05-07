@@ -111,3 +111,37 @@ sed -i 's/8001/8006/g' 8006.conf
 
 6.创建集群
 /app/redis-cluster/bin/redis-cli -a K6CJDjjnE9d0OxRjYNKZ --cluster create --cluster-replicas 1 10.204.51.64:8001 10.204.51.64:8002 10.204.51.64:8003 10.204.51.64:8004 10.204.51.64:8005 10.204.51.64:8006
+
+7.查看集群状态
+app/redis-cluster/bin/redis-cli -a K6CJDjjnE9d0OxRjYNKZ -c -h 10.204.51.64 -p 8001
+
+10.204.51.64:8001> cluster info
+cluster_state:ok
+cluster_slots_assigned:16384
+cluster_slots_ok:16384
+cluster_slots_pfail:0
+cluster_slots_fail:0
+cluster_known_nodes:6
+cluster_size:3
+cluster_current_epoch:8
+cluster_my_epoch:8
+cluster_stats_messages_ping_sent:1843
+cluster_stats_messages_pong_sent:1052
+cluster_stats_messages_fail_sent:4
+cluster_stats_messages_auth-req_sent:5
+cluster_stats_messages_sent:2904
+cluster_stats_messages_ping_received:1048
+cluster_stats_messages_pong_received:1067
+cluster_stats_messages_fail_received:3
+cluster_stats_messages_auth-ack_received:2
+cluster_stats_messages_received:2120
+
+
+10.204.51.64:8001> cluster nodes
+c49a8f4f5f2483b965329d2b1765a8b2dceb6bce 10.204.51.64:8006@18006 slave 8f1792dedb990c865d48cffb014705c361807a90 0 1651911640601 8 connected
+b05c898f1f7598ea9bd2f1ef8c8868aecbcd4dce 10.204.51.64:8004@18004 slave 35c6c25eb5da1da925daf80c4c07c07978732ad8 0 1651911642608 4 connected
+97b4b86843d0dbf3a95019d7d3c00da41963bec4 10.204.51.64:8003@18003 master - 0 1651911641605 3 connected 10923-16383
+b576e28c14f1bf0fc9884871641a81e771938885 10.204.51.64:8005@18005 slave 97b4b86843d0dbf3a95019d7d3c00da41963bec4 0 1651911640000 5 connected
+8f1792dedb990c865d48cffb014705c361807a90 10.204.51.64:8001@18001 myself,master - 0 1651911641000 8 connected 0-5460
+35c6c25eb5da1da925daf80c4c07c07978732ad8 10.204.51.64:8002@18002 master - 0 1651911640000 2 connected 5461-10922
+
