@@ -108,3 +108,6 @@ sed -i 's/8001/8006/g' 8006.conf
 /app/redis-cluster/bin/redis-server  /app/redis-cluster/conf/8004.conf
 /app/redis-cluster/bin/redis-server  /app/redis-cluster/conf/8005.conf
 /app/redis-cluster/bin/redis-server  /app/redis-cluster/conf/8006.conf
+
+6.创建集群
+/app/redis-cluster/bin/redis-cli -a K6CJDjjnE9d0OxRjYNKZ --cluster create --cluster-replicas 1 10.204.51.64:8001 10.204.51.64:8002 10.204.51.64:8003 10.204.51.64:8004 10.204.51.64:8005 10.204.51.64:8006
