@@ -1,1 +1,2 @@
-
+1.删除从节点
+/app/redis-cluster/bin/redis-cli -a K6CJDjjnE9d0OxRjYNKZ --cluster del-node 192.168.0.61:8008 e1ec98aa87327564e4e9bf71edbde0fae0aace7c
