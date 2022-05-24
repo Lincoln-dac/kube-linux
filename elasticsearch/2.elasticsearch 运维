@@ -26,6 +26,9 @@ curl -XGET localhost:9200/_cat
 你也可以后面加一个v，让输出内容表格显示表头，
 \?pretty 人性化显示
 
+ curl -XGET http://10.204.51.64:9200/_cluster/health\?pretty
+
+
 查看集群状态
    
 显示集群状态
