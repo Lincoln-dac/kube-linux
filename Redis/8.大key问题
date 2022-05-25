@@ -1,0 +1,14 @@
+edis使用过程中，有时候会出现大key的情况， 比如：
+
+单个简单的key存储的value很大，size超过10KB
+hash， set，zset，list 中存储过多的元素（以万为单位）
+大key会造成什么问题呢？
+
+客户端耗时增加，甚至超时
+对大key进行IO操作时，会严重占用带宽和CPU
+造成Redis集群中数据倾斜
+主动删除、被动删等，可能会导致阻塞
+如何找到大key?
+
+bigkeys命令：使用bigkeys命令以遍历的方式分析Redis实例中的所有Key，并返回整体统计信息与每个数据类型中Top1的大Key
+redis-rdb-tools：redis-rdb-tools是由Python写的用来分析Redis的rdb快照文件用的工具，它可以把rdb快照文件生成json文件或者生成报表用来分析Redis的使用详情。
