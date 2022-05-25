@@ -2,6 +2,8 @@
 
 ![image](https://github.com/Lincoln-dac/kube-linux/blob/master/pic/v2-e189fefabf47452bb5855d6bb06e9e08_720w.jpg)
 
+
+![image](https://github.com/Lincoln-dac/kube-linux/blob/master/pic/645.png)
 从服务器连接主服务器，发送SYNC命令；
 主服务器接收到SYNC命名后，开始执行BGSAVE命令生成RDB文件并使用缓冲区记录此后执行的所有写命令；
 主服务器BGSAVE执行完后，向所有从服务器发送快照文件，并在发送期间继续记录被执行的写命令；
