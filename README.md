@@ -1,2 +1,2 @@
 # learn-kubernetes
-learn-kubernetes
+learn-kubernetes and linux
