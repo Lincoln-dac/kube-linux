@@ -8,7 +8,11 @@
 
 第一种就是阻塞IO模型，第三种就是I/O复用模型。
 
-图片
+阻塞IO模型
+![image](https://github.com/Lincoln-dac/kube-linux/blob/master/pic/640.png)
+
+I/O复用模型
+![image](https://github.com/Lincoln-dac/kube-linux/blob/master/pic/641.png)
 多路复用模型
 Linux系统有三种方式实现IO多路复用：select、poll和epoll。
 
