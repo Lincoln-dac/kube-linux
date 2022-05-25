@@ -1,4 +1,4 @@
-Redis持久化⽅案分为RDB和AOF两种。
+                                                             Redis持久化⽅案分为RDB和AOF两种。
 
 
 ![image](https://github.com/Lincoln-dac/kube-linux/blob/master/pic/642.png)
