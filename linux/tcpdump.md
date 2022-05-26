@@ -50,6 +50,8 @@ $ tcpdump tcp src host 192.168.10.100
 
 为此，我画了一张图，方便你直观的理解 tcpdump 的各种参数：
 
+![image](https://github.com/Lincoln-dac/kube-linux/blob/master/pic/908fa0ec08fa513ddc9fa0046821bcfdb3fbd983.png)
+
 
 option 可选参数：将在后边一一解释，对应本文 第四节：可选参数解析
 proto 类过滤器：根据协议进行过滤，可识别的关键词有：upd, udp, icmp, ip, ip6, arp, rarp,ether,wlan, fddi, tr, decnet
