@@ -525,3 +525,6 @@ $ ssh root@remotesystem 'tcpdump -s0 -c 1000 -nn -w - port 53' | /Applications/W
 -c 选项用来限制抓取数据的大小。如果不限制大小，就只能通过 ctrl-c 来停止抓取，这样一来不仅关闭了 tcpdump，也关闭了 wireshark。
 
 到这里，我已经将我所知道的 tcpdump 的用法全部说了一遍，如果你有认真地看完本文，相信会有不小的收获，掌握一个上手的抓包工具，对于以后我们学习网络、分析网络协议、以及定位网络问题，会很有帮助，而 tcpdump 是我推荐的一个抓包工具。
+
+  
+  https://icloudnative.io/posts/tcpdump-examples/
