@@ -306,7 +306,7 @@ $ tcpdump "( if=en0 and proc =nc ) || (if != en0 and dir=in)"
 5.1 根据 tcpflags 进行过滤
 
 通过上一篇文章，我们知道了 tcp 的首部有一个标志位。
-
+![image](https://github.com/Lincoln-dac/kube-linux/blob/master/pic/21a4462309f790526c2a7b3d5bbf3ecc7bcbd54b.png)
 
 TCP 报文首部
 
