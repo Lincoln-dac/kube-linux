@@ -517,7 +517,7 @@ $ ssh root@remotesystem 'tcpdump -s0 -c 1000 -nn -w - not port 22' | /Applicatio
 $ ssh root@remotesystem 'tcpdump -s0 -c 1000 -nn -w - port 53' | /Applications/Wireshark.app/Contents/MacOS/Wireshark -k -i -
 
 抓取到的数据：
-[!image](ttps://github.com/Lincoln-dac/kube-linux/blob/master/pic/7aec54e736d12f2e94e9887e168e3c6484356896.png)
+![image](ttps://github.com/Lincoln-dac/kube-linux/blob/master/pic/7aec54e736d12f2e94e9887e168e3c6484356896.png)
 
 -c 选项用来限制抓取数据的大小。如果不限制大小，就只能通过 ctrl-c 来停止抓取，这样一来不仅关闭了 tcpdump，也关闭了 wireshark。
 
