@@ -79,3 +79,7 @@ export PATH=$JAVA_HOME/bin:$PATH
 /app/elasticsearch-7.6.2/bin/elasticsearch -d
 5 查看
   curl -XGET http://10.204.51.64:9200/_cat/nodes?v
+
+6.集群扩容
+
+
