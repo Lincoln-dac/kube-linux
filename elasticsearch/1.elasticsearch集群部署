@@ -81,5 +81,5 @@ export PATH=$JAVA_HOME/bin:$PATH
   curl -XGET http://10.204.51.64:9200/_cat/nodes?v
 
 6.集群扩容
-
+所有节点修改discovery.seed_hosts: 配置 新增新节点IP 重启
 
