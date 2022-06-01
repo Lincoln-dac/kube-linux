@@ -16,4 +16,6 @@ Topic
 Partition
 partition 是一个有序且不可变的消息序列，它是以 append log 文件形式存储的，partition 用于存放 Producer 生产的消息，然后 Consumer 消费 partition 上的消息，每个 partition 只能被一个 Consumer 消费。partition 还有副本的概念，后面文章来详细介绍。
 
+
+
 ![image](https://github.com/Lincoln-dac/kube-linux/blob/master/pic/clipboard.png)
