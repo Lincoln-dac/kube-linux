@@ -75,7 +75,7 @@ Using config: /app/zookeeper/bin/../conf/zoo.cfg
 Mode: leade
 
 
-1.部署kafka
+2.部署kafka
 
 wget https://archive.apache.org/dist/kafka/2.4.1/kafka_2.11-2.4.1.tgz
 cd /app && tar zxvf  kafka_2.11-2.4.1.tgz && mv kafka_2.11-2.4.1.tgz kafka-2.11
