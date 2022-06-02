@@ -19,3 +19,6 @@ partition 是一个有序且不可变的消息序列，它是以 append log 文�
 
 
 ![image](https://github.com/Lincoln-dac/kube-linux/blob/master/pic/clipboard.png)
+
+
+https://mp.weixin.qq.com/s/ju8CcOks2-2PlpVdACg8Zw
