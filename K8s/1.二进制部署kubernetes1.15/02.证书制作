@@ -251,6 +251,6 @@ openssl req -newkey rsa:4096 -nodes -sha256  -subj "/CN=front-proxy-client"  -ke
 openssl x509 -req  -sha256 -days 3650   -CA front-proxy-ca.crt   -CAkey front-proxy-ca.key  -CAcreateserial   -in front-proxy-client.csr  -out front-proxy-client.crt
 
  坑1：注意生成的证书要每个服务器同步一下
- 坑2：如果 etcd服务器上配置有多个IP ，要把对应的IP 都写到证书里去 service 网段的第二个IP 一定要写入到host清单中
+ 坑2：如果 etcd服务器上配置有多个IP ，要把对应的IP 都写到证书里去 service 网段的IP 一定要写入到host清单中
  坑3：证书时间写长点，不要挖坑埋自己
  坑4: kubernetes-csr.json IP 记得把master的 VIP 写进去，考虑到etcd和 master迁移 请多写几个IP
