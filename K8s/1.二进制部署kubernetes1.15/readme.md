@@ -32,4 +32,4 @@ harbor
 harbor vip
 10.204.57.39
 
-![image](https://github.com/Lincoln-dac/kube-linux/blob/master/pic/640.png)
+
