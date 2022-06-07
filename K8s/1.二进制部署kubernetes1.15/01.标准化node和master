@@ -58,7 +58,24 @@ cat /etc/security/limits.conf
 修改
 *             soft    nproc     409600
 
-7.#参数优化 cat /etc/sysctl.conf
+7.开启ipvs模块
+cat > /etc/sysconfig/modules/ipvs.modules <<EOF
+#!/bin/bash
+ipvs_modules="ip_vs ip_vs_lc ip_vs_wlc ip_vs_rr ip_vs_wrr ip_vs_lblc ip_vs_lblcr ip_vs_dh ip_vs_sh ip_vs_fo ip_vs_nq ip_vs_sed ip_vs_ftp ip_conntrack nf_conntrack"
+for kernel_module in \${ipvs_modules}; do
+ /sbin/modinfo -F filename \${kernel_module} > /dev/null 2>&1
+ if [ $? -eq 0 ]; then
+ /sbin/modprobe \${kernel_module}
+ fi
+done
+EOF
+#----------
+chmod 755 /etc/sysconfig/modules/ipvs.modules && bash /etc/sysconfig/modules/ipvs.modules && lsmod | grep -e ip_vs -e nf_conntrack_ipv4
+##
+如果无输出，则ipvs 模块没有加载成功
+####
+
+8.#参数优化 cat /etc/sysctl.conf
 fs.file-max = 65535600
 fs.inotify.max_user_instances=524288
 fs.inotify.max_user_watches= 524288
@@ -101,22 +118,7 @@ vm.swappiness = 0
 sysctl -p
 如果有报错，处理掉报错
 
-8.开启ipvs模块
-cat > /etc/sysconfig/modules/ipvs.modules <<EOF
-#!/bin/bash
-ipvs_modules="ip_vs ip_vs_lc ip_vs_wlc ip_vs_rr ip_vs_wrr ip_vs_lblc ip_vs_lblcr ip_vs_dh ip_vs_sh ip_vs_fo ip_vs_nq ip_vs_sed ip_vs_ftp ip_conntrack nf_conntrack"
-for kernel_module in \${ipvs_modules}; do
- /sbin/modinfo -F filename \${kernel_module} > /dev/null 2>&1
- if [ $? -eq 0 ]; then
- /sbin/modprobe \${kernel_module}
- fi
-done
-EOF
-#----------
-chmod 755 /etc/sysconfig/modules/ipvs.modules && bash /etc/sysconfig/modules/ipvs.modules && lsmod | grep -e ip_vs -e nf_conntrack_ipv4
-##
-如果无输出，则ipvs 模块没有加载成功
-####
+
 
 9.所有节点配置 ntpdate 时间同步
 10.所有节点创建 mkdir -p /app/kubernetes/{bin,logs,config,data,ssl} &&  mkdir -p /app/kubernetes/data/kubelet
