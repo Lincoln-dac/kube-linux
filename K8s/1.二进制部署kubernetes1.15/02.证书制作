@@ -150,23 +150,23 @@ cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=kube
 7.配置kube-controller-manager证书
 
 cat > kube-controller-manager-csr.json <<EOF
-{
-"CN": "system:kube-controller-manager",
-"hosts": [],
-"key": {
-"algo": "rsa",
-"size": 2048
-},
-"names": [
-{
-"C": "CN",
-"ST": "Shenzhen",
-"L": "Shenzhen",
-"O": "system:masters",
-"OU": "System"
-}
-]
-}
+    {
+        "CN": "system:kube-controller-manager",
+        "hosts": [],
+        "key": {
+            "algo": "rsa",
+            "size": 2048
+        },
+        "names": [
+            {
+                "C": "CN",
+                "ST": "Shenzhen",
+                "L": "Shenzhen",
+                "O": "system:masters",
+                "OU": "System"
+           }
+        ]
+    }
 EOF
 
 cfssl gencert -ca=/app/kubernetes/ssl/ca.pem \
