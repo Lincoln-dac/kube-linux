@@ -22,3 +22,6 @@ partition 是一个有序且不可变的消息序列，它是以 append log 文�
 
 
 https://mp.weixin.qq.com/s/ju8CcOks2-2PlpVdACg8Zw
+
+https://www.szzdzhp.com/kafka/
+https://github.com/didi/LogiKM
