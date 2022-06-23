@@ -9,5 +9,4 @@
 （6）Partition：为了实现扩展性，一个非常大的 topic 可以分布到多个 broker（即服务器）上，一个 topic 可以分为多个 partition，每个 partition 是一个有序的队列。 
 （7）Replica：副本。一个 topic 的每个分区都有若干个副本，一个 Leader 和若干个Follower。 
 （8）Leader：每个分区多个副本的“主”，生产者发送数据的对象，以及消费者消费数据的对象都是 Leader。 
-（9）Follower：每个分区多个副本中的“从”，实时从 Leader 中同步数据，保持和
-Leader 数据的同步。Leader 发生故障时，某个 Follower 会成为新的 Leader。
+（9）Follower：每个分区多个副本中的“从”，实时从 Leader 中同步数据，保持和Leader 数据的同步。Leader 发生故障时，某个 Follower 会成为新的 Leader。
