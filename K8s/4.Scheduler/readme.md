@@ -7,3 +7,5 @@ Kubernetes的调度策略与算法
 
 ![image](https://github.com/Lincoln-dac/kube-linux/blob/master/pic/20220513102816.png)
 ![image](https://github.com/Lincoln-dac/kube-linux/blob/master/pic/20220513102825.png)
+
+https://mp.weixin.qq.com/s/e6jh61iqIJPAMyjwSehL5g
