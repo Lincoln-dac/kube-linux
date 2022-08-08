@@ -1,0 +1,20 @@
+在Kafka中修改Topic的preferred replica
+
+目前我们的topic  test-add-replication-topic中partition 0的replicas为[1,2]，则1为preferred replica，应该成为leader。 
+这时我们期望2为preferred replica，并变成leader。
+操作步骤：
+
+/data/server/kafka/bin/kafka-reassign-partitions.sh --zookeeper 10.204.243.85:2181,10.204.243.86:2181,10.204.243.87:2181/zk001 --topics-to-move-json-file /tmp/topics-to-move.json --broker-list "0,2,1,88,89" --generate
+
+vim  /tmp/topics-to-move.json
+{"topics": 
+    [{"topic": "t01"}],
+  	"version":1
+}
+生成新的json 写入 /tmp/reassign-plan.json
+执行
+/data/server/kafka/bin/kafka-reassign-partitions.sh --zookeeper 10.204.243.85:2181,10.204.243.86:2181,10.204.243.87:2181/zk001 --reassignment-json-file /tmp/reassign-plan.json --execute
+
+查看结果
+/data/server/kafka/bin/kafka-reassign-partitions.sh --zookeeper 10.204.243.85:2181,10.204.243.86:2181,10.204.243.87:2181/zk001 --reassignment-json-file /tmp/reassign-plan.json --verify
+
