@@ -1,0 +1,327 @@
+分布式消息系统Kafka Broker 扩容，迁移,缩减
+
+环境
+centos 7
+目前我的环境已经有一套完整的kafka集群
+10.204.243.85 broker id =0
+10.204.243.86 broker id =1
+10.204.243.87 broker id =2
+zookeeper 集群 10.204.243.85:2181,10.204.243.86:2181,10.204.243.87:2181/zk001
+------------------------------------
+首先查看目前kakfa集群 的节点
+在zk 服务器上执行命令/data/server/zookeeper/bin/zkCli.sh -server 10.204.243.86:2181
+
+ls /zk001/brokers/ids（显示目前在线的broker节点）
+
+--------------------------------------
+Kafka Broker 新增
+在原集群中 新增2个节点 10.204.243.83 broker id=83 10.204.243.84 broker id=84
+安装软件（参照我之前发的文章）
+修改 /data/server/kafka/config/server.properties
+10.204.243.84 /data/server/kafka/config/server.properties 内容
+broker.id=84
+listeners=PLAINTEXT://10.204.243.84:9092
+num.network.threads=3
+num.io.threads=8
+socket.send.buffer.bytes=102400
+socket.receive.buffer.bytes=102400
+socket.request.max.bytes=104857600
+log.dirs=/data/server/kafka/data
+num.partitions=1
+num.recovery.threads.per.data.dir=1
+offsets.topic.replication.factor=3
+transaction.state.log.replication.factor=1
+transaction.state.log.min.isr=1
+delete.topic.enable=true
+log.retention.hours=168
+log.segment.bytes=1073741824
+log.retention.check.interval.ms=300000
+zookeeper.connect=10.204.243.85:2181,10.204.243.86:2181,10.204.243.87:2181/zk001
+zookeeper.connection.timeout.ms=6000
+group.initial.rebalance.delay.ms=0
+10.204.243.83 /data/server/kafka/config/server.properties 内容
+broker.id=83
+listeners=PLAINTEXT://10.204.243.83:9092
+num.network.threads=3
+num.io.threads=8
+socket.send.buffer.bytes=102400
+socket.receive.buffer.bytes=102400
+socket.request.max.bytes=104857600
+log.dirs=/data/server/kafka/data
+num.partitions=1
+num.recovery.threads.per.data.dir=1
+offsets.topic.replication.factor=3
+transaction.state.log.replication.factor=1
+transaction.state.log.min.isr=1
+delete.topic.enable=true
+log.retention.hours=168
+log.segment.bytes=1073741824
+log.retention.check.interval.ms=300000
+zookeeper.connect=10.204.243.85:2181,10.204.243.86:2181,10.204.243.87:2181/zk001
+zookeeper.connection.timeout.ms=6000
+group.initial.rebalance.delay.ms=0
+修改后 启动 kafka
+83 ,84 上执行命令
+/data/server/kafka/bin/kafka-server-start.sh -daemon /data/server/kafka/config/server.properties
+查看启动日志日志无报错启动成功
+cat /data/server/kafka/logs/server.log
+
+zk查看broker信息 5个节点都在 说明新增broker 成功
+
+新增成功，但是原来已经新建的topic 是无法使用新的节点，这个需要对其进行数据迁移或者新增分区
+查看目前的topic
+/data/server/kafka/bin/kafka-topics.sh --zookeeper 10.204.243.85:2181,10.204.243.86:2181,10.204.243.87:2181/zk001 --describe
+
+将topic test007新增一个分区
+/data/server/kafka/bin/kafka-topics.sh --zookeeper 10.204.243.85:2181,10.204.243.86:2181,10.204.243.87:2181/zk001 --alter --partitions 6 --topic test007
+
+83节点
+新建一个topic
+/data/server/kafka/bin/kafka-topics.sh --zookeeper 10.204.243.85:2181,10.204.243.86:2181,10.204.243.87:2181/zk001 --create --topic topic0112 --replication-factor 5 --partitions 3
+
+83 84roker都在
+--------------------------------------
+Kafka Broker 迁移
+这里我们测试迁移10.204.243.83 （将83剔除到集群之外，加入82节点）
+准备一台10.204.243.82 broker id =82
+修改kafka配置文件
+10.204.243.82 /data/server/kafka/config/server.properties 内容
+broker.id=82
+listeners=PLAINTEXT://10.204.243.82:9092
+num.network.threads=3
+num.io.threads=8
+socket.send.buffer.bytes=102400
+socket.receive.buffer.bytes=102400
+socket.request.max.bytes=104857600
+log.dirs=/data/server/kafka/data
+num.partitions=1
+num.recovery.threads.per.data.dir=1
+offsets.topic.replication.factor=3
+transaction.state.log.replication.factor=1
+transaction.state.log.min.isr=1
+delete.topic.enable=true
+log.retention.hours=168
+log.segment.bytes=1073741824
+log.retention.check.interval.ms=300000
+zookeeper.connect=10.204.243.85:2181,10.204.243.86:2181,10.204.243.87:2181/zk001
+zookeeper.connection.timeout.ms=6000
+group.initial.rebalance.delay.ms=0
+修改后 启动 kafka
+82上执行命令
+/data/server/kafka/bin/kafka-server-start.sh -daemon /data/server/kafka/config/server.properties
+zk查看broker信息 6个节点都在 说明新增broker 成功
+
+要剔除83节点，首先需要把83上节点上的分区数据迁移。
+操作方法如下
+1.检查当前集群有哪些topic分区在83节点上。
+/data/server/kafka/bin/kafka-topics.sh --zookeeper 10.204.243.85:2181,10.204.243.86:2181,10.204.243.87:2181/zk001 --describe
+
+可以发现 有topic test007 topic0112 2个topic 在83节点上，现在对2个topic 分区进行迁移
+1.1 迁移topic test007
+topic test007 只要迁移分区5就可以
+vim /root/reduce-broker-test007.json (注意json格式)
+{
+"version": 1,
+"partitions":
+[
+{
+"topic": "test007",
+"partition": 0,
+"replicas": [
+2,
+1,
+0
+]
+},
+{
+"topic": "test007",
+"partition": 1,
+"replicas": [
+0,
+2,
+1
+]
+},
+{
+"topic": "test007",
+"partition": 2,
+"replicas": [
+1,
+0,
+2
+]
+},
+{
+"topic": "test007",
+"partition": 3,
+"replicas": [
+2,
+0,
+1
+]
+},
+{
+"topic": "test007",
+"partition": 4,
+"replicas": [
+0,
+1,
+2
+]
+},
+{
+"topic": "test007",
+"partition": 5,
+"replicas": [
+2,
+1,
+0
+]
+}
+]
+}
+执行迁移命令
+/data/server/kafka/bin/kafka-reassign-partitions.sh --zookeeper 10.204.243.85:2181,10.204.243.86:2181,10.204.243.87:2181/zk001 --reassignment-json-file reduce-broker-test007.json --execute
+查看迁移状态
+/data/server/kafka/bin/kafka-reassign-partitions.sh --zookeeper 10.204.243.85:2181,10.204.243.86:2181,10.204.243.87:2181/zk001 --reassignment-json-file reduce-broker-test007.json --verify
+
+检查topic test007
+
+1.1 迁移topic topic0112
+vi reduce-broker-topic0112.json (注意json格式)
+{
+"version": 1,
+"partitions":
+[
+{
+"topic": "topic0112",
+"partition": 0,
+"replicas": [
+84,
+1,
+2,
+82,
+0
+]
+},
+{
+"topic": "topic0112",
+"partition": 1,
+"replicas": [
+0,
+2,
+82,
+84,
+1
+]
+},
+{
+"topic": "topic0112",
+"partition": 2,
+"replicas": [
+1,
+82,
+84,
+0,
+2
+]
+}
+]
+}
+执行迁移命令
+/data/server/kafka/bin/kafka-reassign-partitions.sh --zookeeper 10.204.243.85:2181,10.204.243.86:2181,10.204.243.87:2181/zk001 --reassignment-json-file reduce-broker-topic0112.json --execute
+查看迁移状态
+/data/server/kafka/bin/kafka-reassign-partitions.sh --zookeeper 10.204.243.85:2181,10.204.243.86:2181,10.204.243.87:2181/zk001 --reassignment-json-file reduce-broker-topic0112.json --verify
+
+检查topic topic0112
+
+检查所有topic 没有83节点
+
+最后一步关闭83节点 的kafka主程序
+zk上检查节点数量，83已经不存在
+
+--------------------------------------
+Kafka Broker 缩减
+broker缩减方法跟 迁移类似， 但是需要注意的副本数量，如果目前的topic中副本数大于 迁移后的broker的数量，这需要对topic先减少副本数（我这里是节点5减到3，剔除82,84），而且需要再平衡分区leader 在82 或84上面的分区
+首先对分区0重新选举，因为分区0的leader 是84节点
+
+操作方法
+vi reduce-topic0112-partitions-move.json
+{
+"version":1,
+"partitions": [
+{
+"topic": "topic0112",
+"partition": 0,
+"replicas":[2,1,84,82,0]
+}
+]
+}
+执行命令
+/data/server/kafka/bin/kafka-reassign-partitions.sh --zookeeper 10.204.243.85:2181,10.204.243.86:2181,10.204.243.87:2181/zk001 --reassignment-json-file reduce-topic0112-partitions-move.json --execute
+
+vi reduce-topic0112-leader-move.json
+{
+"version":1,
+"partitions": [
+{
+"topic": "topic0112",
+"partition": 0
+}
+]
+}
+执行命令
+data/server/kafka/bin/kafka-preferred-replica-election.sh --zookeeper 10.204.243.85:2181,10.204.243.86:2181,10.204.243.87:2181/zk001 --path-to-json-file reduce-topic0112-leader-move.json
+
+查看结果
+/data/server/kafka/bin/kafka-topics.sh --zookeeper 10.204.243.85:2181,10.204.243.86:2181,10.204.243.87:2181/zk001 --describe --topic topic0112
+
+完成分区0 的leader切换
+减少副本数量
+vi reduce-topic0112-partitions.json
+{
+"version": 1,
+"partitions": [
+{
+"topic": "topic0112",
+"partition": 0,
+"replicas": [
+2,
+1,
+0
+]
+},
+{
+"topic": "topic0112",
+"partition": 1,
+"replicas": [
+0,
+2,
+1
+]
+},
+{
+"topic": "topic0112",
+"partition": 2,
+"replicas": [
+1,
+0,
+2
+]
+}
+]
+}
+执行命令
+/data/server/kafka/bin/kafka-reassign-partitions.sh --zookeeper 10.204.243.85:2181,10.204.243.86:2181,10.204.243.87:2181/zk001 --reassignment-json-file reduce-topic0112-partitions.json --execute
+查看状态
+/data/server/kafka/bin/kafka-reassign-partitions.sh --zookeeper 10.204.243.85:2181,10.204.243.86:2181,10.204.243.87:2181/zk001 --reassignment-json-file reduce-topic0112-partitions.json --verify
+
+查看topic0112
+
+查看整个topic
+/data/server/kafka/bin/kafka-topics.sh --zookeeper 10.204.243.85:2181,10.204.243.86:2181,10.204.243.87:2181/zk001 --describe
+
+已经没有 82.84节点，这个时候关闭 82.84节点kafka进程
+zk检查状态
+
+整个Kafka Broker 扩容，迁移,缩减就完成了Broker 扩容，迁移,缩减分布式消息系统Kafka Broker 扩容，迁移,缩减
