@@ -25,9 +25,7 @@ cat > /etc/sysconfig/modules/br_netfilter.modules << EOF
 modprobe br_netfilter
 EOF
 
-3.关闭dnsmasq 加载模块(如果有）
-systemctl disable --now dnsmasq 
-关闭默认路由
+3.关闭默认路由
 vim /etc/sysconfig/network 增加内容
 NOZEROCONF=yes
 NETWORKING_IPV6=no
