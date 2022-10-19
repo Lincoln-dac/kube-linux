@@ -45,6 +45,7 @@ tuned-adm profile throughput-performance
 vi /etc/nscd.conf (修改这行，默认是yes）
         enable-cache            hosts           yes
  systemctl restart nscd && systemctl enable nscd (重启服务将立即刷新dns记录）
+ nscd -i hosts（清理缓存）
        
 5修改打开文件数
 cat /etc/security/limits.conf
