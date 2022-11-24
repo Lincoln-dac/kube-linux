@@ -29,8 +29,10 @@ kubectl delete secret  additional-configs -n monitoring && kubectl create secret
 
 4.grafana 导入模板
 
+5.核心指标可以新增对应告警
 
-5. 模板json
+
+6. 附模板json
 {
   "annotations": {
     "list": [
