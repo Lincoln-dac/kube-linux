@@ -1,0 +1,28 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: k8s
+    role: alert-rules
+  name: kube-proxy-k8s-rules
+  namespace: monitoring
+spec:
+  groups:
+  - name: kube-proxy.rules
+    rules:
+    - alert: kube-proxy Process
+      annotations:
+        message: "{{$labels.instance}}: job= kube-proxy IS DOWN"
+      expr: |
+        up{job="kube-proxy"} == 0
+      for: 2m
+      labels:
+        type: kube-proxy
+    - alert: IPVS 99分位同步时间
+      annotations:
+        message: "{{$labels.instance}}: IPVS 99分位同步时间大于1秒"
+      expr: |
+        histogram_quantile(0.99,rate(kubeproxy_sync_proxy_rules_duration_seconds_bucket{job="kube-proxy"}[5m])) > 1
+      for: 2m
+      labels:
+        type: kube-proxy
