@@ -1,4 +1,6 @@
-1.由于通过2进制安装，导致传统的收集kube-proxy的监控方式失效，我们可以通以下方法来实现监控
+1.由于通过二进制安装，导致传统的收集kube-proxy的监控方式失效，我们可以通以下方法来实现监控
+
+修改proxy配置文件 新增 --metrics-bind-address=10.204.51.64"  ###51.64是我的node节点IP ,不修改 默认是监控在127.0.0.1上
 
 2.在prometheus-additional.yaml 新增一个job如下
 
@@ -23,7 +25,7 @@
     target_label: instance      
     
 3.更新secret
-    kubectl delete secret  additional-configs -n monitoring && kubectl create secret generic additional-configs --from-file=prometheus-additional.yaml -n monitoring
+kubectl delete secret  additional-configs -n monitoring && kubectl create secret generic additional-configs --from-file=prometheus-additional.yaml -n monitoring
 
 4.grafana 导入模板
 
