@@ -1,0 +1,47 @@
+# HELP container_cpu_cfs_periods_total Number of elapsed enforcement period intervals.
+# TYPE container_cpu_cfs_periods_total counter
+cfs时间片总数, 完全公平调度的时间片总数(分配到cpu的时间片数)
+
+# HELP container_cpu_cfs_throttled_periods_total Number of throttled period intervals.
+# TYPE container_cpu_cfs_throttled_periods_total counter
+容器被throttle的时间片总数
+
+# HELP container_cpu_cfs_throttled_seconds_total Total time duration the container has been throttled.
+# TYPE container_cpu_cfs_throttled_seconds_total counter
+容器被throttle的时间
+
+# HELP container_file_descriptors Number of open file descriptors for the container.
+# TYPE container_file_descriptors gauge
+容器打开的fd数
+
+# HELP container_memory_usage_bytes Current memory usage in bytes, including all memory regardless of when it was accessed
+# TYPE container_memory_usage_bytes gauge
+容器内存使用量，单位byte 
+
+# HELP container_network_receive_bytes_total Cumulative count of bytes received
+# TYPE container_network_receive_bytes_total counter
+容器入方向的流量
+
+# HELP container_network_transmit_bytes_total Cumulative count of bytes transmitted
+# TYPE container_network_transmit_bytes_total counter
+容器出方向的流量
+
+# HELP container_spec_cpu_period CPU period of the container.
+# TYPE container_spec_cpu_period gauge
+容器的cpu调度单位时间
+
+# HELP container_spec_cpu_quota CPU quota of the container.
+# TYPE container_spec_cpu_quota gauge
+容器的cpu规格 ，除以单位调度时间可以计算核数
+
+# HELP container_spec_memory_limit_bytes Memory limit for the container.
+# TYPE container_spec_memory_limit_bytes gauge
+容器的内存规格，单位byte
+
+# HELP container_threads Number of threads running inside the container
+# TYPE container_threads gauge
+容器当前的线程数
+
+# HELP container_threads_max Maximum number of threads allowed inside the container, infinity if value is zero
+# TYPE container_threads_max gauge
+允许容器启动的最大线程数
