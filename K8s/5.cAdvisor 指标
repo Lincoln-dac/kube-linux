@@ -32,6 +32,8 @@ container_fs_io_time_seconds_total
 container_memory_usage_bytes
 这测量当前内存使用情况，包括所有内存，无论何时访问。在每个容器的基础上进行跟踪，可以让您了解每个容器上进程的内存占用情况，同时有助于未来的优化或资源分配工作。‍
 
+https://www.metricfire.com/blog/top-10-cadvisor-metrics-for-prometheus/
+
   
 
 容器内存故障
