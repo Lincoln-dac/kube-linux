@@ -1,0 +1,3 @@
+Flannel是为Kubernetes设计的一种简单易用的容器网络解决方案，将所有的Pod都组织在同一个子网的虚拟大二层网络中。Flannel支持的后端转发方式有许多种，本文将介绍其中两种，VXLAN以及host-gw。
+
+https://mp.weixin.qq.com/s/71fqwCEjP5QtgBjaUzXCmw
