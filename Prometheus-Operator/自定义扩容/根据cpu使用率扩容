@@ -1,0 +1,74 @@
+"""
+# File       : scaledeploy_cpu.py
+# Time       ：2023/2/9 13:40
+# Author     ：Lincoln
+# version    ：python 3.8
+# Description：
+"""
+from prometheus_api_client import PrometheusConnect
+import subprocess
+
+deployments  = [
+    {
+        "name": "fcbox-boxservice-login-biz-sit1",
+        "replicas": "6"
+    },
+    {
+        "name": "app-manager-sit1",
+        "replicas": "6"
+    },
+    {
+        "name": "fcad-dsp-service-sit1",
+        "replicas": "3"
+    },
+    {
+        "name": "cabinet-base-server-sit1",
+        "replicas": "4"
+    }
+]
+
+try:
+    prom = PrometheusConnect(url="http://prometheus-dev.ops.com/", disable_ssl=True)
+except Exception as e:
+    print("error connecting to promethesu:", e)
+    exit()
+
+for deployment in deployments :
+    replicas_query = 'kube_deployment_spec_replicas{deployment="%s"}' % (deployment['name'])
+    cpu_usage_rate_query = 'sum(irate(container_cpu_usage_seconds_total{namespace="sit1",container="%s"}[1m])) by (container,job,namespace, pod, pod_name,deployname) / (sum(container_spec_cpu_quota{namespace="sit1",container="%s"}/100000) by (container,job,namespace, pod, pod_name,deployname )) * 100 ' % (
+        deployment['name'], deployment['name'])
+    cpu_usage_rate_avg_query = 'avg (sum(irate(container_cpu_usage_seconds_total{namespace="sit1",container="%s"}[1m])) by (container,job,namespace, pod, pod_name,deployname) / (sum(container_spec_cpu_quota{namespace="sit1",container="%s"}/100000) by (container,job,namespace, pod, pod_name,deployname )) * 100 )' % (
+        deployment['name'], deployment['name'])
+    replicas_query_result = prom.custom_query(replicas_query)[0]['value'][1]
+    if replicas_query_result == deployment['replicas']:
+        print("ONLINE deploy %s replicas number is equal scale number,exit" % deployment['name'])
+        exit
+    else:
+        cpu_usage_rate_result = prom.custom_query(cpu_usage_rate_query)
+        cpu_usage_avg_rate_result = prom.custom_query(cpu_usage_rate_avg_query)
+        #print(cpu_usage_rate_result)
+        #print(cpu_usage_avg_rate_result)
+        if cpu_usage_rate_result is None or len(cpu_usage_rate_result) == 0:
+            print("%s is none" % deployment['name'])
+            exit
+        else:
+            cpu_usage_rate_result = cpu_usage_rate_result[0]['value'][1]
+            #单个POD CPU 90%扩容
+            if float(cpu_usage_rate_result) > 0.1:
+                subprocess.run(
+                '/usr/bin/kubectl --kubeconfig /root/.kube/config-test -n sit1 scale deployment %s --replicas=%s' % (deployment['name'], deployment['replicas']))
+                print("%s scale success" % deployment['name'])
+            else:
+                print("cpu usage %s%%  %s not need scale"  % (cpu_usage_rate_result,deployment['name'] ))
+        if cpu_usage_avg_rate_result is None or len(cpu_usage_avg_rate_result) == 0:
+            print("%s is none" % deployment['name'])
+            exit
+        else:
+             cpu_usage_avg_rate_result = cpu_usage_avg_rate_result[0]['value'][1]
+             # deploy平均 CPU 60%扩容
+             if float(cpu_usage_avg_rate_result) > 60:
+                subprocess.run(
+                '/usr/bin/kubectl --kubeconfig /root/.kube/config-test -n sit1 scale deployment %s --replicas=%s' % (deployment['name'], deployment['replicas']))
+                print("%s scale success" % deployment['name'])
+             else:
+                 print("cpu avg usage %s%%  %s not need scale" % (cpu_usage_avg_rate_result, deployment['name']))
