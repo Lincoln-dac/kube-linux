@@ -11,7 +11,7 @@ import json
 import subprocess
 import time
 try:
-    prom = PrometheusConnect(url ="http://prometheus-65.fcbox.com", disable_ssl=True)
+    prom = PrometheusConnect(url ="http://prometheus-65.ops.com", disable_ssl=True)
 except Exception as e:
     # 捕获异常
     print("Error connecting to Prometheus:", e)
