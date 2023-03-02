@@ -19,3 +19,19 @@ cp elastic-certificates.p12 /app/elasticsearch-7.12.0/config/certs
 
 5.重启服务
 kill -9 `ps aux|grep elasticsearch.bootstrap.Elasticsearch|grep -v grep| awk '{print $2}'`  &&  /app/elasticsearch-7.12.0/bin/elasticsearch -d
+
+
+6.设置密码
+/app/elasticsearch-7.12.0/bin/elasticsearch-setup-passwords interactive
+回车 输入密码
+
+7.验证
+curl -uelastic:123456 -XGET http://10.204.51.65:9200/_cluster/health\?pretty
+
+8.修改kibana账号密码
+/app/kibana-7.12.0-linux-x86_64/config/kibana.yml
+修改
+elasticsearch.username: "kibana_system"
+elasticsearch.password: "123456"
+i18n.locale: "zh-CN"（汉化）
+
