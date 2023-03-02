@@ -10,7 +10,7 @@ import subprocess
 
 deployments  = [
     {
-        "name": "boxservice-login-biz-sit1",
+        "name": "login-biz-sit1",
         "replicas": "6"
     },
     {
