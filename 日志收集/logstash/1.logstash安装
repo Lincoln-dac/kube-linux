@@ -1,0 +1,6 @@
+1.下载
+https://artifacts.elastic.co/downloads/logstash/logstash-8.6.2-linux-x86_64.tar.gz
+
+2.解压安装,启动
+/app/logstash-7.12.0/bin/logstash  --config.reload.automatic
+/app/logstash-7.12.0/bin/logstash -f /app/logstash-7.12.0/config/conf/traefik.yaml --config.reload.automatic
