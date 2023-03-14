@@ -1,0 +1,28 @@
+input {
+  kafka {
+    bootstrap_servers => "10.204.51.64:9092"
+    partition_assignment_strategy => "org.apache.kafka.clients.consumer.RoundRobinAssignor"
+    group_id => "elk-os-logs"
+    topics => ["elk-os-log"]
+    consumer_threads => 3
+    codec => json
+    auto_offset_reset => "latest"
+    max_poll_records => '500'
+  }
+}
+filter {
+  mutate {
+    remove_field => [ "[input][type]","[agent][hostname]","[agent][type]","[ecs][version]","[@version]","[agent][name]" ,"[agent][ephemeral_id]","[agent][version]","[agent][id]" ]
+  }
+  if [message] =~ /(Created|Removed) slice/ or [message] =~ /Starting|Started titanagent/ or [message] =~ /scope has no PIDs/ or [message] =~ /sendmail/ or [message] =~ /crond/  {
+    drop {}
+  }
+}
+output {
+  elasticsearch {
+    hosts => ["http://10.204.51.64:9200"]
+    user => "elastic"
+    password => "fcbox.com"
+    index => "os-logs-%{+yyyy.MM.dd}"
+  }
+}
