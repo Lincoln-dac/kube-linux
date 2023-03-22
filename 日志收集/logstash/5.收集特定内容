@@ -1,0 +1,37 @@
+input {
+  kafka {
+    bootstrap_servers => "10.204.51.65:9092"
+    partition_assignment_strategy => "org.apache.kafka.clients.consumer.RoundRobinAssignor"
+    group_id => "elk-traefik-logs"
+    topics => ["elk-traefik-log"]
+    consumer_threads => 1
+    #format => json
+    codec => json
+    auto_offset_reset => "latest"
+    max_poll_records => '500'
+  }
+}
+filter {
+   if [message] =~ /.*ib-discovery-register-sit6.*/ {
+    # 如果消息包含 "ib-discovery-register-sit6"，则继续处理
+    # 可以在这里添加其他的过滤器，或者对数据进行处理
+           }
+   else {
+    # 如果消息不包含 "ib-discovery-register-sit6"，则跳过该消息
+     drop { }
+    }
+  mutate {
+    remove_field => [ "[agent][hostname]","[agent][type]","[ecs][version]","[@version]","[agent][name]" ,"[agent][ephemeral_id]","[agent][version]","[agent][id]" ]
+  }
+
+}
+output {
+  elasticsearch {
+    hosts => ["http://10.204.51.64:9200","http://10.204.51.65:9200","http://10.204.51.66:9200"]
+    user => "elastic"
+    password => "fcbox.com"
+    index => "traefik-logs-%{+yyyy.MM.dd}"
+    #index => "%{Ingressroute_name}-%{+YYYY.MM.dd}"
+    #document_id => "%{Ingressroute_name}"
+  }
+}
