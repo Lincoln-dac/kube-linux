@@ -1,3 +1,46 @@
+#=========================== Filebeat inputs =============================
+max_procs: 1                            # *限制一个CPU核心,避免过多抢占业务资源
+queue.mem.events: 2048                  # 存储于内存队列的事件数，排队发送 (默认4096)
+queue.mem.flush.min_events: 1536        # 小于 queue.mem.events ,增加此值可提高吞吐量 (默认值2048)
+#queue.mem.flush.timeout: 1s             # 这是一个默认值，到达 min_events 需等待多久刷出
+filebeat.inputs:
+- type: log
+  enabled: true
+  ignore_older: 48h                     # 忽略这个时间之前的文件(根据文件改变时间)
+  max_bytes: 20480                      # *单条日志的大小限制,建议限制(默认为10M,queue.mem.events * max_bytes 将是占有内存的一部分)
+  recursive_glob.enabled: true          # 是否启用glob匹配,可匹配多级路径(最大8级)：/A/**/*.log => /A/*.log ~ /A/**/**/**/**/**/**/**/**/*.log  
+  paths:                                # 日志文件路径
+    - /data/logs/**/*.log
+  exclude_files: [.*file1.*|stdout.log|.*file2.*] # 忽略的文件列表,正则匹配
+  fields:                               # 在事件json中添加字段
+    appName: ${serviceName}
+    agentHost: ${hostIp}
+  fields_under_root: true               # 将添加的字段加在JSON的最外层
+  tail_files: false                     # 不建议一直开启,从日志文件的最后开始读取新内容(保证读取最新文件),但是如果有日志轮转，可能导致文件内容丢失，建议结合 ignore_older 将其设置为false
+  multiline:                            # 多行匹配日志 (https://www.elastic.co/guide/en/beats/filebeat/7.2/multiline-examples.html)
+    pattern: '\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}' # 匹配一个以 [YYYY-MM-DD HH:mm:ss 开头的行
+    negate: true                        # 将 pattern 取否(即不匹配pattern的情况)
+    match: after                        # 将其追加到上一行之后 pattern + negate + match 组合成一条语意为: 如果不匹配 [YYYY-MM-DD HH:mm:ss 开头的行，则将其合并到当前行的上一行
+    max_lines: 200                      # 最多匹配多少行，如果超出最大行数，则丢弃多余的行(默认500)
+    timeout: 1s                         # 超时时间后,即使还未匹配到下一个行日志(下一个多行事件)，也将此次匹配的事件刷出 (默认5s)
+
+#=============================== Processors ===============================
+# 省略
+#=============================== output ===============================
+output.kafka:
+  enabled: true
+  hosts: ['ip1:9092','ip2:9092']
+  topic: 'my_topic'
+  partition.round_robin:
+    reachable_only: true
+  worker: 4
+  required_acks: 1
+  compression: gzip
+  max_message_bytes: 1000000            # 10MB
+#================================ Logging ======================================
+# 省略
+
+
 减少文件监视范围：Filebeat 可以通过指定路径或文件名来监视特定的文件或目录。减少监视范围可以降低 CPU 和内存使用率。
 
 调整 Filebeat 的配置：Filebeat 可以通过配置文件进行优化。例如，可以通过减小批量大小和减小等待时间来减少网络和磁盘 I/O 负载。
