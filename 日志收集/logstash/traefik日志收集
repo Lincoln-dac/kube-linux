@@ -19,7 +19,7 @@ output {
   elasticsearch {
     hosts => ["http://10.204.51.65:9200"]
     user => "elastic"
-    password => "fcbox.com"
+    password => "123456"
     index => "traefik-logs-%{+yyyy.MM.dd}"
     #index => "%{Ingressroute_name}-%{+YYYY.MM.dd}" #### 根据Ingressroute_name名称创建指定的index
     #document_id => "%{Ingressroute_name}" ###document_id等于Ingressroute_name
