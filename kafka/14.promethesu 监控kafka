@@ -36,3 +36,4 @@ WantedBy=multi-user.target
 https://grafana.com/grafana/dashboards/7589-kafka-exporter-overview/
 
 8.如图
+![image](https://github.com/Lincoln-dac/kube-linux/blob/master/pic/20230410134018.png)
