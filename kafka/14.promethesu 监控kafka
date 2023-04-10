@@ -7,6 +7,7 @@
 /app/kafka_exporter/kafka_exporter --kafka.server=10.204.51.65:9092 >> /var/log/kafka_exporter.log
 
 4.cat /usr/lib/systemd/system/kafka_exporter.service
+#####
 [Unit]
 Description=kafka_exporter
 Documentation=https://github.com/danielqsj/kafka_exporter/
@@ -18,7 +19,7 @@ User=root
 Group=root
 # 启动脚本
 ExecStart=/app/kafka_exporter/start_kafka_exporter.sh
-
+##############
 [Install]
 WantedBy=multi-user.target
 5.systemctl restart kafka_export
