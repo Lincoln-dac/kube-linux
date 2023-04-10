@@ -3,7 +3,7 @@ import subprocess
 
 deployments = [
     {
-        "name": "fcbox-boxservice-login-biz-sit1",
+        "name": "boxservice-login-biz-sit1",
         "replicas": "6"
     },
     {
