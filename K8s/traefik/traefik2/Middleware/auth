@@ -1,0 +1,38 @@
+1.设置htpasswd -nb admin admin
+
+2. echo " admin admin" >  secret && cat secret  | openssl base64
+
+3.Middleware  middleware.yaml
+
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: auth
+spec:
+  basicAuth:
+    secret: authsecret
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: authsecret
+data:
+  root: |2
+    cm9vdDokYXByMSRuSVhGMnhZciQ4Sm55bE9CRnJTUUo3dXVNWno0NHcxCg==
+
+4.ingressroute 新增
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: docker-hello
+spec:
+  entryPoints:
+  - web
+  routes:
+  - kind: Rule
+    match: Host(`docker.test.com`)
+    middlewares:
+      - name: auth
+    services:
+    - name: docker-helloworld-svc
+      port: 8080
