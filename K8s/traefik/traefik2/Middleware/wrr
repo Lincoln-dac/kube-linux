@@ -1,0 +1,51 @@
+1. wrr配置文件
+kubectl get traefikservices.traefik.containo.us app-web-wrr -o yaml
+
+apiVersion: traefik.containo.us/v1alpha1
+kind: TraefikService
+metadata:
+  name: app-web-wrr
+  namespace: default
+spec:
+  weighted:
+    services:
+    - kind: Service
+      name: appmgr-web-svc
+      port: 8080
+      weight: 5
+    - kind: Service
+      name: vs-appmgr-gateway-svc
+      port: 8080
+      weight: 5
+
+2.ingressroute配置
+
+kind: IngressRoute
+metadata:
+  name: appmgr-web-ingressroute
+  namespace: default
+spec:
+  entryPoints:
+  - web
+  routes:
+  - kind: Rule
+    match: Host(`appmgr-web.test.com`) && PathPrefix(`/`)
+    services:
+    - name: appmgr-web-svc
+      port: 8080
+      sticky:
+        cookie: {}
+  - kind: Rule
+    match: Host(`appmgr-web.test.com`) && PathPrefix(`/postCourier/login/richScanAppLogin`)
+    services:
+    - kind: TraefikService
+      name: app-web-wrr
+      sticky:
+        cookie: {}
+  - kind: Rule
+    match: Host(`appmgr-web.test.com`) && PathPrefix(`/postCourier/mobilePost/`)
+    services:
+    - kind: TraefikService
+      name: app-web-wrr
+      sticky:
+        cookie: {}
