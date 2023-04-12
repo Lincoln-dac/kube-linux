@@ -29,8 +29,6 @@ spec:
         - name: TZ
           value: "Asia/Shanghai"
         args:
-          - --api.insecure
-          - --api.dashboard
           - --log
           - --log.level=INFO
           - --log.filepath=/var/log/traefik.log
