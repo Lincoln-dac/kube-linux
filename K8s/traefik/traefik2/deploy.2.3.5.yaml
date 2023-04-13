@@ -49,6 +49,9 @@ spec:
           - --entryPoints.websecure.forwardedHeaders.trustedIPs=0.0.0.0/0
           - --metrics.prometheus=true
           - --ping=true
+          - --serversTransport.forwardingTimeouts.dialTimeout=180s
+          - --serversTransport.forwardingTimeouts.idleConnTimeout=180s
+          - --serverstransport.forwardingtimeouts.responseheadertimeout=60s
           - --metrics.prometheus.entrypoint=metrics
           - --entryPoints.metrics.address=:8082
           - --providers.kubernetesingress.disablepasshostheaders=true
