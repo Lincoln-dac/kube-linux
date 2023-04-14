@@ -1,0 +1,8 @@
+# Retry to send request 4 times
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: test-retry
+spec:
+  retry:
+    attempts: 4
