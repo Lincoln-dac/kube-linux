@@ -1,4 +1,4 @@
-edis使用过程中，有时候会出现大key的情况， 比如：
+redis使用过程中，有时候会出现大key的情况， 比如：
 
 单个简单的key存储的value很大，size超过10KB
 hash， set，zset，list 中存储过多的元素（以万为单位）
