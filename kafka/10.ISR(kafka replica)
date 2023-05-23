@@ -15,7 +15,8 @@ kafka不是完全同步，也不是完全异步，是一种ISR机制：
 2. 如果一个flower比一个leader落后太多，或者超过一定时间未发起数据复制请求，则leader将其重ISR中移除 
 3. 当ISR中所有Replica都向Leader发送ACK时，leader才commit
 既然所有Replica都向Leader发送ACK时，leader才commit，那么flower怎么会leader落后太多？ 
-producer往kafka中发送数据，不仅可以一次发送一条数据，还可以发送message的数组；批量发送，同步的时候批量发送，异步的时候本身就是就是批量；底层会有队列缓存起来，批量发送，对应broker而言，就会收到很多数据(假设1000)，这时候leader发现自己有1000条数据，flower只有500条数据，落后了500条数据，就把它从ISR中移除出去，这时候发现其他的flower与他的差距都很小，就等待；如果因为内存等原因，差距很大，就把它从ISR中移除出去。
+producer往kafka中发送数据，不仅可以一次发送一条数据，还可以发送message的数组；批量发送，同步的时候批量发送，异步的时候本身就是就是批量；底层会有队列缓存起来，批量发送，对应broker而言，就会收到很多数据(假设1000)，
+这时候leader发现自己有1000条数据，flower只有500条数据，落后了500条数据，就把它从ISR中移除出去，这时候发现其他的flower与他的差距都很小，就等待；如果因为内存等原因，差距很大，就把它从ISR中移除出去。
 commit策略： 
 server配置
   rerplica.lag.time.max.ms=10000
