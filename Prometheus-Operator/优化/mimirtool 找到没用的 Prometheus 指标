@@ -1,0 +1,39 @@
+最近我有一个任务，需要跟踪、搞定 series 基数问题，并显著减少 Prometheus 的资源使用。为了做到这一点，我首先需要分析系统。在本文中，我将解释如何使用 mimirtool 来识别平台上使用哪些指标以及哪些没有被使用。
+
+先决条件
+本文中描述的所有内容都是在 Kubernetes 环境中使用 kube-prometheus-stack 完成的。如果您的 Prometheus 部署方式与我不同，您可能需要进行调整，但如果您同时拥有 Prometheus 和 Grafana 的至少一个实例，那么您应该可以继续使用。
+
+根据 Grafana 的官网：
+
+Mimirtool 是一个 CLI 工具，可用于涉及 Grafana Mimir 或 Grafana Cloud Metrics 的 Prometheus 兼容任务的各种操作。
+
+要重现示例，您需要：
+# Archlinux
+pacman -Sy kubectl mimir jq
+
+# MacOS
+brew install kubectl mimirtool jq
+如果您的 Prometheus 和 Grafana 实例也在 Kubernetes 上运行，如果您希望能够复制和粘贴示例，则可以在下面的变量中复制它们的 pod 名称：
+# kubectl get pod -n monitoring | grep -E 'prometheus|grafana'
+my_grafana_pod="kube-prometheus-stack-grafana-6b7fc54bd9-q2fdj"
+my_prometheus_pod="prometheus-kube-prometheus-stack-prometheus-0"
+分析你的 Prometheus 的 metrics 使用情况
+我们需要做的第一件事是确定我们使用的指标和我们拥有的指标。我过去曾使用 grep 手动完成此操作，但 mimirtool 使它变得非常简单！
+
+Grafana 仪表板中的指标
+在我们提取 Grafana 实例中使用的指标列表之前，我们首先需要创建一个具有管理员角色的 Grafana API 密钥。如果你有一个暴露的 Grafana 实例，只需打开它并转到 https://grafana.your.domain/org/apikeys 。如果没有，您可能需要先公开它：
+# Run this is a separate terminal
+kubectl port-forward ${my_grafana_pod} -n monitoring 3000:3000
+然后你应该能够打开：http://localhost:3000/org/apikeys
+
+从那里，单击 New API key 按钮，为密钥命名、管理员角色和可选的 TTL，如下所示：
+我们现在可以使用 mimirtool 来提取我们的 Grafana 实例中使用的指标列表：
+
+mimirtool analyze grafana --address=http://localhost:3000 --key="${GRAFANA_API_TOKEN}"
+完成后，您应该在当前目录中有一个 metrics-in-grafana.json 文件，其中包含 Grafana 中使用的 JSON 格式的指标列表。
+Prometheus 规则中的指标
+我们将对我们在 Prometheus 规则中使用的指标做同样的事情。因为我使用 Prometheus Operator，所以我的规则来自不同的地方和格式，主要是 ServiceMonitors 但不仅如此。最后，它们都加载到 Prometheus 实例本身，这就是为什么我们需要直接在 Prometheus pod 上提取指标列表。
+
+所有规则都位于我的 Prometheus pod 中的 /etc/prometheus/rules/ 中，检查你的规则并在需要时进行调整：
+
+https://mp.weixin.qq.com/s/z23gYsLIkvbBePg-FUMJXA
