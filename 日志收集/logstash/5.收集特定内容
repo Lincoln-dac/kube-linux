@@ -29,7 +29,7 @@ output {
   elasticsearch {
     hosts => ["http://10.204.51.64:9200","http://10.204.51.65:9200","http://10.204.51.66:9200"]
     user => "elastic"
-    password => "fcbox.com"
+    password => "aaa.com"
     index => "traefik-logs-%{+yyyy.MM.dd}"
     #index => "%{Ingressroute_name}-%{+YYYY.MM.dd}"
     #document_id => "%{Ingressroute_name}"
