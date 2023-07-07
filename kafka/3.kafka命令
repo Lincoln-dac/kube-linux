@@ -19,7 +19,7 @@ topic增加partition
 查看消息是否延时
 /data/server/kafka/bin/kafka-consumer-groups.sh --bootstrap-server 10.204.243.87:9092 --describe --group te0073（LAG 大于0则有延时）
 查看topic是否有积压
-./bin/kafka-run-class.sh kafka.tools.GetOffsetShell --broker-list 10.33.2.7:9092 -topic fcbox-zj-apiserver-error --time -1
+./bin/kafka-run-class.sh kafka.tools.GetOffsetShell --broker-list 10.33.2.7:9092 -topic zj-apiserver-error --time -1
 消费消息
 bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic test --from-beginning
 产生消息
