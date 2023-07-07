@@ -60,7 +60,7 @@ case $Action  in
     
     #备份
     pwd
-    #scp -r  appdeploy@10.204.8.5:/app/openresty/nginx/html/front-list.fcbox.com/hibox-app/*   ${WORKSPACE}/frontend_backup/${date_now}/${time_now}
+    #scp -r  appdeploy@10.204.8.5:/app/openresty/nginx/html/front-list/hibox-app/*   ${WORKSPACE}/frontend_backup/${date_now}/${time_now}
     
     for web_ip in ${Web_Servers}
     do
