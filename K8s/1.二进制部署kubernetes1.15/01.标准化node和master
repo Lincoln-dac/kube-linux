@@ -117,7 +117,6 @@ net.netfilter.nf_conntrack_tcp_loose = 1
 net.netfilter.nf_conntrack_tcp_timeout_established=300
 net.netfilter.nf_conntrack_tcp_timeout_time_wait = 30
 net.netfilter.nf_conntrack_timestamp=1
-
 user.max_user_namespaces= 15000 
 vm.max_map_count= 655360
 vm.overcommit_memory= 1
