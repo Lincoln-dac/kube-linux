@@ -1,0 +1,15 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: consul-ingressroute
+spec:
+  entryPoints:
+    - web
+  routes:
+  - match: Host(`consul-test.fcbox.com`) 
+    kind: Rule
+    services:
+    - name: consul-svc
+      port: 8500
+      sticky:
+        cookie: {}
