@@ -130,3 +130,6 @@ CoreOS: v4.19.84+
 
 自动扩容
 因为将 CPU 请求和限制设置为相同的值通常会给人们他们所期望的行为，解决此问题的简单方法是将 CPU 请求和限制设置为相同的值并添加 HPA。让 Pod 根据负载进行自动扩缩容。
+
+
+https://cloud.tencent.com/developer/article/2241757
