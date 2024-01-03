@@ -1,21 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b6e2e39e-7914-4930-8e06-db9e2c1f289f" name="变更" comment="">
-      <change afterPath="$PROJECT_DIR$/K8s/Higress/readme" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/K8s/DNS/COREDNS/cm.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/K8s/6.DNS/COREDNS/cm.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/K8s/DNS/COREDNS/coredns 关键指标" beforeDir="false" afterPath="$PROJECT_DIR$/K8s/6.DNS/COREDNS/coredns 关键指标" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/K8s/DNS/COREDNS/readme" beforeDir="false" afterPath="$PROJECT_DIR$/K8s/6.DNS/COREDNS/readme" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/K8s/DNS/COREDNS/优化 ndots" beforeDir="false" afterPath="$PROJECT_DIR$/K8s/6.DNS/COREDNS/优化 ndots" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/K8s/DNS/COREDNS/启用 autopath" beforeDir="false" afterPath="$PROJECT_DIR$/K8s/6.DNS/COREDNS/启用 autopath" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/K8s/DNS/COREDNS/提高外网dns解析" beforeDir="false" afterPath="$PROJECT_DIR$/K8s/6.DNS/COREDNS/提高外网dns解析" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/K8s/DNS/DNS高阶指南" beforeDir="false" afterPath="$PROJECT_DIR$/K8s/6.DNS/DNS高阶指南" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/K8s/DNS/LOCAL-NODE-DNS-CACHE/dns-cm.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/K8s/6.DNS/LOCAL-NODE-DNS-CACHE/dns-cm.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/K8s/DNS/LOCAL-NODE-DNS-CACHE/dns-ds.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/K8s/6.DNS/LOCAL-NODE-DNS-CACHE/dns-ds.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/K8s/DNS/LOCAL-NODE-DNS-CACHE/dns-sa.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/K8s/6.DNS/LOCAL-NODE-DNS-CACHE/dns-sa.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/K8s/DNS/LOCAL-NODE-DNS-CACHE/dns-service.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/K8s/6.DNS/LOCAL-NODE-DNS-CACHE/dns-service.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/K8s/DNS/LOCAL-NODE-DNS-CACHE/readme" beforeDir="false" afterPath="$PROJECT_DIR$/K8s/6.DNS/LOCAL-NODE-DNS-CACHE/readme" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/K8s/DNS/readme" beforeDir="false" afterPath="$PROJECT_DIR$/K8s/6.DNS/readme" afterDir="false" />
+    <list default="true" id="b6e2e39e-7914-4930-8e06-db9e2c1f289f" name="变更" comment="done">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/K8s/优化/大型Kubernetes集群的资源编排优化" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/K8s/优化/大规模场景下 kubernetes 集群的性能优化" beforeDir="false" afterPath="$PROJECT_DIR$/K8s/优化/集群的性能优化" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -23,6 +12,12 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="Git.Settings">
+    <option name="PUSH_TAGS">
+      <GitPushTagMode>
+        <option name="argument" value="--tags" />
+        <option name="title" value="All" />
+      </GitPushTagMode>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GithubDefaultAccount">
@@ -39,6 +34,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
+    <property name="ASKED_SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
@@ -76,6 +72,35 @@
       <option name="presentableId" value="Default" />
       <updated>1704264967919</updated>
     </task>
+    <task id="LOCAL-00001" summary="done">
+      <created>1704267404414</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1704267404414</updated>
+    </task>
+    <task id="LOCAL-00002" summary="done">
+      <created>1704267491100</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1704267491100</updated>
+    </task>
+    <task id="LOCAL-00003" summary="done">
+      <created>1704267502885</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1704267502885</updated>
+    </task>
+    <task id="LOCAL-00004" summary="done">
+      <created>1704267632730</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1704267632730</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -92,5 +117,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
+    <MESSAGE value="add higress" />
+    <MESSAGE value="done" />
+    <option name="LAST_COMMIT_MESSAGE" value="done" />
   </component>
 </project>

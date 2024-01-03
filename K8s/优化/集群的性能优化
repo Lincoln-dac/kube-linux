@@ -223,3 +223,5 @@ Kubernetes 调度优化--重平衡策略方案整理
 记一次kubernetes集群异常: kubelet连接apiserver超时
 
 
+参考
+https://cloud.tencent.com/developer/article/1683024
