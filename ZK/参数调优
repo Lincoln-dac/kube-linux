@@ -1,0 +1,25 @@
+zookeeper的默认配置文件为zookeeper/conf/zoo_sample.cfg，需要将其修改为zoo.cfg。其中各配置项的含义，解释如下：
+1.tickTime：Client-Server通信心跳时间
+Zookeeper 服务器之间或客户端与服务器之间维持心跳的时间间隔，也就是每个 tickTime 时间就会发送一个心跳。tickTime以毫秒为单位。
+tickTime=2000
+2.initLimit：Leader-Follower初始通信时限
+集群中的follower服务器(F)与leader服务器(L)之间初始连接时能容忍的最多心跳数（tickTime的数量）。
+initLimit=5
+3.syncLimit：Leader-Follower同步通信时限
+集群中的follower服务器与leader服务器之间请求和应答之间能容忍的最多心跳数（tickTime的数量）。
+syncLimit=2
+
+4.dataDir：数据文件目录
+Zookeeper保存数据的目录，默认情况下，Zookeeper将写数据的日志文件也保存在这个目录里。
+dataDir=/home/michael/opt/zookeeper/data
+5.clientPort：客户端连接端口
+客户端连接 Zookeeper 服务器的端口，Zookeeper 会监听这个端口，接受客户端的访问请求。
+clientPort=2181
+6.服务器名称与地址：集群信息（服务器编号，服务器地址，LF通信端口，选举端口）
+这个配置项的书写格式比较特殊，规则如下：
+server.N=YYY:A:B
+server.1=itcast05:2888:3888
+server.2=itcast06:2888:3888
+server.3=itcast07:2888:3888
+7.ZK为什么设置为奇数个？
+zookeeper有这样一个特性：集群中只要有过半的机器是正常工作的，那么整个集群对外就是可用的。也就是说如果有2个zookeeper，那么只要有1个死了zookeeper就不能用了，因为1没有过半，所以2个zookeeper的死亡容忍度为0；同理，要是有3个zookeeper，一个死了，还剩下2个正常的，过半了，所以3个zookeeper的容忍度为1；同理你多列举几个：2 -> 0; 3 -> 1; 4 - >1; 5 -> 2; 6 -> 2会发现一个规律，2n和2n-1的容忍度是一样的，都是n-1，所以为了更加高效，何必增加那一个不必要的zookeeper呢。

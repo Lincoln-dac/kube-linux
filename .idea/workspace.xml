@@ -1,157 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="b6e2e39e-7914-4930-8e06-db9e2c1f289f" name="变更" comment="done">
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/1.创建NS" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/1.创建NS" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/2.部署nfs 存储提供者nfs-provisioner" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/2.部署nfs 存储提供者nfs-provisioner" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/3.部署prometheus-operator" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/3.部署prometheus-operator" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/4.创建访问域名" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/4.创建访问域名" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/nfs-provisioner/clusterrole.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/nfs-provisioner/clusterrole.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/nfs-provisioner/clusterrolebinding.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/nfs-provisioner/clusterrolebinding.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/nfs-provisioner/deployment-nfs.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/nfs-provisioner/deployment-nfs.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/nfs-provisioner/readme" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/nfs-provisioner/readme" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/nfs-provisioner/serviceaccount.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/nfs-provisioner/serviceaccount.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/0prometheus-operator-0alertmanagerCustomResourceDefinition.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/0prometheus-operator-0alertmanagerCustomResourceDefinition.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/0prometheus-operator-0prometheusCustomResourceDefinition.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/0prometheus-operator-0prometheusCustomResourceDefinition.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/0prometheus-operator-0prometheusruleCustomResourceDefinition.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/0prometheus-operator-0prometheusruleCustomResourceDefinition.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/0prometheus-operator-0servicemonitorCustomResourceDefinition.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/0prometheus-operator-0servicemonitorCustomResourceDefinition.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/0prometheus-operator-clusterRole.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/0prometheus-operator-clusterRole.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/0prometheus-operator-clusterRoleBinding.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/0prometheus-operator-clusterRoleBinding.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/0prometheus-operator-deployment.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/0prometheus-operator-deployment.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/0prometheus-operator-service.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/0prometheus-operator-service.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/0prometheus-operator-serviceAccount.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/0prometheus-operator-serviceAccount.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/0prometheus-operator-serviceMonitor.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/0prometheus-operator-serviceMonitor.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/alertmanager-alertmanager.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/alertmanager-alertmanager.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/alertmanager-secret.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/alertmanager-secret.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/alertmanager-service.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/alertmanager-service.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/alertmanager-serviceAccount.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/alertmanager-serviceAccount.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/alertmanager-serviceMonitor.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/alertmanager-serviceMonitor.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/bundle.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/bundle.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/grafana-dashboardDatasources.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/grafana-dashboardDatasources.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/grafana-dashboardDefinitions.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/grafana-dashboardDefinitions.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/grafana-dashboardSources.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/grafana-dashboardSources.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/grafana-deployment.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/grafana-deployment.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/grafana-service.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/grafana-service.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/grafana-serviceAccount.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/grafana-serviceAccount.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/grafana.ini" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/grafana.ini" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/kube-state-metrics-clusterRole.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/kube-state-metrics-clusterRole.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/kube-state-metrics-clusterRoleBinding.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/kube-state-metrics-clusterRoleBinding.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/kube-state-metrics-deployment.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/kube-state-metrics-deployment.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/kube-state-metrics-role.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/kube-state-metrics-role.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/kube-state-metrics-roleBinding.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/kube-state-metrics-roleBinding.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/kube-state-metrics-service.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/kube-state-metrics-service.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/kube-state-metrics-serviceAccount.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/kube-state-metrics-serviceAccount.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/kube-state-metrics-serviceMonitor.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/kube-state-metrics-serviceMonitor.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/node-exporter-clusterRole.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/node-exporter-clusterRole.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/node-exporter-clusterRoleBinding.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/node-exporter-clusterRoleBinding.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/node-exporter-daemonset.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/node-exporter-daemonset.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/node-exporter-service.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/node-exporter-service.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/node-exporter-serviceAccount.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/node-exporter-serviceAccount.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/node-exporter-serviceMonitor.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/node-exporter-serviceMonitor.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/prometheus-clusterRole.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/prometheus-clusterRole.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/prometheus-clusterRoleBinding.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/prometheus-clusterRoleBinding.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/prometheus-k8s-ClusterRole.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/prometheus-k8s-ClusterRole.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/prometheus-prometheus.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/prometheus-prometheus.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/prometheus-roleBindingConfig.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/prometheus-roleBindingConfig.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/prometheus-roleBindingSpecificNamespaces.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/prometheus-roleBindingSpecificNamespaces.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/prometheus-roleConfig.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/prometheus-roleConfig.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/prometheus-roleSpecificNamespaces.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/prometheus-roleSpecificNamespaces.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/prometheus-service.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/prometheus-service.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/prometheus-serviceAccount.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/prometheus-serviceAccount.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/prometheus-serviceMonitor.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/prometheus-serviceMonitor.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/prometheus-serviceMonitorApiserver.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/prometheus-serviceMonitorApiserver.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/prometheus-serviceMonitorCoreDNS.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/prometheus-serviceMonitorCoreDNS.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/prometheus-serviceMonitorKubeControllerManager.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/prometheus-serviceMonitorKubeControllerManager.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/prometheus-serviceMonitorKubeScheduler.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/prometheus-serviceMonitorKubeScheduler.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/prometheus-serviceMonitorKubelet.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/prometheus-serviceMonitorKubelet.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/prometheus/readme" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/prometheus/readme" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/readme" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/readme" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/storageclass/prometheus-storageclass-nfs.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/storageclass/prometheus-storageclass-nfs.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/1.安装部署Prometheus-Operator/storageclass/readme" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/1.安装部署Prometheus-Operator/storageclass/readme" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/Federation/1.安装influxdb" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/Federation/1.安装influxdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/Federation/2.安装grafana" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/Federation/2.安装grafana" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/Federation/3.安装prometheus" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/Federation/3.安装prometheus" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/Federation/4.配置集群联邦" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/Federation/4.配置集群联邦" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/Federation/readme" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/Federation/readme" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/PromQL/语法初探" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/PromQL/语法初探" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/Prometheus 自定义告警规则汇总" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/Prometheus 自定义告警规则汇总" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/Prometheus参数/grafana数据持久化" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/Prometheus参数/grafana数据持久化" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/Prometheus参数/kubernetes_sd_config" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/Prometheus参数/kubernetes_sd_config" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/Prometheus参数/指定本地存储" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/Prometheus参数/指定本地存储" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/Prometheus参数/数据保留时长" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/Prometheus参数/数据保留时长" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/Prometheus参数/配置远程存储" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/Prometheus参数/配置远程存储" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/Prometheus官方文档.pdf" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/Prometheus官方文档.pdf" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/grafana/readme.md" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/grafana/readme.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/grafana/监控信息展示语句" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/grafana/监控信息展示语句" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/node_exporter/node_exporter自定义KEY" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/node_exporter/node_exporter自定义KEY" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/node_exporter/注册到consul" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/node_exporter/注册到consul" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/node_exporter/自定义数值" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/node_exporter/自定义数值" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/node_exporter/自定义监控项" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/node_exporter/自定义监控项" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/readme.md" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/readme.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/rule/cluster-rule/cluster-rule.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/rule/cluster-rule/cluster-rule.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/rule/jvm-rule/jvm-rule.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/rule/jvm-rule/jvm-rule.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/rule/network-rule/network-rule.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/rule/network-rule/network-rule.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/rule/node-rule/node-rule.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/rule/node-rule/node-rule.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/rule/pod-rule/pod-rule.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/rule/pod-rule/pod-rule.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/rule/prometheus-rule/prometheus-rules.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/rule/prometheus-rule/prometheus-rules.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/rule/reamd me" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/rule/reamd me" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/victoriametrics/readme.md" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/victoriametrics/readme.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/victoriametrics/victoriametrics集群部署" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/victoriametrics/victoriametrics集群部署" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/victoriametrics/远程存储 VictoriaMetrics 简介" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/victoriametrics/远程存储 VictoriaMetrics 简介" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/优化/1.优化远程读写的性能.md" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/优化/1.优化远程读写的性能.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/优化/2.性能和高基数问题" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/优化/2.性能和高基数问题" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/优化/mimirtool 找到没用的 Prometheus 指标" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/优化/mimirtool 找到没用的 Prometheus 指标" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/优化/readme.md" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/优化/readme.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/常用指标" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/常用指标" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/监控Traefik/1.修改traefik配置文件" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/监控Traefik/1.修改traefik配置文件" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/监控Traefik/2.新建traefik-prometheus-service" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/监控Traefik/2.新建traefik-prometheus-service" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/监控Traefik/3.新建traefik-serviceMonitor" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/监控Traefik/3.新建traefik-serviceMonitor" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/监控Traefik/4.新增模板" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/监控Traefik/4.新增模板" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/监控Traefik/readme" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/监控Traefik/readme" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/监控kube-apiserver/api.json" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/监控kube-apiserver/api.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/监控kube-proxy/1.步骤" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/监控kube-proxy/1.步骤" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/监控kube-proxy/2.告警规则" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/监控kube-proxy/2.告警规则" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/监控kube-proxy/kube-proxy.json" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/监控kube-proxy/kube-proxy.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/监控kube-proxy/readme.md" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/监控kube-proxy/readme.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/监控kubelet/ Kubelet 相关指标" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/监控kubelet/ Kubelet 相关指标" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/监控kubelet/cAdvisor 指标梳理" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/监控kubelet/cAdvisor 指标梳理" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/监控kubelet/kubelet.json" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/监控kubelet/kubelet.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/监控kubelet/模板json" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/监控kubelet/模板json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/监控pod的jvm/0.监控pod的jvm" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/监控pod的jvm/0.监控pod的jvm" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/监控pod的jvm/1.将jvmagent 和配置文件写进java镜像中" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/监控pod的jvm/1.将jvmagent 和配置文件写进java镜像中" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/监控pod的jvm/2.数据收集服务自动发现sd" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/监控pod的jvm/2.数据收集服务自动发现sd" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/监控pod的jvm/3.在yaml文件中给定特定的label标签做关联" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/监控pod的jvm/3.在yaml文件中给定特定的label标签做关联" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/监控pod的jvm/4.配置granfan jvm图形展示" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/监控pod的jvm/4.配置granfan jvm图形展示" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/监控pod的jvm/config/config.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/监控pod的jvm/config/config.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/监控pod的jvm/config/jmx_prometheus_javaagent-0.12.0.jar" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/监控pod的jvm/config/jmx_prometheus_javaagent-0.12.0.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/监控pod的jvm/config/readme" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/监控pod的jvm/config/readme" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/监控pod的jvm/img/1.png" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/监控pod的jvm/img/1.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/监控pod的jvm/img/2.png" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/监控pod的jvm/img/2.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/监控pod的jvm/img/3.png" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/监控pod的jvm/img/3.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/监控pod的jvm/img/readme" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/监控pod的jvm/img/readme" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/监控pod的jvm/readme" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/监控pod的jvm/readme" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/监控外部ETCD/1.创建secret" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/监控外部ETCD/1.创建secret" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/监控外部ETCD/2.创建service" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/监控外部ETCD/2.创建service" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/监控外部ETCD/3.创建serviceMonitor" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/监控外部ETCD/3.创建serviceMonitor" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/监控外部ETCD/4.修改prometheus-prometheus.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/监控外部ETCD/4.修改prometheus-prometheus.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/监控外部ETCD/5.granfan添加模板" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/监控外部ETCD/5.granfan添加模板" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/监控外部ETCD/job" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/监控外部ETCD/job" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/监控外部ETCD/readme" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/监控外部ETCD/readme" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/监控外部ETCD/yaml/etcd-prometheus-service.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/监控外部ETCD/yaml/etcd-prometheus-service.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/监控外部ETCD/yaml/etcd-prometheus-serviceMonitor.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/监控外部ETCD/yaml/etcd-prometheus-serviceMonitor.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/监控外部ETCD/yaml/prometheus-prometheus.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/监控外部ETCD/yaml/prometheus-prometheus.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/监控外部ETCD/yaml/readme" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/监控外部ETCD/yaml/readme" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/自定义metrics/promethues自定义监控.pdf" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/自定义metrics/promethues自定义监控.pdf" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/自定义metrics/readme" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/自定义metrics/readme" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/自定义扩容/scaledeploy_cpu_thread" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/自定义扩容/scaledeploy_cpu_thread" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/自定义扩容/根据cpu使用率扩容" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/自定义扩容/根据cpu使用率扩容" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/自定义扩容/根据流量扩容.py" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/自定义扩容/根据流量扩容.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prometheus-Operator/自定义扩容/根据线程池扩容.py" beforeDir="false" afterPath="$PROJECT_DIR$/Prometheus/自定义扩容/根据线程池扩容.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ZK/参数调优" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ZK/部署与管理ZooKeeper" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ZK/ZK" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="PUSH_TAGS">
@@ -161,6 +29,14 @@
       </GitPushTagMode>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitSEFilterConfiguration">
+    <file-type-list>
+      <filtered-out-file-type name="LOCAL_BRANCH" />
+      <filtered-out-file-type name="REMOTE_BRANCH" />
+      <filtered-out-file-type name="TAG" />
+      <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
+    </file-type-list>
   </component>
   <component name="GithubDefaultAccount">
     <option name="defaultAccountId" value="96b00a6d-6823-4635-8dd1-ab0375b85237" />
@@ -180,9 +56,35 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/python/ToolScripts" />
-    <property name="settings.editor.selected.configurable" value="vcs.Git" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
-  <component name="RunManager">
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="F:\kube-linux\python\ToolScripts" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Python.getGitubAddressUpToLocalHost">
+    <configuration name="getGitubAddressUpToLocalHost" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="D:\Program Files\python3\python.exe" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/python/ToolScripts" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/python/ToolScripts/getGitubAddressUpToLocalHost.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="main" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -204,6 +106,11 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.getGitubAddressUpToLocalHost" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="应用程序级" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -256,7 +163,77 @@
       <option name="project" value="LOCAL" />
       <updated>1704268296651</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="done">
+      <created>1704268435588</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1704268435588</updated>
+    </task>
+    <task id="LOCAL-00008" summary="done">
+      <created>1704270463744</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1704270463744</updated>
+    </task>
+    <task id="LOCAL-00009" summary="done">
+      <created>1704270580368</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1704270580369</updated>
+    </task>
+    <task id="LOCAL-00010" summary="done">
+      <created>1704270590126</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1704270590126</updated>
+    </task>
+    <task id="LOCAL-00011" summary="done">
+      <created>1704270622606</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1704270622606</updated>
+    </task>
+    <task id="LOCAL-00012" summary="done">
+      <created>1704270651037</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1704270651037</updated>
+    </task>
+    <task id="LOCAL-00013" summary="done">
+      <created>1704270681048</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1704270681048</updated>
+    </task>
+    <task id="LOCAL-00014" summary="done">
+      <created>1704270729198</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1704270729198</updated>
+    </task>
+    <task id="LOCAL-00015" summary="done">
+      <created>1704270784857</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1704270784857</updated>
+    </task>
+    <task id="LOCAL-00016" summary="done">
+      <created>1704270925048</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1704270925048</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
