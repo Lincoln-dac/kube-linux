@@ -4,11 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b6e2e39e-7914-4930-8e06-db9e2c1f289f" name="变更" comment="done">
-      <change afterPath="$PROJECT_DIR$/ZK/参数调优" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ZK/部署与管理ZooKeeper" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ZK/ZK" beforeDir="false" />
-    </list>
+    <list default="true" id="b6e2e39e-7914-4930-8e06-db9e2c1f289f" name="变更" comment="done" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -233,7 +229,35 @@
       <option name="project" value="LOCAL" />
       <updated>1704270925048</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="done">
+      <created>1704280434705</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1704280434705</updated>
+    </task>
+    <task id="LOCAL-00018" summary="done">
+      <created>1704280486164</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1704280486164</updated>
+    </task>
+    <task id="LOCAL-00019" summary="done">
+      <created>1704280518003</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1704280518003</updated>
+    </task>
+    <task id="LOCAL-00020" summary="done">
+      <created>1704280604877</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1704280604877</updated>
+    </task>
+    <option name="localTasksCounter" value="21" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
