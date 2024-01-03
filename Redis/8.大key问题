@@ -1,0 +1,28 @@
+redis使用过程中，有时候会出现大key的情况， 比如：
+
+单个简单的key存储的value很大，size超过10KB
+hash， set，zset，list 中存储过多的元素（以万为单位）
+大key会造成什么问题呢？
+
+客户端耗时增加，甚至超时
+对大key进行IO操作时，会严重占用带宽和CPU
+造成Redis集群中数据倾斜
+主动删除、被动删等，可能会导致阻塞
+如何找到大key?
+
+bigkeys命令：使用bigkeys命令以遍历的方式分析Redis实例中的所有Key，并返回整体统计信息与每个数据类型中Top1的大Key
+redis-rdb-tools：redis-rdb-tools是由Python写的用来分析Redis的rdb快照文件用的工具，它可以把rdb快照文件生成json文件或者生成报表用来分析Redis的使用详情。
+
+
+如何处理大key?
+
+
+删除大key
+
+当Redis版本大于4.0时，可使用UNLINK命令安全地删除大Key，该命令能够以非阻塞的方式，逐步地清理传入的Key。
+当Redis版本小于4.0时，避免使用阻塞式命令KEYS，而是建议通过SCAN命令执行增量迭代扫描key，然后判断进行删除。
+压缩和拆分key
+
+当vaule是string时，比较难拆分，则使用序列化、压缩算法将key的大小控制在合理范围内，但是序列化和反序列化都会带来更多时间上的消耗。
+当value是string，压缩之后仍然是大key，则需要进行拆分，一个大key分为不同的部分，记录每个部分的key，使用multiget等操作实现事务读取。
+当value是list/set等集合类型时，根据预估的数据规模来进行分片，不同的元素计算后分到不同的片。

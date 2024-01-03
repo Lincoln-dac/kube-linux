@@ -24,7 +24,7 @@ defaultEntryPoints = ["http","https"]
 ############key 名称根据实际情况调整##########
 
 2.创建secret
-kubectl create secret generic fcbox-cert --from-file=a.key --from-file=a.pem -n kube-system
+kubectl create secret generic cert --from-file=a.key --from-file=a.pem -n kube-system
 ############key 名称根据实际情况调整##########
 3. 部署traefik-rbac
 kubectl apply -f traefik-rbac.yaml

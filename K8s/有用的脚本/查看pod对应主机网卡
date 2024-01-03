@@ -1,0 +1,17 @@
+root@k8s-master1:~# kubectl exec -ti busybox -- ip addr show
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host 
+       valid_lft forever preferred_lft forever
+2: eth0@if12: <BROADCAST,MULTICAST,UP,LOWER_UP,M-DOWN> mtu 1450 qdisc noqueue 
+    link/ether 92:d9:97:72:d5:ab brd ff:ff:ff:ff:ff:ff
+    inet 172.16.2.31/24 brd 172.16.2.255 scope global eth0
+       valid_lft forever preferred_lft forever
+    inet6 fe80::90d9:97ff:fe72:d5ab/64 scope link 
+       valid_lft forever preferred_lft forever
+root@k8s-master1:~# 
+root@k8s-master1:~# ip addr show | grep "^12:\ veth"
+12: veth7cbd10a4@if2: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 qdisc noqueue master cni0 state UP group default 
+root@k8s-master1:~# 

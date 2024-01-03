@@ -1,0 +1,100 @@
+ 启动kafka集群
+./data/server/kafka/bin/kafka-server-start.sh -daemon  /data/server/kafka/config/server.properties  &
+ 启动zookeeper集群
+/data/server/kafka/bin/zookeeper-server-start.sh -daemon /data/server/kafka/config/zookeeper.properties & 
+创建topic 
+/data/server/kafka/bin/kafka-topics.sh --zookeeper 10.204.243.82:2181,10.204.243.83:2181,10.204.243.84:2181 --create --replication-factor 1 --partitions 1 --topic test001
+topic增加partition
+/data/server/kafka/bin/kafka-topics.sh --zookeeper 10.204.243.82:2181,10.204.243.83:2181,10.204.243.84:2181  --alter --partitions 20 --topic test001
+查看全部topic
+/data/server/kafka/bin/kafka-topics.sh  --zookeeper 10.204.243.82:2181,10.204.243.83:2181,10.204.243.84:2181 --list
+查看全部topic详细
+/data/server/kafka/bin/kafka-topics.sh --zookeeper 10.204.243.82:2181,10.204.243.83:2181,10.204.243.84:2181 --describe
+查看某个topic信息
+/data/server/kafka/bin/kafka-topics.sh  --zookeeper 10.204.243.82:2181,10.204.243.83:2181,10.204.243.84:2181 --topic testb --describe
+删除topic
+/data/server/kafka/bin/kafka-topics.sh  --zookeeper 10.204.243.82:2181,10.204.243.83:2181,10.204.243.84:2181 --topic payment_completed --delete
+查看不同步的分区
+/data/server/kafka/bin/kafka-topics.sh --zookeeper 10.204.243.85:2181,10.204.243.86:2181,10.204.243.87:2181/zk001 --describe --under-replicated-partitions
+查看消息是否延时
+/data/server/kafka/bin/kafka-consumer-groups.sh --bootstrap-server 10.204.243.87:9092 --describe --group te0073（LAG 大于0则有延时）
+查看topic是否有积压
+./bin/kafka-run-class.sh kafka.tools.GetOffsetShell --broker-list 10.33.2.7:9092 -topic zj-apiserver-error --time -1
+消费消息
+bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic test --from-beginning
+产生消息
+bin/kafka-console-producer.sh --broker-list localhost:9092 --topic test
+
+查看不可用的分区
+/data/server/kafka/bin/kafka-topics.sh --zookeeper 10.204.243.85:2181,10.204.243.86:2181,10.204.243.87:2181/zk001 --describe --unavailable-partitions
+
+
+重新分配leader
+/data/server/kafka/bin/kafka-reassign-partitions.sh --zookeeper 10.204.243.85:2181,10.204.243.86:2181,10.204.243.87:2181/zk001 --topics-to-move-json-file topic.json --broker-list "0,88,89" --generate
+topic.json
+{
+  "topics": [
+    {"topic": "t01"}
+  ],
+  "version":1
+}
+
+增加副本
+/data/server/kafka/bin/kafka-reassign-partitions.sh --zookeeper 10.204.243.85:2181,10.204.243.86:2181,10.204.243.87:2181/zk001 --reassignment-json-file ddReplicas.json --execute
+
+新建一个ddReplicas.json
+######
+{
+"version": 1,
+"partitions": [
+{
+"topic": "test002",
+"partition": 0,
+"replicas": [
+2,
+1,
+0
+]
+},
+{
+"topic": "test002",
+"partition": 1,
+"replicas": [
+0,
+2,
+1
+]
+},
+{
+"topic": "test002",
+"partition": 2,
+"replicas": [
+1,
+0,
+2
+]
+}
+]
+}
+
+##########
+
+减少副本
+/data/server/kafka/bin/kafka-reassign-partitions.sh --zookeeper 10.204.243.85:2181,10.204.243.86:2181,10.204.243.87:2181/zk001 --reassignment-json-file test007-replica.json --execute
+
+
+
+
+
+makermirror
+/data/server/kafka/bin/kafka-mirror-maker.sh --consumer.config /data/server/kafka/config/mirror-consumer.properties  --num.streams 1 --producer.config /data/server/kafka/config/mirror-producer.properties  --whitelist=".*"
+
+
+https://cwiki.apache.org/confluence/display/KAFKA/Replication+tools#Replicationtools-1.PreferredReplicaLeaderElectionTool
+
+http://www.jasongj.com/tags/Kafka/
+
+查看生产情况
+./kafka-run-class.sh kafka.tools.GetOffsetShell --broker-list 10.204.2.142:9092 -topic expressFrontEndLog --time -1
+查看消费情况
+./kafka-consumer-groups.sh  --bootstrap-server 10.204.57.32:9092 --group logstash2 --describe

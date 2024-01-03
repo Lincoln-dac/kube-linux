@@ -1,0 +1,101 @@
+1.部署zookeeper
+集群节点IP 
+10.204.51.64
+10.204.51.65
+10.204.51.66
+
+配置文件
+10.204.51.64
+cat /app/zookeeper/conf/zoo.cfg
+
+tickTime=2000
+initLimit=5
+syncLimit=2
+dataDir=/app/zookeeper/data
+clientPort=2181
+clientPortAddress=10.204.51.64
+maxClientCnxns=100
+logDir=/app/zookeeper/logs
+autopurge.snapRetainCount=3
+autopurge.purgeInterval=5
+server.1=10.204.51.64:2888:3888
+server.2=10.204.51.65:2888:3888
+server.3=10.204.51.66:2888:3888
+##########
+追加ID
+echo 1 > /app/zookeeper/data/myid
+
+10.204.51.65
+cat /app/zookeeper/conf/zoo.cfg
+
+tickTime=2000
+initLimit=5
+syncLimit=2
+dataDir=/app/zookeeper/data
+clientPort=2181
+clientPortAddress=10.204.51.65
+maxClientCnxns=100
+logDir=/app/zookeeper/logs
+autopurge.snapRetainCount=3
+autopurge.purgeInterval=5
+server.1=10.204.51.64:2888:3888
+server.2=10.204.51.65:2888:3888
+server.3=10.204.51.66:2888:3888
+##########
+追加ID
+echo 2 > /app/zookeeper/data/myid
+
+
+10.204.51.66
+cat /app/zookeeper/conf/zoo.cfg
+
+tickTime=2000
+initLimit=5
+syncLimit=2
+dataDir=/app/zookeeper/data
+clientPort=2181
+clientPortAddress=10.204.51.66
+maxClientCnxns=100
+logDir=/app/zookeeper/logs
+autopurge.snapRetainCount=3
+autopurge.purgeInterval=5
+server.1=10.204.51.64:2888:3888
+server.2=10.204.51.65:2888:3888
+server.3=10.204.51.66:2888:3888
+##########
+追加ID
+echo 3 > /app/zookeeper/data/myid
+
+启动服务
+/app/zookeeper/bin/zkServer.sh start
+查看服务
+/app/zookeeper/bin/zkServer.sh status
+ZooKeeper JMX enabled by default
+Using config: /app/zookeeper/bin/../conf/zoo.cfg
+Mode: leade
+
+
+2.部署kafka
+
+wget https://archive.apache.org/dist/kafka/2.4.1/kafka_2.11-2.4.1.tgz
+cd /app && tar zxvf  kafka_2.11-2.4.1.tgz && mv kafka_2.11-2.4.1.tgz kafka-2.11
+创建目录
+修改10.204.51.64上配置文件
+broker.id=0
+port=9092
+log.dirs= /app/kafka-2.11/log
+zookeeper.connect=10.204.51.64:2181,10.204.51.65:2181,10.204.51.66:2181
+修改10.204.51.65上配置文件
+broker.id=1
+port=9092
+log.dirs= /app/kafka-2.11/log
+zookeeper.connect=10.204.51.64:2181,10.204.51.65:2181,10.204.51.66:2181
+修改10.204.51.66上配置文件
+broker.id=2
+port=9092
+log.dirs= /app/kafka-2.11/log
+zookeeper.connect=10.204.51.64:2181,10.204.51.65:2181,10.204.51.66:2181
+
+ /app/kafka-2.11/bin/kafka-server-start.sh -daemon /app/kafka-2.11/config/server.properties
+ 
+

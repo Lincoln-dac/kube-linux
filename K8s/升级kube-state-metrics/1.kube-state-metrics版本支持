@@ -1,0 +1,22 @@
+1.正常情况下， 升级k8s之后，很多监控项会消失，需要升级对应的kube-state-metrics，
+kube-state-metrics支持版本
+kube-state-metrics	Kubernetes 1.12	Kubernetes 1.13	Kubernetes 1.14	Kubernetes 1.15	Kubernetes 1.16
+v1.5.0	                    ✓	          -	              -	              -	              -
+v1.6.0	                    ✓	          ✓	              -	              -	              -
+v1.7.2	                    ✓	          ✓	              ✓	              -	              -
+v1.8.0	                    ✓	          ✓	              ✓	              ✓	              -
+v1.9.8	                    ✓	          ✓	              ✓	              ✓	              ✓
+master	                    ✓	          ✓	              ✓	              ✓	              ✓
+2.设置账号权限
+kubectl create clusterrolebinding kube-state-metrics-admin-binding --clusterrole=cluster-admin  --user=system:serviceaccount:monitoring:kube-state-metrics
+
+3.资源
+
+As a general rule, you should allocate
+
+200MiB memory
+0.1 cores
+For clusters of more than 100 nodes, allocate at least
+
+2MiB memory per node
+0.001 cores per node

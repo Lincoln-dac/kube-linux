@@ -1,0 +1,112 @@
+1.创建prometheus访问域名
+kubectl apply -f prometheus-service.yaml
+cat prometheus-service.yaml
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    prometheus: k8s
+  name: prometheus-k8s
+  namespace: monitoring
+spec:
+  ports:
+  - name: web
+    port: 9090
+    targetPort: web
+  selector:
+    app: prometheus
+    prometheus: k8s
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: prometheus-ingress
+  namespace: monitoring
+  annotations:
+    kubernetes.io/ingress.class: traefik
+spec:
+  rules:
+  - host: prometheus.test.com
+    http:
+      paths:
+      - backend:
+          serviceName: prometheus-k8s
+          servicePort: web
+          
+ 2.创建grafana访问域名     
+ kubectl apply -f grafana-service.yaml 
+cat grafana-service.yaml 
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  namespace: monitoring
+spec:
+  ports:
+  - name: http
+    port: 3000
+    targetPort: http
+  selector:
+    app: grafana
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: grafana-ingress
+  namespace: monitoring
+  annotations:
+    kubernetes.io/ingress.class: traefik
+spec:
+  rules:
+  - host: grafana.test.com
+    http:
+      paths:
+      - backend:
+          serviceName: grafana
+          servicePort: http
+3.创建alertmanager访问域名
+ kubectl apply -f alertmanager-service.yaml
+cat alertmanager-service.yaml
+alertmanager-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    alertmanager: main
+  name: alertmanager-main
+  namespace: monitoring
+spec:
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800
+  ports:
+  - name: web
+    port: 9093
+    targetPort: web
+  selector:
+    alertmanager: main
+    app: alertmanager
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: alter-ingress
+  namespace: monitoring
+  annotations:
+    kubernetes.io/ingress.class: traefik
+spec:
+  rules:
+  - host: altermanager.test.com
+    http:
+      paths:
+      - backend:
+          serviceName: alertmanager-main
+          servicePort: web
+          
+3.新增域名解析，将域名解析解析到traefik ip 即可
+altermanager.test.com
+grafana.test.com
+prometheus.test.com

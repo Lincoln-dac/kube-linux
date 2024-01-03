@@ -1,0 +1,6 @@
+1.创建monitoring ns
+kubectl create ns monitoring
+2.创建etcd secret
+kubectl -n monitoring create secret generic etcd-certs --from-file=/app/kubernetes/ssl/kubernetes.pem --from-file=/app/kubernetes/ssl/kubernetes-key.pem --from-file=/app/kubernetes/ssl/ca.pem
+3.创建 grafan secret
+kubectl create secret generic grafana-ini --from-file=grafana.ini  -n  monitoring

@@ -1,0 +1,33 @@
+remove_field 这个用法 在7.12.0上如下使用，其他版本写法 不一样 网上大部分是 字段单[]号
+ 
+如字段input.type  可以写 ["input.type"] 而 7.12.0 [ "[input][type]" ]
+
+
+input {
+  kafka {
+    bootstrap_servers => "10.204.51.64:9092"
+    partition_assignment_strategy => "org.apache.kafka.clients.consumer.RoundRobinAssignor"
+    group_id => "elk-os-logs"
+    topics => ["elk-os-log"]
+    consumer_threads => 3
+    codec => json
+    auto_offset_reset => "latest"
+    max_poll_records => '500'
+  }
+}
+filter {
+  mutate {
+    remove_field => [ "[input][type]","[agent][hostname]","[agent][type]","[ecs][version]","[@version]","[agent][name]" ,"[agent][ephemeral_id]","[agent][version]","[agent][id]" ]
+  }
+  if [message] =~ /(Created|Removed) slice/ or [message] =~ /Starting|Started titanagent/ or [message] =~ /scope has no PIDs/ or [message] =~ /sendmail/ or [message] =~ /crond/  {
+    drop {}
+  }
+}
+output {
+  elasticsearch {
+    hosts => ["http://10.204.51.64:9200"]
+    user => "elastic"
+    password => "123456"
+    index => "os-logs-%{+yyyy.MM.dd}"
+  }
+}

@@ -1,0 +1,25 @@
+mkdir -p /etc/logrotate.d/traefik
+tee /etc/logrotate.d/traefik/config <<-'EOF'
+/var/log/traefik/*.log {
+  daily
+  rotate 15
+  missingok
+  notifempty
+  compress
+  dateext
+  dateyesterday
+  dateformat .%Y-%m-%d
+  create 0644 root root
+  postrotate
+   docker kill --signal="USR1" $(docker ps | grep traefik |grep -v pause| awk '{print $1}')
+  endscript
+ }
+EOF
+
+
+
+创建定时任务
+
+crontab -e
+0 0 * * * /usr/sbin/logrotate -f /etc/logrotate.d/traefik/config >/dev/null 2>&1
+https://doc.traefik.io/traefik/observability/logs/

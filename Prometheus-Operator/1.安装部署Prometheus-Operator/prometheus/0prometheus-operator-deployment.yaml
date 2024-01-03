@@ -1,0 +1,42 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  labels:
+    k8s-app: prometheus-operator
+  name: prometheus-operator
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      k8s-app: prometheus-operator
+  template:
+    metadata:
+      labels:
+        k8s-app: prometheus-operator
+    spec:
+      containers:
+      - args:
+        - --kubelet-service=kube-system/kubelet
+        - -logtostderr=true
+        - --config-reloader-image=10.204.57.39/common/configmap-reload:v0.0.1
+        - --prometheus-config-reloader=10.204.57.39/common/prometheus-config-reloader:v0.23.0
+        image: 10.204.57.39/common/prometheus-operator:v0.23.0
+        name: prometheus-operator
+        ports:
+        - containerPort: 8080
+          name: http
+        resources:
+          limits:
+            cpu: 4000m
+            memory: 16000Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+      serviceAccountName: prometheus-operator

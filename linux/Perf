@@ -1,0 +1,5 @@
+一、perf工具介绍
+perf 命令(performance 的缩写)，是Linux系统提供的性能分析工具集，包含多种子工具，能够监测多种硬件及软件性能指标，包括cpu、内存、io等，这些可监测指标我们称为event。
+
+https://zhuanlan.zhihu.com/p/614212908
+
