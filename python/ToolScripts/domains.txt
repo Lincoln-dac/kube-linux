@@ -1,0 +1,9 @@
+sc.sudiyi.cn
+bass.sudiyi.cn
+device-query.sudiyi.cn
+duty-schedule.sudiyi.cn
+fc-flash-server.sudiyi.cn
+idcms-api.sudiyi.cn
+idcms-local.sudiyi.cn
+idcms.sudiyi.cn
+user-blacklist.sudiyi.cn
