@@ -1,0 +1,644 @@
+路由规则
+
+  路由规则是一系列的匹配规则,当匹配到了符合规则的请求,就会使用中间件处理请求并转发请求到服务   目前支持的规则如下
+
+路由规则	描述
+Headers(key, value)	检查请求投中是否包含了键值对 (key: value)
+HeadersRegexp(key, regexp)	检查请求头中是否包含了键key,且其值匹配正则表达式regexp
+Host(example.com, …)	检查请求域名是否被包含在给出的域名中
+HostHeader(example.com, …)	用法跟Host规则一样. 此匹配项由于历史原因存在
+HostRegexp(example.com, {subdomain:[a-z]+}.example.com, …)	检查请求域名是否符合给出的正则表达式之一
+Method(GET, …)	检查请求方法是否在给定的几个方法中.此选项支持GET, POST, PUT, DELETE, PATCH, HEAD
+Path(/path, /articles/{cat:[a-z]+}/{id:[0-9]+}, …)	精确匹配请求路径,它接受一系列文字和正则表达式.例如Path(/path)会匹配path但是不匹配path/foo
+PathPrefix(/products/, /articles/{cat:[a-z]+}/{id:[0-9]+})	匹配请求路径前缀,它接受一系列文字和正则表达式
+Query(foo=bar, bar=baz)	匹配请求查询参数,接收key=value键值对序列
+  ClientIP(10.0.0.0/16, ::1) ， 检查请求的客户端IP(request client IP)是否在给出的IPv4 IPv6 CIDR格式的地址中，这些规则可以用 AND(&&) OR(||) 操作符结合起来使用,也可以使用!表示对匹配规则取反的规则.
+
+为了对 Host 和 Path 使用正则表达式，需要声明一个任意命名的变量，然后跟上用冒号分隔的正则表达式，所有这些都用花括号括起来。 可以使用 Golang 的 regexp 包支持的模式（例如：/posts/{id:[0-9]+}）
+
+  路由优先级: 默认情况下,路由优先级由规则的长度决定,如果一个请求同时匹配到了两个路由,那么rule越长的那一个路由优先级越高,因此建议显示地在路由规则中定义priority,参考如下(IngressRoute的spec.routes[*].priority)
+
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: myingressroute
+  namespace: traefik-ingress
+spec:
+  entryPoints:
+    - web
+  routes:
+  - match: Host(`foo.com`) && PathPrefix(`/bar`)
+    kind: Rule
+    priority: 1
+    services:
+    - name: whoami
+      namespace: traefik-ingress-test
+      port: 80
+场景一、金丝雀发布(灰度发布)
+流程和镜像参考自https://juejin.cn/post/7065492332304400415
+
+灰度发布是指在一套集群中存在稳定和灰度两个版本，灰度版本可以限制只针对部分人员可用，待灰度版本测试完成后，可以将灰度版本升级为稳定版本，旧的稳定版本就可以下线了，我们也称之为金丝雀发布。
+
+(1)首先部署stable版本的应用及svc,资源清单app-stable.yaml如下
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: traefik-stable-app
+  namespace: traefik-ingress-test
+spec:
+  selector:
+    matchLabels:
+      app: go-test
+      version: stable
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: go-test
+        version: stable
+    spec:
+      containers:
+      - name: app-server
+        image: registry.cn-hangzhou.aliyuncs.com/rookieops/go-test:v1
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort:  8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: traefik-stable-app-svc
+  namespace: traefik-ingress-test
+spec:
+  selector:
+    app: go-test
+    version: stable
+  ports:
+  - name: http
+    port: 8080
+  stable版本的访问效果如下
+
+# curl 10.43.102.123:8080
+{"data":"hello world","version":"v1"}
+(2)然后部署canary版本的应用及svc,资源清单app-canary.yaml如下
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: traefik-canary-app
+  namespace: traefik-ingress-test
+spec:
+  selector:
+    matchLabels:
+      app: go-test
+      version: canary
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: go-test
+        version: canary
+    spec:
+      containers:
+      - name: app-server
+        image: registry.cn-hangzhou.aliyuncs.com/rookieops/go-test:v2
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort:  8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: traefik-canary-app-svc
+  namespace: traefik-ingress-test
+spec:
+  selector:
+    app: go-test
+    version: canary
+  ports:
+  - name: http
+    port: 8080
+  canary版本的应用访问效果如下
+
+# curl 10.43.35.7:8080
+{"data":"hello SB","version":"v2"}
+(3)基于权重进行灰度发布 
+
+​ 基于权重的发布场景比较粗糙，它是将所有用户中的一部分的访问转发到灰度版本，无法用特定条件限制具体的用户.   这里需要用到TraefikService,这是对traefik service的CRD实现,具体看参考官网介绍https://doc.traefik.io/traefik/routing/providers/kubernetes-crd/#kind-traefikservice
+
+  创建一个TraefikService,资源清单wrr-traefik-service.yaml如下
+
+apiVersion: traefik.containo.us/v1alpha1
+kind: TraefikService
+metadata:
+  name: canary-wrr
+  namespace: traefik-ingress-test
+spec:
+  weighted:
+    services:
+      - name: traefik-stable-app-svc
+        namespace: traefik-ingress-test
+        port: 8080
+        weight: 8
+      - name: traefik-canary-app-svc
+        namespace: traefik-ingress-test
+        port: 8080
+        weight: 2
+  创建IngressRoute,资源清单wrr-canary-ingressRoute.yaml如下
+
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: ingressroutebar
+  namespace: traefik-ingress
+
+spec:
+  entryPoints:
+    - web
+  routes:
+  - match: Host(`prod.traefik.com`)
+    kind: Rule
+    services:
+    - name: canary-wrr
+      namespace: traefik-ingress-test
+      kind: TraefikService
+  其中定义了使用域名prod.traefik.com访问应用,访问到的stable版本应用和canary版本应用的比例是8:2
+
+  查看traefik dashboard可以看到新增的路由
+
+image-20220515125027400
+
+  别忘了在主机上添加域名解析.之后访问这个域名,发现访问到的两个版本的应用大概就是8:2:
+
+image-20220515125111906
+
+  (4)基于请求头进行灰度发布
+
+  注意此方案也可以用于多版本应用共存的场景,尤其是当移动端用户安装有多个版本(v1,v2,v3)时,我们可以根据app发来的请求头中携带的应用版本信息将流量转发到不同版本的服务端应用里,使得之前版本的用户也能正常使用app.
+
+  deploy和svc复用第(3)步创建的两个,traefik-canary-app和traefik-stable-app
+
+  新建IngressRoute的资源清单canary-header-ingressRoute.yaml如下
+
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: canary-header-ingressroute
+  namespace: traefik-ingress
+spec:
+  entryPoints:
+    - web
+  routes:
+  - match: Host(`prod.traefik.com`) && Headers(`appversion`,`v2.0.0`)
+    kind: Rule
+    services:
+    - name: traefik-stable-app-svc
+      namespace: traefik-ingress-test
+      port: 8080
+
+  - match: Host(`prod.traefik.com`) && Headers(`appversion`,`v2.1.0`)
+    kind: Rule
+    services:
+    - name: traefik-canary-app-svc
+      namespace: traefik-ingress-test
+      port: 8080
+  使用curl构建带请求头的请求,结果如下,效果符合预期
+
+image-20220515125204989
+
+场景二、使用IngressRouteTCP暴露TCP服务
+  如果tcp routers和http routers监听听一个entryPoint，那么tcp routers会优先应用，当tcp routers中没有匹配的路由时，http routers会接管流量
+
+  tcp routers的路由规则:
+
+姓名	年龄
+HostSNI(domain-1, …)	检查SNI是否和给出的域名匹配
+  这里以redis为例，下面是部署单节点redis的资源清单tcp-router-redis.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tcp-router-redis
+  namespace: traefik-ingress-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:5.0.14
+        ports:
+        - containerPort: 6379
+          protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tcp-router-redis-svc
+  namespace: traefik-ingress-test
+spec:
+  ports:
+  - port: 6379
+    targetPort: 6379
+  selector:
+    app: redis
+  traefik使用TCP routers配置需要SNI，SNI依赖于TLS，目前没有证书，可以使用通配符*进行配置。
+
+  由于同一个entryPoint下，tcp routers优先级高于http routers，因此为了避免预期之外的行为，最好单独定义一个entryPoint，具体做法是在traefik-ingress-controller.yaml中的名为traefik的deployment的定义中增加一个名为tcpredis的entryPoint，同时在名为traefik的svc中增加访问相应的端口配置，之后别忘了kubectl apply更新资源：
+
+
+...其他内容省略...
+          args:
+            - --log.level=DEBUG
+            - --api
+            - --api.insecure
+            - --entrypoints.web.address=:80
+            - --entrypoints.tcpep.address=:8000
+            // 添加entryPoint
+            - --entrypoints.tcpredis.address=:6379
+            - --entrypoints.udpep.address=:9000/udp
+            - --providers.kubernetescrd
+            - --providers.kubernetescrd.allowCrossNamespace=true
+          ports:
+            - name: web
+              containerPort: 80
+            - name: admin
+              containerPort: 8080
+            - name: tcpep
+              containerPort: 8000
+            // 添加端口
+            - name: tcpredis
+              containerPort: 6379
+            - name: udpep
+              containerPort: 9000
+...其他内容省略...
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: traefik
+  namespace: traefik-ingress
+spec:
+  #type: LoadBalancer
+  type: NodePort
+  selector:
+    app: traefik
+  ports:
+    - protocol: TCP
+      port: 80
+      name: web
+      targetPort: 80
+    - protocol: TCP
+      port: 8080
+      name: admin
+      targetPort: 8080
+    - protocol: TCP
+      port: 8000
+      name: tcpep
+      targetPort: 8000
+    // 新增端口
+    - protocol: TCP
+      port: 6379
+      name: tcpredis
+      targetPort: 6379
+  查看dashboard可以看到新增的entryPoint
+
+image-20220515125548786
+
+  创建一个IngressRouteTCP，下面是资源清单ingressRouteTCP-redis.yaml
+
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRouteTCP
+metadata:
+  name: tcp-route-redis
+  namespace: traefik-ingress
+spec:
+  entryPoints:
+    - tcpredis
+  routes:
+  - match: HostSNI(`*`)
+    services:
+    - name: tcp-router-redis-svc
+      namespace: traefik-ingress-test
+      port: 6379
+  创建之后观察dashboard:
+
+image-20220515125627803
+
+  测试这个redis是否正常可达，先查看6379的NodePort:
+
+image-20220515125719296
+
+  在服务器上加上域名解析，将此域名redis.traefik.com解析到节点IP
+
+  然后访问这个redis
+
+image-20220515125749949
+
+给tcp routers加上tcp中间件(TCP Middlewares)
+
+  中间件附加在routers上。请求被转发到服务之前(或响应在到达客户端之前)会被中间件处理和修改。
+
+image-20220515125838015
+
+  目前可用的TCP Middlewares如下:
+
+中间件	用途	范围
+InFlightConn	限制同时连接数	安全, 请求生命周期(security,request lifecycle)
+IPWhiteList	限制可访问客户端IP	安全, 请求生命周期(security,request lifecycle)
+(1). InFlightConn
+  1. 按如下资源清单inFlightConn.yaml创建MiddlewareTCP
+
+apiVersion: traefik.containo.us/v1alpha1
+kind: MiddlewareTCP
+metadata:
+  name: redis-inflightconn
+  namespace: traefik-ingress
+spec:
+  inFlightConn:
+    amount: 2
+image-20220515125954918
+
+  2. 修改ingressRouteTCP-redis.yaml,在其中IngressRouteTCP.spec.routes.middlewares修改中间件配置并使用kubetl apply使之生效
+
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRouteTCP
+metadata:
+  name: tcp-route-redis
+  namespace: traefik-ingress
+spec:
+  entryPoints:
+    - tcpredis
+  routes:
+  - match: HostSNI(`*`)
+    middlewares:
+    - name: redis-inflightconn
+      namespace: traefik-ingress
+    services:
+    - name: tcp-router-redis-svc
+      namespace: traefik-ingress-test
+      port: 6379
+  查看dashboard，里面的tcp routers详情显示此中间件已启用
+
+image-20220515130042034
+
+  3. 验证效果，InFlightConn的资源清单里我们定义了最大同时连接数为2，因此只要尝试查看同时向这个redis发起三个请求的效果即可
+
+  节点1上连接redis
+
+image-20220515130122548
+
+  节点2上连接redis
+
+image-20220515130146253
+
+  节点3上连接redis
+
+image-20220515130210136
+
+  可以看到两个节点连接到redis之后，第三个连接会被拒绝，验证成功。
+
+(2). IPWhiteList
+  1. 按如下资源清单ipWhileList.yaml创建MiddlewareTCP
+
+
+apiVersion: traefik.containo.us/v1alpha1
+kind: MiddlewareTCP
+metadata:
+  name: redis-ipwhitelist
+  namespace: traefik-ingress
+spec:
+  ipWhiteList:
+    sourceRange:
+      - 127.0.0.1/32
+      - 192.168.1.7
+  2. 修改ingressRouteTCP-redis.yaml,在其中IngressRouteTCP.spec.routes.middlewares修改中间件配置并使用kubetl apply使之生效：
+
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRouteTCP
+metadata:
+  name: tcp-route-redis
+  namespace: traefik-ingress
+spec:
+  entryPoints:
+    - tcpredis
+  routes:
+  - match: HostSNI(`*`)
+    middlewares:
+    - name: redis-ipwhitelist
+      namespace: traefik-ingress
+    services:
+    - name: tcp-router-redis-svc
+      namespace: traefik-ingress-test
+      port: 6379
+验证失败 所有服务器连接这个redis都会报错：
+
+image-20220515130245337
+
+这里留个坑，之后有空了再来解决。
+
+场景三、流量镜像
+image-20220515130412013
+
+  流量镜像功能可以将发送到一个服务的流量同时发送到其他服务,镜像服务可以获得给定百分比的请求同时也会忽略这部分请求的响应
+
+  先来部署两个服务，其中app-v1是流量真正要发送到的服务，app-v2则是镜像流量发送到的服务。
+
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: whoami-v1
+  namespace: traefik-ingress-test
+  labels:
+    app: traefiklabs
+    name: whoami-v1
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: traefiklabs
+      task: whoami-v1
+  template:
+    metadata:
+      labels:
+        app: traefiklabs
+        task: whoami-v1
+    spec:
+      containers:
+        - name: whoami
+          image: nginx:1.18.0-alpine
+          ports:
+            - containerPort: 80
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: whoami-v1
+  namespace: traefik-ingress-test
+
+spec:
+  ports:
+    - name: http
+      port: 80
+  selector:
+    app: traefiklabs
+    task: whoami-v1
+
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: whoami-v2
+  namespace: traefik-ingress-test
+  labels:
+    app: traefiklabs
+    name: whoami-v2
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: traefiklabs
+      task: whoami-v2
+  template:
+    metadata:
+      labels:
+        app: traefiklabs
+        task: whoami-v2
+    spec:
+      containers:
+        - name: whoami
+          image: nginx:1.18.0-alpine
+          ports:
+            - containerPort: 80
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: whoami-v2
+  namespace: traefik-ingress-test
+
+spec:
+  ports:
+    - name: http
+      port: 80
+  selector:
+    app: traefiklabs
+    task: whoami-v2
+  创建一个ingressRoute和TraefikService，将app-v1的流量复制50%到app-v2，资源对象如下所示:
+
+# cat mirror-ingressRoute.yaml
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: mirror-ingressroute
+  namespace: traefik-ingress
+
+spec:
+  entryPoints:
+    - web
+  routes:
+  - match: Host(`foo.com`) && PathPrefix(`/mirror`)
+    kind: Rule
+    services:
+    - name: mirror1
+      namespace: traefik-ingress-test
+      kind: TraefikService
+
+# cat  mirror-traefikService.yaml
+apiVersion: traefik.containo.us/v1alpha1
+kind: TraefikService
+metadata:
+  name: mirror1
+  namespace: traefik-ingress-test
+
+spec:
+  mirroring:
+    name: whoami-v1
+    port: 80
+    mirrors:
+      - name: whoami-v2
+        port: 80
+        percent: 50
+  查看dashboard中的http services，如下图所示:
+
+image-20220515130504931
+
+  验证,使用命令curl foo.com:19206/mirror访问whoami-v1，两个容器的日志输出如下:
+
+  这是whoami-v1容器内的访问日志：
+
+image-20220515130539496
+
+  这是whoami-v2容器内的访问日志，验证镜像流量的比例确实是50%：
+
+image-20220515130614184
+
+参考资料
+​ https://doc.traefik.io/traefik/
+
+​ https://juejin.cn/post/7065492332304400415
+
+总结
+目前金丝雀发布在应用版本升级过程比较常用的一种方式，本文使用traefik实践了这一过程，并介绍了其他场景下的使用。在测试白名单中间件的时候出现了预期之外的错误，初步判断是在k8s集群中客户端IP没有被正确传递的原因，这里先挖个坑。
+
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: sit6
+  name: appmgr-web-sit6-svc
+  annotations:
+    prometheus.io/scrape: true
+spec:
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+  selector:
+    app: appmgr-web-sit6
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: appmgr-web-sit6-ingressroute
+  namespace: sit6
+spec:
+  entryPoints:
+    - web
+  routes:
+  - match: Host(`appmgr-web-sit6.test.com`) && PathPrefix(`/postCourier/login/richScanAppLogin`)
+    kind: Rule
+    #priority: 1
+    services:
+    - name: appmgr-web-sit6-svc
+      port: 8080
+      sticky:
+        cookie: {}
+  - match: Host(`appmgr-web-sit6.test.com`) && Headers(`Pinpoint-Flags`, `10`)
+    kind: Rule
+    #priority: 99
+    services:
+    - name: appmgr-web-sit6-gray-svc
+      namespace: sit6-gray
+      port: 8080
+      sticky:
+        cookie: {}
+
+
+
+https://www.garfieldthink.com/post/2022-05-15-traefik2/
