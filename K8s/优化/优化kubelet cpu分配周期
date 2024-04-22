@@ -1,1 +1,2 @@
-cpu-cfs-quota-period: "5ms"
+--cpu-cfs-quota-period duration     Default: 100ms
+Sets CPU CFS quota period value, cpu.cfs_period_us, defaults to Linux Kernel default. (DEPRECATED: This parameter should be set via the config file specified by the kubelet's --config flag. See kubelet-config-file for more information.)
