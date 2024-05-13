@@ -1,2 +1,5 @@
+traefik2 在配置不同日志输出格式，性能差异大
+传统的format格式，性能大概在1.5W qps/S
+json格式，只有8000 超时后，traefik响应将急剧增加
 
 https://www.jianshu.com/p/2b6798ba8028
