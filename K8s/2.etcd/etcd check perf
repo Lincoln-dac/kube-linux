@@ -1,0 +1,20 @@
+ /etcd/bin/etcdctl --write-out=table check perf --load='s' 
+ 60 / 60 Boooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo! 100.00%1m0s
+PASS: Throughput is 150 writes/s
+PASS: Slowest request took 0.065480s
+PASS: Stddev is 0.003489s
+PASS
+
+/etcd/bin/etcdctl --write-out=table check perf --load='m' 
+ 60 / 60 Boooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo! 100.00%1m0s
+PASS: Throughput is 963 writes/s
+PASS: Slowest request took 0.181001s
+PASS: Stddev is 0.008398s
+PASS
+
+ /etcd/bin/etcdctl --write-out=table check perf --load='l' 
+ 60 / 60 Boooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo! 100.00%1m0s
+FAIL: Throughput too low: 3638 writes/s
+PASS: Slowest request took 0.376028s
+PASS: Stddev is 0.024331s
+FAIL
