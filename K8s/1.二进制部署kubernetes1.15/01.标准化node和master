@@ -16,7 +16,7 @@ fi
 
 2.重启服务器
 #关闭防火墙，swap,selinux,清除所有iptables规则
-systemctl stop firewalld NetworkManager && systemctl disable firewalld NetworkManager && systemctl stop abrtd && systemctl disable abrtd  && swapoff -a && setenforce 0
+systemctl stop firewalld NetworkManager && systemctl disable firewalld NetworkManager && systemctl stop abrt-oops && systemctl stop abrtd && systemctl stop abrt-ccpp systemctl disable abrt-oops && systemctl disable abrtd && systemctl disable abrt-ccpp  && swapoff -a && setenforce 0
 sed -ri '/^[^#]*SELINUX=/s#=.+$#=disabled#' /etc/selinux/config && sed -ri '/^[^#]*swap/s@^@#@' /etc/fstab && cat /etc/fstab && cat /etc/selinux/config
 iptables -F
 确保虚拟内存关闭 seliunx关闭
