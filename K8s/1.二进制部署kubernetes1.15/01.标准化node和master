@@ -73,8 +73,9 @@ chmod 755 /etc/sysconfig/modules/ipvs.modules && bash /etc/sysconfig/modules/ipv
 ##
 如果无输出，则ipvs 模块没有加载成功
 ####
-
-8.#参数优化 cat /etc/sysctl.conf
+modprobe ip_conntrack
+8.开启modprobe ip_conntrack
+#参数优化 cat /etc/sysctl.conf
 fs.file-max = 65535600
 fs.inotify.max_user_instances=524288
 fs.inotify.max_user_watches= 524288
