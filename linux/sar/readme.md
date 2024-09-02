@@ -272,6 +272,18 @@ sar -f /var/log/sa/sa04 -b    # 查看4号的I/O使用情况
 
  注意：系统每10分钟保存一次，所以即使指定每 1 秒输出一次，也是按每 10 分钟输出一次
 
+
+ sar -f /var/log/sa/sa04 -u    # 查看4号的CPU使用情况
+sar -f /var/log/sa/sa04 -r    # 查看4号的内存使用情况
+sar -f /var/log/sa/sa04 -d    # 查看4号的磁盘使用情况
+sar -f /var/log/sa/sa04 -b    # 查看4号的I/O使用情况
+
+————————————————
+
+                            版权声明：本文为博主原创文章，遵循 CC 4.0 BY-SA 版权协议，转载请附上原文出处链接和本声明。
+                        
+原文链接：https://blog.csdn.net/m0_61066945/article/details/126213941
+
         
 
 7. 总结
