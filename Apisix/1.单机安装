@@ -1,0 +1,11 @@
+1.下载安装包 
+wget https://repos.apiseven.com/packages/centos/apache-apisix-repo-1.0-1.noarch.rpm
+2.配置rpm源
+yum-config-manager --add-repo https://repos.apiseven.com/packages/centos/apache-apisix.repo
+3.安装apisix
+yum install apisix-3.2.0
+4.安装etcd
+ETCD_VERSION='3.5.4'
+wget https://github.com/etcd-io/etcd/releases/download/v${ETCD_VERSION}/etcd-v${ETCD_VERSION}-linux-amd64.tar.gz
+tar -xvf etcd-v${ETCD_VERSION}-linux-amd64.tar.gz 
+nohup etcd >/tmp/etcd.log 2>&1 &
