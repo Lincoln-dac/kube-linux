@@ -9,3 +9,5 @@ ETCD_VERSION='3.5.4'
 wget https://github.com/etcd-io/etcd/releases/download/v${ETCD_VERSION}/etcd-v${ETCD_VERSION}-linux-amd64.tar.gz
 tar -xvf etcd-v${ETCD_VERSION}-linux-amd64.tar.gz 
 nohup etcd >/tmp/etcd.log 2>&1 &
+启动
+/app/etcd-v3.5.4-linux-amd64/bin/etcd --data-dir=/app/etcd-v3.5.4-linux-amd64/data --wal-dir=/app/etcd-v3.5.4-linux-amd64/data --snapshot-count=10000 --advertise-client-urls=http://10.204.51.66:2381 --listen-peer-urls=http://10.204.51.66:2381 --listen-client-urls=http://10.204.51.66:2382 --quota-backend-bytes=8589934592
