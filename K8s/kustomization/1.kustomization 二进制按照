@@ -1,0 +1,6 @@
+1.下载安装包
+https://github.com/kubernetes-sigs/kustomize/releases?page=20
+2.https://objects.githubusercontent.com/github-production-release-asset-2e65be/133067498/25104080-f90b-11ea-9dcf-3e0047d8cd44?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=releaseassetproduction%2F20250318%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250318T091046Z&X-Amz-Expires=300&X-Amz-Signature=38ebab7f937d53d1d43315fc5b8b00a34a353baa15325de5e437f0b93db03488&X-Amz-SignedHeaders=host&response-content-disposition=attachment%3B%20filename%3Dkustomize_v3.8.3_linux_amd64.tar.gz&response-content-type=application%2Foctet-stream
+3.mv kustomize /usr/bin/ && chmod +x kustomize
+
+
