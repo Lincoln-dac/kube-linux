@@ -1,0 +1,44 @@
+安装argoCD
+1.下载安装文件
+wget https://raw.githubusercontent.com/argoproj/argo-cd/v2.1.0/manifests/install.yaml
+2.安装文件
+kubectl apply -f install.yaml
+3.配置ingress(我这里使用的traefik做网关，所以创建ingressroute)
+  kubectl apply -f ingress.yaml
+  ----
+ apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: argocd-ingressroute
+  namespace: default
+spec:
+  entryPoints:
+  - web
+  routes:
+  - kind: Rule
+    match: Host(`argocd-test.abc.com`)
+    services:
+    - name: argocd-server
+      port: 80
+      sticky:
+        cookie: {}
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: argocd-ingressroute-tls
+spec:
+  entryPoints:
+  - websecure
+  routes:
+  - kind: Rule
+    match: Host(`argocd-test.abc.com`)
+    services:
+    - name: argocd-server
+      port: 443
+      sticky:
+        cookie: {}
+  tls:
+    secretName: fc-tls
+  ----
+  
