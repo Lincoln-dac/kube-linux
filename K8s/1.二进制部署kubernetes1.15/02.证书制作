@@ -14,9 +14,9 @@ wget  http://pkg.cfssl.org/R1.2/cfssl_linux-amd64
 wget  http://pkg.cfssl.org/R1.2/cfssljson_linux-amd64
 wget  http://pkg.cfssl.org/R1.2/cfssl-certinfo_linux-amd64
 chmod +x cfssl*
-mv cfssl-certinfo_linux-amd64 /usr/local/bin/cfssl-certinfo
-mv cfssljson_linux-amd64 /usr/local/bin/cfssljson
-mv cfssl_linux-amd64 /usr/local/bin/cfssl
+mv cfssl-certinfo_linux-amd64 /usr/bin/cfssl-certinfo
+mv cfssljson_linux-amd64 /usr/bin/cfssljson
+mv cfssl_linux-amd64 /usr/bin/cfssl
 mkdir /root/ssl
 cd /root/ssl
 3:生成ca证书
