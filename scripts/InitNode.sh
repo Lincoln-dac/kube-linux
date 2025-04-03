@@ -1,6 +1,6 @@
 #!/bin/bash
 # 定义基础URL变量
-base_url="http://yum-xl-repo.fcbox.com"
+base_url="http://yum-xl-repo.test.com"
 
 # 通用错误处理函数
 handle_error() {
