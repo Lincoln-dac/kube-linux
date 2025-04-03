@@ -1,5 +1,5 @@
 #!/bin/bash
-netstat -naltp|grep 0.0.0.0:6443
+nc -z localhost 80 && netstat -naltp|grep traefik|grep -w 80
 if [ $? = 0 ];
   then
     exit 0
