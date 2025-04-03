@@ -1,4 +1,4 @@
-进入 prometheus
+1.进入 prometheus
 编辑grafana-deployment.yaml
 将 grafana-storage  映射到nfs存储，做数据保留
 
@@ -10,8 +10,9 @@
           server: 10.204.51.64
           path: /app/nfs/prom/
 
-编辑prometheus-prometheus.yaml
-新增
+2. kubectl create secret generic additional-configs --from-file=prometheus-additional.yaml -n monitoring
+
+编辑prometheus-prometheus.yaml 新增
 
   storage:
     volumeClaimTemplate:
@@ -21,11 +22,11 @@
           requests:
             storage: 10Gi
 
-
   retention: 7d（修改）
 
   secrets:
   - etcd-certs
+
 
   additionalScrapeConfigs:
     name: additional-configs
