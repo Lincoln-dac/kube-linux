@@ -77,4 +77,38 @@ cat  prometheus-additional.yaml
     target_label: pod
 ---
 
-5.
+5.4.创建prometheus-ingress
+cat prometheus-service.yaml
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    prometheus: k8s
+  name: prometheus-k8s
+  namespace: monitoring
+spec:
+  ports:
+  - name: web
+    port: 9090
+    targetPort: web
+  selector:
+    app: prometheus
+    prometheus: k8s
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: prometheus-ingress
+  namespace: monitoring
+  annotations:
+    kubernetes.io/ingress.class: traefik
+spec:
+  rules:
+  - host: prometheus.test.com
+    http:
+      paths:
+      - backend:
+          serviceName: prometheus-k8s
+          servicePort: web
+---
