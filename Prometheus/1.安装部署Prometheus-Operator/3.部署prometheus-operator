@@ -34,6 +34,4 @@
     name: additional-configs
     key: prometheus-additional.yaml
 
-
-
 多次执行 kubectl apply -f . 不报错为止
