@@ -1,1 +1,80 @@
 1.使用prometheus-operator  版本 0.23 ，由于版本比较老旧
+1.创建monitoring ns
+kubectl create ns monitoring
+2.创建etcd secret
+kubectl -n monitoring create secret generic etcd-certs --from-file=/app/kubernetes/ssl/kubernetes.pem --from-file=/app/kubernetes/ssl/kubernetes-key.pem --from-file=/app/kubernetes/ssl/ca.pem
+3.创建 grafan secret
+kubectl create secret generic grafana-ini --from-file=grafana.ini  -n  monitoring
+4.创建prometheus-storageclass-nfs
+cat  prometheus-storageclass-nfs.yaml
+---
+apiVersion: storage.k8s.io/v1beta1
+kind: StorageClass
+metadata:
+  name: prometheus-data-db
+provisioner: fuseim.pri/ifs
+---
+5.创建additional-configs
+kubectl create secret generic additional-configs --from-file=prometheus-additional.yaml -n monitoring
+cat  prometheus-additional.yaml
+---
+ job_name: 'kubernetes-service-endpoints'
+  kubernetes_sd_configs:
+  - role: endpoints
+  relabel_configs:
+  - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
+    action: keep
+    regex: true
+  - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+    action: replace
+    target_label: __scheme__
+    regex: (https?)
+  - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
+    action: replace
+    target_label: __metrics_path__
+    regex: (.+)
+  - source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
+    action: replace
+    target_label: __address__
+    regex: ([^:]+)(?::\d+)?;(\d+)
+    replacement: $1:$2
+  - action: labelmap
+    regex: __meta_kubernetes_service_label_(.+)
+  - source_labels: [__meta_kubernetes_namespace]
+    action: replace
+    target_label: kubernetes_namespace
+  - source_labels: [__meta_kubernetes_service_name]
+    action: replace
+    target_label: kubernetes_name
+- job_name: 'JVM'
+  scrape_interval: 30s
+  metrics_path: /metrics
+  kubernetes_sd_configs:
+  - role: pod
+  scheme: http
+  relabel_configs:
+  - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_jvm]
+    action: keep
+    regex: true
+  - source_labels: [__meta_kubernetes_pod_container_port_name]
+    action: keep
+    regex: 'jvmport'
+  - source_labels: [__meta_kubernetes_pod_container_port_number]
+    action: keep
+    regex: 12345
+  - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+    action: replace
+    regex: ([^:]+)(?::\d+)?;(\d+)
+    replacement: $1:$2
+    target_label: __address__
+  - action: labelmap
+    regex: __meta_kubernetes_pod_label_(.+)
+  - source_labels: [__meta_kubernetes_namespace]
+    action: replace
+    target_label: namespace
+  - source_labels: [__meta_kubernetes_pod_name]
+    action: replace
+    target_label: pod
+---
+
+5.
