@@ -22,7 +22,7 @@ else
         fi
     fi
     # 进行同步
-    /usr/bin/rsync -avz --delete /app/nexus/ mwopr@10.204.16.232:/app/nexus/
+    /usr/bin/rsync -avz --delete /app/nexus/ mwopr@10.204.16.12:/app/nexus/
     echo `date`  "sync data to 10.204.16.12 finish" >> /tmp/syncdata.log
 fi
 
