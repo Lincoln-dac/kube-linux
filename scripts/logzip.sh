@@ -20,7 +20,7 @@ function DEL_LOG()
     log_path=$1
 
     find $log_path -name "*.gz" -type f -mtime +15 -exec rm -rf {} \;
-    find /app/war/fcbox_send_core_01/version/rollback/pkg  -mtime +15 -exec rm -rf {} \;
+
     #find $log_path -path $log_path/edmsdcn -prune -o -name "*.tar"*.gz" -type f -mtime +15 -exec rm -rf {} \;
 }
 
