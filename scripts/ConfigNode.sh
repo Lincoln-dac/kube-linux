@@ -17,7 +17,7 @@ Configflannled() {
     systemctl stop flanneld && systemctl start flanneld && systemctl enable flanneld || handle_error "启动或启用flanneld服务失败"
 }
 ConfigDocker() {
-    docker login -u admin -p Harbor12345 harbor.fcbox.com || handle_error "登录Harbor失败"
+    docker login -u admin -p Harbor12345 harbor.test.com || handle_error "登录Harbor失败"
     cp /root/.docker/config.json /app/kubernetes/data/kubelet || handle_error "复制docker配置文件失败"
     systemctl stop docker && systemctl start docker && systemctl enable docker || handle_error "启动或启用docker服务失败"
 
