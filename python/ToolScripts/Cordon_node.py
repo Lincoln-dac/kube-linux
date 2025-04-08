@@ -9,7 +9,7 @@ from prometheus_api_client import PrometheusConnect
 import os
 
 try:
-    prom = PrometheusConnect(url="http://prometheus-65.fcbox.com/", disable_ssl=True)
+    prom = PrometheusConnect(url="http://prometheus-65.test.com/", disable_ssl=True)
 except Exception as e:
     print("error connecting to promethesu:", e)
     exit()

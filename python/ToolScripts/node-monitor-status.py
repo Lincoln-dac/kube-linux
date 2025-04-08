@@ -12,7 +12,7 @@ class monitor:
     """获取prometheus监控数据"""
     def __init__(self):
         #prometheus 地址
-        self.url = 'http://prometheus-65.fcbox.com'
+        self.url = 'http://prometheus-65.test.com'
         # up节点列表
         self.up_list = []
         # down节点列表
