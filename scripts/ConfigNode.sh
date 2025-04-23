@@ -25,7 +25,7 @@ ConfigDocker() {
 
 ConfigKubelet() {
     systemctl stop kubelet && systemctl start kubelet && systemctl enable kubelet || handle_error "启动或启用kubelet服务失败"
-    echo "kubelet配置完成,请在控制台执行kubectl certificate approve `kubectl get csr | awk '{ print $1}'` 将新节点加入集群"
+    echo "kubelet配置完成,请在控制台执行kubectl certificate approve `kubectl get csr | awk '{ print $1}'` 将新节点加入集群,脚本将等待120秒"
     sleep 120
 }
 ConfigKubeProxy() {
