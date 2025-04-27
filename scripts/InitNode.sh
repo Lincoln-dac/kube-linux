@@ -74,9 +74,7 @@ EOF
     cd /etc/ || handle_error "切换到 /etc/ 目录失败"
     wget -O  sysctl.conf "${base_url}/k8s/config/sysctl.conf" || handle_error "下载sysctl.conf文件失败"
 
-    cd /etc/rc.d/ || handle_error "切换到 /etc/rc.d/ 目录失败"
-    wget -O rc.local "${base_url}/k8s/${network_zone}/config/rc.local" || handle_error "下载rc.local文件失败"
-    chmod +x /etc/rc.d/rc.local
+
 
     # 关闭IPV6
     if [ $(cat /etc/default/grub |grep 'ipv6.disable=1' |grep GRUB_CMDLINE_LINUX|wc -l) -eq 0 ]; then
@@ -143,6 +141,10 @@ InitDocker() {
 
     cd /usr/lib/systemd/system/ || handle_error "切换到 /usr/lib/systemd/system/ 目录失败"
     wget -O docker.service "${base_url}/k8s/config/docker.service" || handle_error "下载docker.service文件失败"
+
+    cd /app/kubernetes/data/kubelet || handle_error "切换到 /app/kubernetes/data/kubelet 目录失败"
+    wget -O config.json "${base_url}/k8s/${network_zone}/config/config.json" || handle_error "下载config.json文件失败"
+
 }
 
 # 初始化kubelet

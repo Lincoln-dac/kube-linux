@@ -1,10 +1,32 @@
 #!/bin/bash
+# 定义基础URL变量
+base_url="http://yum-xl-repo.test.com"
+
 # 通用错误处理函数
 handle_error() {
     local message="$1"
     echo "$message"
     exit 1
 }
+
+# 检查是否为root用户
+if [ "$EUID" -ne 0 ]; then
+    handle_error "错误：此脚本必须以root用户身份执行。"
+fi
+
+# 检查是否传入了参数
+if [ $# -ne 1 ]; then
+    handle_error "错误：只能输入一个变量,切只能是 xlesn xldcn nwdcn nwesn。"
+fi
+
+# 定义允许的变量值
+allowed_values=("xlesn" "xldcn" "nwdcn" "nwesn")
+network_zone="$1"
+
+# 检查输入的参数是否在允许的值列表中
+if ! [[ " ${allowed_values[*]} " =~ " ${network_zone} " ]]; then
+    handle_error "错误：变量${network_zone}无效，只允许输入 xlesn, xldcn, nwdcn, nwesn。"
+fi
 
 Configflannled() {
     read -p "初始化节点需要提前在etcd写入新节点POD网点，请确认操作是否执行，是选择Y 不是选择N: " confirm
@@ -20,7 +42,9 @@ ConfigDocker() {
     docker login -u admin -p Harbor12345 harbor.test.com || handle_error "登录Harbor失败"
     cp /root/.docker/config.json /app/kubernetes/data/kubelet || handle_error "复制docker配置文件失败"
     systemctl stop docker && systemctl start docker && systemctl enable docker || handle_error "启动或启用docker服务失败"
-
+    cd /etc/rc.d/ || handle_error "切换到 /etc/rc.d/ 目录失败"
+    wget -O rc.local "${base_url}/k8s/${network_zone}/config/rc.local" || handle_error "下载rc.local文件失败"
+    chmod +x /etc/rc.d/rc.local || handle_error "设置rc.local文件可执行权限失败"
 }
 
 ConfigKubelet() {
