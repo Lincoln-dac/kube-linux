@@ -1,6 +1,6 @@
 #!/bin/bash
 # 定义基础URL变量
-base_url="http://10.204.210.11"
+base_url="http://10.204.51.72:8888/download"
 
 # 通用错误处理函数
 handle_error() {
@@ -104,7 +104,7 @@ EOF
 # 初始化目录
 InitNodeDir() {
     echo  "初始化目录"
-    mkdir -p /app/kubernetes/{bin,logs,config,data,ssl} /app/kubernetes/data/kubelet /app/scripts /app/applogs/sit1 /app/applogs/sit2 /app/applogs/sit3 /app/applogs/sit4 /app/applogs/sit5 /app/applogs/sit6 /app/applogs/gray /etc/docker /data/dockerdata || handle_error "创建 /app/kubernetes 相关目录失败"
+    mkdir -p /app/kubernetes/{bin,logs,config,data,ssl} /app/kubernetes/data/kubelet /app/scripts /app/applogs/sit1 /app/applogs/sit2 /app/applogs/sit2-gray /app/applogs/sit6-gray /app/applogs/sit3 /app/applogs/sit4 /app/applogs/sit5 /app/applogs/sit6 /app/applogs/gray /etc/docker /data/dockerdata || handle_error "创建 /app/kubernetes 相关目录失败"
     chmod -R 700 /app/kubernetes || handle_error "修改 /app/kubernetes 目录权限失败"
     chown -R mwopr:mwopr /app/applogs/|| handle_error "修改 /app/applogs/gray 目录所有者失败"
     mkdir -p /faceiddata /data/ml /data/faceid /data/mfs   || handle_error "创建其他目录失败"
