@@ -215,8 +215,8 @@ InitLogAgent() {
     wget -O compensatelog.sh "${base_url}/k8s/scripts/compensatelog.sh" || handle_error "下载compensatelog.sh文件失败"
     wget -O logzip.sh "${base_url}/k8s/scripts/logzip.sh" || handle_error "下载logzip.sh文件失败"
     wget -O clean_dockimage.sh "${base_url}/k8s/scripts/clean_dockimage.sh" || handle_error "下载clean_dockimage.sh.sh文件失败"
-    chmod +x compensatelog.sh && chmod +x logzip.sh && chmod +x clean_dockimage.sh || handle_error "修改脚本文件权限失败"
-
+    wget -O Del_traefik_log.sh.sh "${base_url}/k8s/scripts/Del_traefik_log.sh.sh" || handle_error "下载Del_traefik_log.sh.sh文件失败"
+    chmod +x compensatelog.sh && chmod +x logzip.sh && chmod +x clean_dockimage.sh && chmod +x Del_traefik_log.sh || handle_error "修改脚本文件权限失败"
     cd /var/spool/cron || handle_error "切换到 /var/spool/cron 目录失败"
     wget -O  root "${base_url}/k8s/config/root" || handle_error "下载root文件失败"
 }
