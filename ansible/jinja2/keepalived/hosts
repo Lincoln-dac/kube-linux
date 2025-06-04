@@ -1,0 +1,4 @@
+[keepalived_servers]
+master ansible_host=10.204.51.64
+backup ansible_host=10.204.51.65
+

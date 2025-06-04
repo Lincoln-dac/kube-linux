@@ -1,0 +1,46 @@
+---
+- name: 部署Keepalived主从集群
+  hosts: keepalived_servers
+  become: yes
+  gather_facts: yes
+  vars_files:
+    - vars/keepalived.yml
+
+  tasks:
+    - name: 安装Keepalived
+      package:
+        name: keepalived
+        state: present
+
+    - name: 创建脚本目录
+      file:
+        path: "{{ keepalived_script_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: 部署健康检查脚本
+      template:
+        src: templates/check_nginx.sh.j2
+        dest: "{{ keepalived_script_dir }}/check_nginx.sh"
+        mode: '0755'
+
+    - name: 部署Keepalived配置文件 - 主节点
+      template:
+        src: templates/keepalived-master.conf.j2
+        dest: /etc/keepalived/keepalived.conf
+        mode: '0644'
+      when: inventory_hostname == 'master'
+
+    - name: 部署Keepalived配置文件 - 从节点
+      template:
+        src: templates/keepalived-backup.conf.j2
+        dest: /etc/keepalived/keepalived.conf
+        mode: '0644'
+      when: inventory_hostname == 'backup'
+
+    - name: 确保Keepalived服务已启动
+      service:
+        name: keepalived
+        state: started
+        enabled: yes
+      when: not ansible_check_mode    

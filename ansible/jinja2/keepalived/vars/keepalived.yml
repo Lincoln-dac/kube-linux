@@ -1,0 +1,9 @@
+---
+# Keepalived 配置变量
+keepalived_vip: 10.204.51.66  # 虚拟IP地址，需根据实际环境调整
+keepalived_network_interface: eth0  # 网络接口，需根据实际环境调整
+keepalived_virtual_router_id: 51  # 虚拟路由ID，主从必须相同
+keepalived_master_priority: 101  # 主节点优先级
+keepalived_backup_priority: 100  # 从节点优先级
+keepalived_auth_pass: 1111  # 认证密码
+keepalived_script_dir: /etc/keepalived/scripts  # 脚本目录    

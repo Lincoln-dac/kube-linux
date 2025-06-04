@@ -1,0 +1,29 @@
+! Configuration File for keepalived
+
+global_defs {
+    router_id {{ ansible_hostname }}
+}
+
+vrrp_script chk_nginx {
+    script "{{ keepalived_script_dir }}/check_nginx.sh"
+    interval 2
+    weight -20
+}
+
+vrrp_instance VI_1 {
+    state BACKUP
+    interface {{ keepalived_network_interface }}
+    virtual_router_id {{ keepalived_virtual_router_id }}
+    priority {{ keepalived_backup_priority }}
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass {{ keepalived_auth_pass }}
+    }
+    track_script {
+        chk_nginx
+    }
+    virtual_ipaddress {
+        {{ keepalived_vip }}
+    }
+}    
