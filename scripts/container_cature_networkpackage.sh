@@ -1,6 +1,6 @@
-check-pod-id.sh podname namespace
+#check-pod-id.sh podname namespace
 
-cat  check-pod-id.sh
+#cat  check-pod-id.sh
 
 #!/bin/bash
 #1 podname
@@ -14,5 +14,5 @@ echo " please  use command docker inspect -f {{.State.Pid}} $dockerid  and  nsen
 
 docker inspect -f {{.State.Pid}} 69786dd8873d4879b7b98b35232ca011442f9082b8ee9b34a678f9a4d44e73cf   
 
-nsenter -n -t 20512
-tcpdump host -w a.cap
+#nsenter -n -t 20512
+#tcpdump host -w a.cap
