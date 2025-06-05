@@ -86,8 +86,8 @@ EOF
         /usr/sbin/grub2-mkconfig -o /boot/efi/EFI/centos/grub.cfg
     fi
 
-    # 关闭防火墙
-    systemctl stop firewalld NetworkManager && systemctl disable firewalld NetworkManager && /usr/sbin/swapoff -a && /usr/sbin/setenforce 0 && /usr/sbin/iptables -F
+    # 关闭防火墙和其他相关服务
+    systemctl stop firewalld NetworkManager && systemctl disable firewalld NetworkManager  abrt-ccpp  abrtd && /usr/sbin/swapoff -a && /usr/sbin/setenforce 0 && /usr/sbin/iptables -F
 
     # 优化netfilter
     echo "modprobe br_netfilter" > /etc/sysconfig/modules/br_netfilter.modules
