@@ -1,0 +1,35 @@
+upstream open-edi-sit2-https {
+         server 10.204.209.241:80;
+}
+upstream open-edi-gray-sit2-https{
+         server 10.204.209.98:80;
+}
+server {
+        listen   10.204.56.159:443;
+        server_name  open-edi-sit2.test.com;
+        access_log /app/nginx/logs/open-edi-sit2.test.com.log main;
+        error_log /app/nginx/logs/open-edi-sit2.test.com.log;
+#        ssl   on;
+        ssl_certificate      /app/nginx/conf/https/fcbox.pem;
+        ssl_certificate_key  /app/nginx/conf/https/fcbox.key;
+        ssl_session_timeout  5m;
+        ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+        ssl_ciphers  HIGH:!RC4:!MD5:!aNULL:!eNULL:!NULL:!DH:!EDH:!EXP:+MEDIUM:!3DES;
+        ssl_prefer_server_ciphers   on;
+
+
+        location / {
+                set $backend 'open-edi-sit2-https';
+                set $customhost $host;
+                #set_by_lua_file $gray /app/openresty/lualib/fcbox/hostgray/open-edi.lua;
+                access_by_lua_file /app/openresty/lualib/fcbox/hostgray/open-edi.lua;
+                proxy_pass http://$backend;
+                proxy_set_header Host $customhost;
+                #proxy_pass http://open-edi-sit2-https;
+                #proxy_set_header Host $customhost;
+                #proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header REMOTE-HOST $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        }
+}

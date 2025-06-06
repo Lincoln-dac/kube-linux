@@ -1,0 +1,10 @@
+filter {
+
+  mutate {
+    remove_field => [ "[agent][hostname]","[agent][type]","[ecs][version]","[@version]","[agent][name]" ,"[agent][ephemeral_id]","[agent][version]","[agent][id]" ]
+  }
+  json {
+    source => "message"
+  }   
+
+}
