@@ -87,7 +87,7 @@ EOF
     fi
 
     # 关闭防火墙和其他相关服务
-    systemctl stop firewalld NetworkManager && systemctl disable firewalld NetworkManager  abrt-ccpp  abrtd && /usr/sbin/swapoff -a && /usr/sbin/setenforce 0 && /usr/sbin/iptables -F
+    systemctl stop firewalld NetworkManager && systemctl disable firewalld NetworkManager abrt-ccpp abrtd  abrt-oops && /usr/sbin/swapoff -a && /usr/sbin/setenforce 0 && /usr/sbin/iptables -F
 
     # 优化netfilter
     echo "modprobe br_netfilter" > /etc/sysconfig/modules/br_netfilter.modules
@@ -99,6 +99,13 @@ EOF
     # 加载模块
     /usr/sbin/modprobe ip_conntrack || handle_error "加载ip_conntrack模块失败"
     /usr/sbin/sysctl -p || handle_error "应用sysctl参数失败"
+
+    #允许root直接登录
+    sed -i 's/PermitRootLogin no/PermitRootLogin yes/g' /etc/ssh/sshd_config
+    sed -i 's/AllowGroups/#AllowGroups/g' /etc/ssh/sshd_config
+    sed -i 's/PermitEmptyPasswords/#PermitEmptyPasswords/g' /etc/ssh/sshd_config
+    systemctl restart sshd || handle_error "重启sshd服务失败"
+
 }
 
 # 初始化目录
@@ -127,7 +134,7 @@ InitFlanneld() {
 
     cd /usr/lib/systemd/system/ || handle_error "切换到 /usr/lib/systemd/system/ 目录失败"
     wget -O flanneld.service  "${base_url}/k8s/config/flanneld.service" || handle_error "下载flanneld.service文件失败"
-    flanneld-amd64 --version
+    flanneld-amd64 --version || handle_error "验证flanneld版本失败"
 }
 
 # 初始化Docker
@@ -161,7 +168,7 @@ InitKubelet() {
 
     cd /app/kubernetes/bin/ || handle_error "切换到 /app/kubernetes/bin/ 目录失败"
     wget -O kubelet "${base_url}/k8s/package/kubelet" || handle_error "下载kubelet文件失败"
-    chmod +x /app/kubernetes/bin/kubelet
+    chmod +x /app/kubernetes/bin/kubelet || handle_error "设置kubelet文件可执行权限失败"
 }
 
 # 初始化kube-proxy
@@ -223,9 +230,9 @@ InitLogAgent() {
 
 # 初始化挂载目录
 InitMountDir() {
-    cd /usr/bin/ && wget -O  mfsmount "${base_url}/k8s/package/mfsmount"
+    cd /usr/bin/ && wget -O  mfsmount "${base_url}/k8s/package/mfsmount" || handle_error "下载mfsmount文件失败"
     chmod +x  /usr/bin/mfsmount
-    echo "初始化节点需要提前在etcd写入新节点POD网点,并在控制台执行kubectl certificate approve `kubectl get csr | awk '{ print $1}'` 将新节点加入集群，请手动重启物理机"
+    echo "初始化节点需要提前在etcd写入新节点POD网点,并在控制台执行kubectl certificate approve 将新节点加入集群，请手动重启物理机"
 }
 
 # 函数调用部分
