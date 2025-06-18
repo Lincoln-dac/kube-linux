@@ -1,0 +1,35 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: argocd-ingressroute
+  namespace: default
+spec:
+  entryPoints:
+  - web
+  routes:
+  - kind: Rule
+    match: Host(`argocd-test.test.com`)
+    services:
+    - name: argocd-server
+      port: 80
+      sticky:
+        cookie: {}
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: argocd-ingressroute-tls
+spec:
+  entryPoints:
+  - websecure
+  routes:
+  - kind: Rule
+    match: Host(`argocd-test.test.com`)
+    services:
+    - name: argocd-server
+      port: 443
+      sticky:
+        cookie: {}
+  tls:
+    secretName: fc-tls
+
