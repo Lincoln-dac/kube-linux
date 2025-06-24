@@ -1,0 +1,23 @@
+1.使用 CLI 创建 APP
+argocd app create guestbook --repo https://github.com/argoproj/argocd-example-apps.git --path guestbook --dest-server https://kubernetes.default.svc --dest-namespace default
+2.列出所有应用
+argocd app list
+3.获取应用详细信息
+argocd app get guestbook
+4.使用 YAML 文件创建
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: myapp
+  namespace: argocd
+spec:
+  destination:
+    namespace: devops # 部署应用的命名空间
+    server: https://kubernetes.default.svc # API Server 地址
+  project: default # 项目名
+  source:
+    path: quickstart # 资源文件路径
+    repoURL: http://11.8.36.29/root/argocd-lab.git # Git 仓库地址
+    targetRevision: main # 分支名
+
+

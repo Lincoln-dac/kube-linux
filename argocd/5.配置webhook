@@ -1,0 +1,9 @@
+1.在私有仓库创建webhook
+项目-用户管理-创建webhook
+URL配置http://argocd-test.test.com/api/webhook
+2.设置trigger 勾选push event 
+内容输入 "master"
+3.去掉Enable SSL verification
+4.点击测试
+
+![image](https://github.com/Lincoln-dac/kube-linux/blob/master/pic/20250624133834.png)

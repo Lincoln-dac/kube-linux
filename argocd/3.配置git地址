@@ -1,0 +1,4 @@
+1.命令配置git地址
+argocd repo add http://git-test.test.com/QM/OPG/DEVOPS/argocd-lab.git --insecure-skip-server-verification --username admin --password admin
+argocd repo add https://github.com/argoproj/argocd-example-apps.git
+注释 argocd页面只支持https,非https的工程，可以使用命令，如上
