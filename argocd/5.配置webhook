@@ -7,3 +7,5 @@ URL配置http://argocd-test.test.com/api/webhook
 4.点击测试
 
 ![image](https://github.com/Lincoln-dac/kube-linux/blob/master/pic/20250624133834.png)
+
+注释：默认argocd同步周期为3分钟，配置webhook的触发条件，当master分支有代码push的时候，及时触发webhook。

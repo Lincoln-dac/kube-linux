@@ -1,5 +1,6 @@
 1.部署argocd服务 
 kubectl apply -f install.yaml
+
 2.配置ingress
 kubectl apply -f ingress.yaml
 3.获取初始密码
