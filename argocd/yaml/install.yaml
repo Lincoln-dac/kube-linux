@@ -3151,6 +3151,7 @@ spec:
         - argocd-repo-server
         - --redis
         - argocd-redis:6379
+        - --parallelismlimit=10
         env:
         - name: ARGOCD_RECONCILIATION_TIMEOUT
           valueFrom:
@@ -3564,6 +3565,7 @@ spec:
       containers:
       - command:
         - argocd-application-controller
+
         env:
         - name: ARGOCD_RECONCILIATION_TIMEOUT
           valueFrom:
