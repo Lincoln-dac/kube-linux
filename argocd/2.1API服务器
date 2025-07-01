@@ -1,0 +1,25 @@
+API服务器是我们所有请求的入口点，无论它们是来自UI、CLI，还是来自自定义客户机，比如curl。
+它没有任何状态，所以我们可以根据负载来放大或缩小它。
+这也意味着我们可以通过更改其部署的副本数量来保持HA安装。
+通过使用HA选项，我们得到了两个副本，但是让我们看看如何将这个数字更新到三个，以及需要做哪些其他更改。
+除了副本之外，我们还可以选择更新ARGOCD_API_SERVER_REPLICAS环境变量，使其具有与我们正在使用的相同数量的副本。
+这用于计算暴力密码攻击的限制。
+假设，对于一个实例，30个并发登录请求将触发与服务器不同的响应，对于三个实例，负载将被分散，所以你将只得到10个。
+这意味着我们所拥有的实例越多，我们需要使用的限制就越低。
+现在，如果你不更新该变量，那么该应用程序仍然可以工作，但如果你确实更新了它，那么它将会更安全。
+
+ 要拥有 argocd-server部署的三个副本，我们需要执行以下操作。在补丁程序文件夹中创建一个名为argocd-server-deployment.yaml的新文件。其内容应如下：
+ 
+ apiVersion: apps/v1
+kind: Deployment
+metadata:
+ name: argocd-server
+spec:
+ replicas: 3
+ template:
+ spec:
+ containers:
+ - name: argocd-server
+ env:
+ - name: ARGOCD_API_SERVER_REPLICAS
+ value: '3'

@@ -7,12 +7,16 @@ kubectl apply -f ingress.yaml
 kubectl  get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo
 4.修改密码
 kubectl -n argocd patch secret argocd-initial-admin-secret -p '{"stringData": { "password": "12345678" }}' 
-5.登录
+5.安装客户端argocd
+wget https://github.com/argoproj/argo-cd/releases/download/v2.1.0/argocd-linux-amd64
+chmod +x  /usr/bin/argocd-linux-amd64
+mv /usr/bin/argocd-linux-amd64 /usr/bin/argocd
+6.登录
 argocd login argocd-test.test.com:443 --username admin --password <password> --insecure
 argocd login argocd-test.test.com
 登录持久化
 argocd login argocd-test.test.com --auth-token token_name
 cat ~/.argocd/config
 
-6.add github
+7.新增工程应用
 argocd repo add https://github.com/argoproj/argocd-example-apps.git 

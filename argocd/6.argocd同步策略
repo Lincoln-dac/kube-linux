@@ -1,0 +1,33 @@
+ 1.自动同步政策
+     当 Argo CD 检测到 Git 中的预期清单与集群中的实时状态存在差异时，它能够自动同步应用程序。 自动同步的一个好处是，CI/CD 管道不再
+需要直接访问 Argo CD API 服务器来执行部署。 相反，管道会进行提交，并将跟踪 Git 仓库中清单的变更推送到 Git 仓库。
+配置自动同步运行
+argocd app set <APPNAME> --sync-policy automated
+或者，如果创建应用程序清单，可指定一个同步策略，该策略应带有automated政策。
+spec:
+  syncPolicy:
+    automated: {}
+也可以通过界面进行配置。
+
+2.自动修剪
+ 默认情况下（作为一种安全机制），当 Argo CD 检测到 Git 中不再定义资源时，自动同步将不会删除该资源。 要修剪资源，可始终执行手动同步（选中修剪）。 
+ 也可通过运行启用修剪，使其作为自动同步的一部分自动执行： Argo CD。   
+
+argocd app set <APPNAME> --auto-prune
+或者在自动同步策略中将剪枝选项设置为 true： true
+spec:
+  syncPolicy:
+    automated:
+      prune: true
+使用 Allow-Empty 自动剪枝（v1.8
+默认情况下（作为一种安全机制），当没有目标资源时，使用剪枝的自动同步具有防止任何自动/人为错误的功能。 
+它可以防止应用程序出现空资源。 要允许应用程序出现空资源，请运行
+argocd app set <APPNAME> --allow-empty
+或者在自动同步策略中将允许清空选项设置为 true： true
+spec:
+  syncPolicy:
+    automated:
+      prune: true
+      allowEmpty: true
+
+注释：https://argocd.devops.gold/user-guide/auto_sync/
