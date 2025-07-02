@@ -1,22 +1,40 @@
-最初，这是一个不能有多个副本的组件，因为有一个控制循环是所有同步的启动器。因此，拥有多个副本将引入为同一应用程序同时启动两个或多个同步的可能性。但是从1.8版本开始，你可以有多个副本，每个实例都要处理在Argo CD中注册的一部分集群。
- 例如，如果你有9个集群，其中Argo CD正在安装应用程序，并且你启动了三个应用程序控制器，那么每个控制器将处理其中的三个集群。缩放它们对于HA安装不是必需的，但它在这个方向上确实有帮助，因为一个控制器的故障只影响部分集群，而不是所有的集群。它还通过将负载分解为多个实例，从而有助于实现Argo CD的整体性能。
- 要告诉Argo CD应用程序控制器它可以拥有多少个碎片（或实例），你可以使用其状态集中的ARGOCD_CONTROLLER_REPLICAS环境变量。让我们来看看为控制器的Kustomize安装设置为3个副本（这意味着三个碎片）的覆盖层会是什么样子的。在补丁文件夹下创建一个名为argocd-应用程序控制器statefulset.yaml的文件，内容如下：
+最初，这是一个不能有多个副本的组件，因为有一个控制循环是所有同步的启动器。
+因此，拥有多个副本将引入为同一应用程序同时启动两个或多个同步的可能性。
+但是从1.8版本开始，你可以有多个副本，每个实例都要处理在Argo CD中注册的一部分集群。
+例如，如果你有9个集群，其中Argo CD正在安装应用程序，并且你启动了三个应用程序控制器，
+那么每个控制器将处理其中的三个集群。
+缩放它们对于HA安装不是必需的，但它在这个方向上确实有帮助，
+因为一个控制器的故障只影响部分集群，而不是所有的集群。
+它还通过将负载分解为多个实例，从而有助于实现Argo CD的整体性能。
+要告诉Argo CD应用程序控制器它可以拥有多少个碎片（或实例），
+你可以使用其状态集中的ARGOCD_CONTROLLER_REPLICAS环境变量。
+让我们来看看为控制器的Kustomize安装设置为3个副本（这意味着三个碎片）的覆盖层会是什么样子的。
+在补丁文件夹下创建一个名为argocd-应用程序控制器statefulset.yaml的文件，内容如下：
 
- apiVersion: apps/v1
+apiVersion: apps/v1
 kind: StatefulSet
 metadata:
- name: argocd-application-controller
+  name: argocd-application-controller
 spec:
- replicas: 3
- template:
-spec:
- containers:
- - name: argocd-application-controller
- env:
- - name: ARGOCD_CONTROLLER_REPLICAS
- value: "3"
+  replicas: 3
+  template:
+    spec:
+      containers:
+      - name: argocd-application-controller
+        env:
+        - name: ARGOCD_CONTROLLER_REPLICAS
+          value: "3"
 
- 创建提交，推送到远程，Argo CD将处理其余的部分。
- 可能只有一个目标集群，这意味着所有应用程序，无论它们是开发、测试、质量保证还是生产，都将只安装在一个集群上。在这种情况下，有多个应用程序控制器的实例并没有意义，但是你应该为容器分配大量的CPU和内存。你应该检查官方文档（https://argo-cd.readthedocs.io/en/stable/operator-manual/high_availability/#argocd-application-controller）中的—操作处理器、状态处理器和—库并行限制标志，并为它们设置更高的值，以允许你的实例处理更多的应用程序。
- 注意：环境变量中的复制副本
- ** **该模式至少可以在两个地方使用：API服务器和应用程序控制器。在这里，副本的数量被注入到具有环境变量的容器中。这样，这比从每个实例中调用Kubernetes API来找出数字要简单得多。即使开发人员有额外的开销来确保他们更新了这两个地方，它仍然值得这样做。
+创建提交，推送到远程，Argo CD将处理其余的部分。
+可能只有一个目标集群，这意味着所有应用程序，无论它们是开发、测试、质量保证还是生产，
+都将只安装在一个集群上。
+在这种情况下，有多个应用程序控制器的实例并没有意义，
+但是你应该为容器分配大量的CPU和内存。
+你应该检查官方文档（https://argo-cd.readthedocs.io/en/stable/operator-manual/high_availability/#argocd-application-controller）中的
+—操作处理器、状态处理器和—库并行限制标志，并为它们设置更高的值，
+以允许你的实例处理更多的应用程序。
+注意：环境变量中的复制副本
+** **该模式至少可以在两个地方使用：API服务器和应用程序控制器。
+在这里，副本的数量被注入到具有环境变量的容器中。
+这样，这比从每个实例中调用Kubernetes API来找出数字要简单得多。
+即使开发人员有额外的开销来确保他们更新了这两个地方，它仍然值得这样做。

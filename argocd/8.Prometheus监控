@@ -1,0 +1,20 @@
+就像Kubernetes 成为了容器编排的标准一样， Prometheus也成为了监控的标准。
+这是第二个进入云本地计算基金会（CNCF）的项目，Kubernetes是第一个。
+在云原生世界中，我们有一个在Kubernetes中运行Prometheus的操作符（就像Argo CD是GitOps的操作符一样），
+叫做Prometheus操作符（https://prometheus-operator.dev/）。
+Argo CD组件以Prometheus格式公开度量，这使得在集群中安装Prometheus操作符并开始抓取这些端点很容易。
+有一个帮助图表，你可以用来安装它（通常，这是在一个称为监视的单独的名称空间中完成的）：
+https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack。
+安装完成后，我们将需要告诉Prometheus，它可以在哪里找到公开度量的端点。
+为此，我们可以使用自定义的服务监视器资源（https://prometheus-operator.dev/docs/operator/design/#servicemonitor）。
+应该删除三个服务——一个用于应用程序控制器，一个用于API服务器，另一个用于存储库服务器——
+从而覆盖了所有的Argo CD组件。
+你可以在https://argo-cd.readthedocs.io/en/stable/operator-manual/metrics/#prometheus-operator的官方文档中找到服务监视器资源。
+我们还在ch03/服务器文件夹中的Git存储库（https://github.com/PacktPublishing/ArgoCD-in-Practice）中保存了它们的一个副本。
+你可以通过将文件放在Git存储库中的文件夹中，然后创建一个指向它的应用程序，以便可以使用GitOps应用它们。
+在我们有了服务监视器资源并抓取过程开始之后，有一个Grafana仪表板（https://grafana.com/grafana/dashboards），
+在https://argo-cd.readthedocs.io/en/stable/operator-manual/metrics/#dashboards，你可以使用它。
+请遵循有关如何导入仪表板的官方文档，看看如何将其添加到你自己的Prometheus操作员安装： 
+https://grafana.com/docs/grafana/latest/ dashboards/export-import/#import-dashboard。
+我们将从两个不同的角度涵盖监控——一个用于负责Argo CD的团队，我们称之为运营团队，
+另一个用于团队构建应用程序，我们称之为微服务团队。

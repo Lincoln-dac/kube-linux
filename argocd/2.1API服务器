@@ -8,18 +8,18 @@ API服务器是我们所有请求的入口点，无论它们是来自UI、CLI，
 这意味着我们所拥有的实例越多，我们需要使用的限制就越低。
 现在，如果你不更新该变量，那么该应用程序仍然可以工作，但如果你确实更新了它，那么它将会更安全。
 
- 要拥有 argocd-server部署的三个副本，我们需要执行以下操作。在补丁程序文件夹中创建一个名为argocd-server-deployment.yaml的新文件。其内容应如下：
- 
- apiVersion: apps/v1
+要拥有argocd-server部署的三个副本，我们需要执行以下操作。在补丁程序文件夹中创建一个名为argocd-server-deployment.yaml的新文件。其内容应如下：
+
+apiVersion: apps/v1
 kind: Deployment
 metadata:
- name: argocd-server
+  name: argocd-server
 spec:
- replicas: 3
- template:
- spec:
- containers:
- - name: argocd-server
- env:
- - name: ARGOCD_API_SERVER_REPLICAS
- value: '3'
+  replicas: 3
+  template:
+    spec:
+      containers:
+      - name: argocd-server
+        env:
+        - name: ARGOCD_API_SERVER_REPLICAS
+          value: '3'
