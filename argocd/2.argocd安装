@@ -20,3 +20,5 @@ cat ~/.argocd/config
 
 7.新增工程应用
 argocd repo add https://github.com/argoproj/argocd-example-apps.git 
+
+
