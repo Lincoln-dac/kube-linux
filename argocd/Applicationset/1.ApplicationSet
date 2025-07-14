@@ -1,0 +1,148 @@
+ ApplicationSet 概述
+  ApplicationSet controller是一个 Kubernetes controller，添加了对 ApplicationSet CustomResourceDefinition (CRD) 的支持。
+该controller/CRD 实现了跨大量集群和 monorepos 内管理 Argo CD Application 的自动化和更大的灵活性，此外，它还使多租户 Kubernetes
+集群上的自助服务使用成为可能。
+
+ApplicationSet 功能
+1. 能够使用单个 Kubernetes 清单通过 Argo CD 部署到多个 Kubernetes 集群
+2. 能够使用单个 Kubernetes 清单通过 Argo CD 从一个或多个 Git 存储库部署多个应用程序
+3. 改进了对 monorepos 的支持：在 Argo CD 的context中，monorepo 是在单个 Git 存储库中定义的多个 Argo CD Application资源
+4. 在多租户集群内，提高单个集群租户使用 Argo CD 部署应用程序的能力（无需特权集群管理员参与启用目标clusters/namespaces）
+
+ApplicationSet controller 工作模式
+
+ApplicationSet controller的唯一职责是创建、更新和删除 Argo CD 命名空间内的Application资源。controller的唯一工作是确保Application
+资源与定义的声明性 ApplicationSet 资源保持一致。因此，ApplicationSet controller：
+1. 不创建/修改/删除 Kubernetes 资源（Application CR 除外）
+2. 不会连接到部署了Argo CD 的集群以外的集群
+3. 除了argocd名称空间外，不与其他命称空间交互
+
+Argo CD 本身负责生成子Application资源的实际部署，例如 Deployments、Services 和 ConfigMaps。
+ApplicationSet控制器可被视作Application CRD资源的工厂，它将ApplicationSet资源作为输入，而输出的是一个或多个Application资源配置
+
+ ![image](https://github.com/Lincoln-dac/kube-linux/blob/master/pic/ApplicationSet.png)
+
+ 在此图中ApplicationSet定义了一个资源，ApplicationSet controller负责创建相应的Application资源。然后生成的Application资源由 
+ Argo CD 管理：也就是说，Argo CD 负责实际部署资源。
+Argo CD 根据Application spec字段中定义的 Git 存储库的内容生成Application的 Kubernetes 资源， e.g. Deployments,
+ Service和其他资源。
+Applications的创建、更新或删除将对 Argo CD 命名空间中存在的Application产生直接影响。同样，cluster events
+（使用Cluster generator时添加/删除 Argo CD cluster secrets）或 Git 中的更改（使用 Git generator时）将在构建Application资源时用作 ApplicationSet controller的输入
+
+ApplicationSet generators
+
+1. List generator
+2. Cluster generator
+3. Git generator
+4. Matrix generator
+5. Merge generator
+6. SCM Provider generator
+7. Pull Request generator
+8. Cluster Decision Resource generator
+9. Plugin generator
+
+ApplicationSet 默认在 ArgoCD v2.3+ 中内置。如果未启用：
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/applicationset/v0.4.1/manifests/install.yaml
+
+一个arogcd applicationset 案例yaml文件
+
+======
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: multi-apps
+spec:
+  generators:
+  - git:
+      repoURL: http://git-test.test.com/QM/OPG/DEVOPS/argocd-lab.git
+      revision: HEAD
+      directories:
+      - path: "multi-app/*"
+  template:
+    metadata:
+      name: "app-{{path.basename}}"
+    spec:
+      project: default
+      source:
+        repoURL: http://git-test.test.com/QM/OPG/DEVOPS/argocd-lab.git
+        targetRevision: HEAD
+        path: multi-app/{{path.basename}}
+      destination:
+        server: https://kubernetes.default.svc
+      syncPolicy:
+        automated:  # 自动同步配置
+          prune: true       # 自动清理已删除资源
+          selfHeal: true    # 自动修复配置漂移
+          allowEmpty: true  # 允许空资源集
+        syncOptions:        # 同步选项
+        - Validate=true     # 启用验证
+        retry:              # 重试策略
+          limit: 3          # 最大重试次数
+          backoff:
+            duration: 5s    # 初始重试间隔
+            maxDuration: 3m # 最大重试间隔
+            factor: 2       # 退避因子
+==================
+
+多集群配置 案例yaml文件
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: bgd
+  namespace: openshift-gitops
+spec:
+  generators:
+  - list:
+      elements:
+      - cluster: cluster1
+        url: https://api.cluster1.chx.osecloud.com:6443
+     - cluster: cluster2
+        url: https://api.cluster2.chx.osecloud.com:6443
+      - cluster: cluster3
+        url: https://api.cluster3.chx.osecloud.com:6443
+  template:
+    metadata:
+      name: '{{cluster}}-bgd'
+    spec:
+      project: default
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+      source:
+        repoURL: https://github.com/christianh814/gitops-examples
+        targetRevision: master
+        path: applicationsets/list-generator/overlays/{{cluster}}
+      destination:
+        server: '{{url}}'
+        namespace: bgd
+
+同一个应用多集群配置 案例yaml文件
+
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: cluster-custom-app
+spec:
+  generators:
+  - clusters:
+      selector:
+        matchLabels:
+          env: production   # 只选择带有 env=production 标签的集群
+          region: us-west-1 # 同时需要 region=us-west-1 标签
+  template:
+    metadata:
+      name: "app-{{name}}"
+    spec:
+      source:
+        repoURL: https://gitlab.com/your/repo.git
+        targetRevision: HEAD
+        path: production/app
+        helm:
+          values: |
+            cluster:
+              region: {{values.region}}
+              size: {{values.size}}
+      destination:
+        server: '{{server}}'
+        namespace: production

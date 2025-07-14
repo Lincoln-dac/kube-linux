@@ -1,0 +1,184 @@
+kustomize配置结构
+kustomize 配置一般分为两个文件夹base和overlay，base 文件夹下面一般存放”原始的”/“公共的” YAML，overlay 文件夹下放入”特定环境下”的YAML。
+
+base
+base 一般由两部分内容组成， kustomize 描述文件和 resources 文件：
+![image](https://github.com/Lincoln-dac/kube-linux/blob/master/pic/base.jpeg)
+
+resource 文件就是 k8s 的 YAML 资源文件，可以理解为各类型资源创建的模板，一般是基础设置。
+
+kustomization 文件是配置组合文件，在 base 文件夹下，会通过 resources 描述将资源组合起来，最小 kustomization:
+
+resources:
+- deployment.yaml
+
+
+overlay
+overlay 可以理解为在 base 模板基础上做定制化，也就是起到补丁的所用。overlay 下的 kustomization文件形式：
+
+
+bases:
+- ../base # 模板base文件夹的路径
+patches:
+- deployment_patches.yaml # 补丁文件路径
+``` 
+
+overlay 主要是对 base 做覆写（所以才叫 overlay 啊~）
+
+![](/img/kubernetes实战/kustomize-overlay.jpg)
+
+kustomization 打补丁是通过 `kind`和`name`进行匹配的，也就是 base 和 patch 里面的名字和类型一致就可以匹配。
+
+这里要注意，对于 deployment 中的 `template/containers` 的下面也是一种类型（本质是容器），所以这的名字也是要一致的，不然会报错。
+
+## kustomize 语法
+
+除了上面提到的两种基本语法 `resources`、`base` 和 `patches`，常用到的语法还有：
+- configMapGenerator
+- secretGenerator
+- generatorOptions
+- commonLabels
+- commonAnnonation
+- namespace
+- images
+- namePrefix
+- nameSuffix
+- images
+
+
+### configMapGenerator
+
+用于生成configMap配置文件的，用法：
+```YAML
+configMapGenerator:
+- name: my-application-properties # configMap名字
+  files:
+  - application.properties # 本地文件路径
+
+  或者
+  configMapGenerator:
+- name: my-java-server-env-vars
+  literals:
+  - JAVA_HOME=/opt/java/jdk
+  - JAVA_TOOL_OPTIONS=-agentlib:hprof
+这里的语法和 configMap 一致。
+
+
+secretGenerator
+secretGenerator 用法和 configMapGenerator 类似，用于生成 secret。
+
+
+generatorOptions
+generatorOptions 为Generator（secretGenerator/configMapGenerator）添加属性, 比如 labels、annotations，用法：
+
+generatorOptions:
+  labels: # 为所有 generator 设置 labels 属性
+    fruit: apple
+  annotations: # 为所有 generator 设置 annotations 属性
+    kustomize.generated.resource: somevalue
+  disableNameSuffixHash: true # 关闭名字前缀的hash，默认是开启hash，因此generator在内容相同不同的时候名字会不一样
+
+
+  commonLabels
+commonLabels 会为所有资源添加 Labels 标签，比如：
+
+commonLabels:
+  app: foo
+  environment: test
+resources:
+- deployment.yaml
+
+覆写后的 deployment.yaml：
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: foo # 新加或覆盖的label
+    environment: test # 新加或覆盖的label
+    ... 模板自带没被覆盖的label
+  name: nginx-deployment
+spec:
+  selector:
+    matchLabels:
+    app: foo # 新加或覆盖的label
+    environment: test # 新加或覆盖的label
+    ... 模板自带没被覆盖的label
+  template:
+    metadata:
+      labels:
+        app: foo # 新加或覆盖的label
+        environment: test # 新加或覆盖的label
+        ... 模板自带没被覆盖的label
+    spec:
+      containers:
+      - image: nginx
+        name: nginx
+
+commonAnnotations
+commonAnnotations 和 commonLabels 用法一致，也是对所有 resources 写入 Annotations
+
+namespace
+kustomization 中的 namespace 会应用所有 resources。
+
+namePrefix
+为所有的 resources 的 name 加上前缀，用法：
+
+namePrefix: prod- # 添加前缀的字段
+nameSuffix
+为所有资源的名字加上后缀，用法同 namePrefix
+
+images
+images 主要用于修改镜像，结构如下：
+
+images:
+  - name: mycontainerregistry/myimage # 需修改的原镜像名称（不用带版本）
+    newName: differentregistry/myimage # 新的镜像名称
+    newTag: v1 # 新的镜像版本
+
+images 主要三个字段，name代表需要匹配的镜像名称，newName 代表替换的新的镜像名称，newTag 新的镜像版本
+replicas
+replicas 用于修改副本数：
+replicas:
+- name: deployment-name
+  count: 5
+
+  注：由于这个声明无法设置kind和group，他会从Deployment、ReplicationController、ReplicaSet、StatefulSet这几种资源进行匹配，
+  如果要限定应该使用patch来实现
+
+patches
+patches 是 kustomize 最核心的机制，用于在资源上添加和覆盖字段，patches 形式有三种：
+
+最简单的是直接通过文件的形式添加，比如设置 path:<patch文件路径>
+通过 json patch 的形式添加
+通过 strategic merge patch 的形式添加
+
+最简单的 patches 案例：
+patches:
+- path: patch.yaml # patch 文件路径
+
+目标选择器 target
+patch 可以通过目标选择器 target 来定义作用域，目标选择器可以通过 group、version、kind、name、namespace、labelSelector、annotationSelector，没有 target 默认状况是应用于所有资源，
+如果有多个选择器，需要匹配所有指定字段的资源才能来应用 patches:
+patches:
+- path: patch.yaml
+  target:
+    group: apps
+    version: v1
+    kind: Deployment
+    name: deploy.*
+    labelSelector: "env=dev"
+    annotationSelector: "zone=west"
+
+ 上面这个例子要同时匹配才能应用 patches 文件。
+需注意的是 patch 目标选择器的 name 和 namespace 字段是自动锚定的正则表达式。这意味着 myapp 的值相当于 ^myapp$   
+
+vars
+vars 一般用于将 一个资源的数据 注入到 另一个资源的容器参数，vars 通过 kustomize 中通过反射改变值，比如：
+原文件：
+containers:
+  - image: myimage
+    command: ["start", "--host", "$(MY_SERVICE_NAME)"]
+    env:
+    - name: SECRET_TOKEN
+      value: $(SOME_SECRET_NAME)

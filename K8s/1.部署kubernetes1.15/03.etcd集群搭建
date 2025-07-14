@@ -1,0 +1,131 @@
+1.etcd 3个节点下载etcd
+wget https://github.com/coreos/etcd/releases/download/v3.3.12/etcd-v3.3.12-linux-amd64.tar.gz
+ IP 10.204.51.64/65/66 版本为3.3.1
+2.新建目录
+mkdir -p /etcd/{bin,conf,data}
+###分开etcd目录是为了防止 其他程序影响etcd,生产环境建议kubernetes的目录也单独出来，有条件最好单独划分逻辑磁盘
+将etcdctl和etcd程序拷贝到/etcd/bin下 并修改为可执行
+cd /etcd/bin/ && chmod +x etcdctl && chmod +x etcd
+3.修改etcd配置文件 /etcd/conf/etcd.conf
+ IP 10.204.51.64上的 /etcd/conf/etcd.conf配置
+NAME="--name=infra1"
+SSL="--cert-file=/app/kubernetes/ssl/kubernetes.pem \
+--key-file=/app/kubernetes/ssl/kubernetes-key.pem \
+--peer-cert-file=/app/kubernetes/ssl/kubernetes.pem \
+--peer-key-file=/app/kubernetes/ssl/kubernetes-key.pem \
+--trusted-ca-file=/app/kubernetes/ssl/ca.pem \
+--peer-trusted-ca-file=/app/kubernetes/ssl/ca.pem"
+MEMEBER="--initial-cluster infra1=https://10.204.51.64:2380,infra2=https://10.204.51.65:2380,infra3=https://10.204.51.66:2380"
+INITCLUSTER="--initial-advertise-peer-urls https://10.204.51.64:2380 \
+--listen-peer-urls https://10.204.51.64:2380 \
+--listen-client-urls https://10.204.51.64:2379,http://127.0.0.1:2379 \
+--advertise-client-urls https://10.204.51.64:2379 \
+--initial-cluster-token etcd-cluster"
+TUNNING="--initial-cluster-state new --heartbeat-interval=300 --election-timeout=3000 --snapshot-count=10000 --metrics=basic --quota-backend-bytes=8589934592"
+ETCDDATA="--data-dir=/etcd/data/"
+###
+ IP 10.204.51.65上的 /etcd/conf/etcd.conf配置
+NAME="--name=infra2"
+SSL="--cert-file=/app/kubernetes/ssl/kubernetes.pem \
+--key-file=/app/kubernetes/ssl/kubernetes-key.pem \
+--peer-cert-file=/app/kubernetes/ssl/kubernetes.pem \
+--peer-key-file=/app/kubernetes/ssl/kubernetes-key.pem \
+--trusted-ca-file=/app/kubernetes/ssl/ca.pem \
+--peer-trusted-ca-file=/app/kubernetes/ssl/ca.pem"
+MEMEBER="--initial-cluster infra1=https://10.204.51.64:2380,infra2=https://10.204.51.65:2380,infra3=https://10.204.51.66:2380"
+INITCLUSTER="--initial-advertise-peer-urls https://10.204.51.65:2380 \
+--listen-peer-urls https://10.204.51.65:2380 \
+--listen-client-urls https://10.204.51.65:2379,http://127.0.0.1:2379 \
+--advertise-client-urls https://10.204.51.65:2379 \
+--initial-cluster-token etcd-cluster \
+--initial-cluster-state new"
+TUNNING="--initial-cluster-state new --heartbeat-interval=500 --election-timeout=3000 --snapshot-count=10000 --metrics=basic --quota-backend-bytes=8589934592"
+ETCDDATA="--data-dir=/etcd/data/"
+
+
+ IP 10.204.51.66上的 /etcd/conf/etcd.conf配置
+NAME="--name=infra3"
+SSL="--cert-file=/app/kubernetes/ssl/kubernetes.pem \
+--key-file=/app/kubernetes/ssl/kubernetes-key.pem \
+--peer-cert-file=/app/kubernetes/ssl/kubernetes.pem \
+--peer-key-file=/app/kubernetes/ssl/kubernetes-key.pem \
+--trusted-ca-file=/app/kubernetes/ssl/ca.pem \
+--peer-trusted-ca-file=/app/kubernetes/ssl/ca.pem"
+MEMEBER="--initial-cluster infra1=https://10.204.51.64:2380,infra2=https://10.204.51.65:2380,infra3=https://10.204.51.66:2380"
+INITCLUSTER="--initial-advertise-peer-urls https://10.204.51.66:2380 \
+--listen-peer-urls https://10.204.51.66:2380 \
+--listen-client-urls https://10.204.51.66:2379,http://127.0.0.1:2379 \
+--advertise-client-urls https://10.204.51.66:2379 \
+--initial-cluster-token etcd-cluster \
+--initial-cluster-state new"
+TUNNING="--initial-cluster-state new --heartbeat-interval=300 --election-timeout=3000 --snapshot-count=10000 --metrics=basic --quota-backend-bytes=8589934592"
+ETCDDATA="--data-dir=/etcd/data/"
+
+说明
+NAME:为etcd节点名字 每个节点必须不同
+SSL:为etcd认证证书
+MEMBER:为所有节点信息
+INITCLUSTER:为etcd集群通用配置
+TUNNING:为调优参数 根据实际网络情况调整
+ETCDDATA：为etcd数据目录（初次搭建etcd集群过程中,建议清空目录）
+###
+参数说明
+--heartbeat-interval：心跳间隔时间
+--election-timeout：超时选举时间
+--snapshot-count：snapshot间隔
+--metrics=basic: metrics接口 默认是开启的，可以取消掉
+--quota-backend-bytes：etcd DB最大大小，默认是2G，这里改为8G
+#####
+4.修改etcd.service 
+cat /usr/lib/systemd/system/etcd.service
+[Unit]
+Description=Etcd Server
+After=network.target
+After=network-online.target
+Wants=network-online.target
+Documentation=https://github.com/coreos
+[Service]
+Type=notify
+EnvironmentFile=-/etcd/conf/etcd.conf
+ExecStart=/etcd/bin/etcd $NAME $SSL $MEMEBER $INITCLUSTER $TUNNING $ETCDDATA
+Restart=on-failure
+RestartSec=5
+LimitNOFILE=65536
+[Install]
+WantedBy=multi-user.target
+5.启动etcd并设置 开机启动
+systemctl daemon-reload && systemctl start etcd && systemctl enable etcd 
+查看集群情况
+/etcd/bin/etcdctl   --ca-file=/app/kubernetes/ssl/ca.pem   --cert-file=/app/kubernetes/ssl/kubernetes.pem   --key-file=/app/kubernetes/ssl/kubernetes-key.pem member list
+6.调整etcd磁盘优先级
+ionice -c2 -n0 -p `pgrep etcd`
+###可以将此项写入到/etc/rc.d/rc.local 文件中去，让开机生效
+vim /etc/rc.d/rc.local
+写入
+ionice -c2 -n0 -p `pgrep etcd` 
+执行 chmod +x /etc/rc.d/rc.local
+
+7.设置POD CIDR
+在etcd集群中的一个节点上执行
+/etcd/bin/etcdctl --ca-file=/app/kubernetes/ssl/ca.pem --cert-file=/app/kubernetes/ssl/kubernetes.pem  --key-file=/app/kubernetes/ssl/kubernetes-key.pem mkdir /coreos.com/network
+/etcd/bin/etcdctl --ca-file=/app/kubernetes/ssl/ca.pem   --cert-file=/app/kubernetes/ssl/kubernetes.pem   --key-file=/app/kubernetes/ssl/kubernetes-key.pem mk /coreos.com/network/config '{"Network":"172.16.0.0/16","SubnetLen":24,"Backend":{"Type":"host-gw"}}'
+Network 为pod16位地址
+backend 模式  host-gw
+####
+通过以下命令可以指定每个node 的POD 网段
+/etcd/bin/etcdctl --ca-file=/app/kubernetes/ssl/ca.pem   --cert-file=/app/kubernetes/ssl/kubernetes.pem   --key-file=/app/kubernetes/ssl/kubernetes-key.pem set /coreos.com/network/subnets/172.16.65.0-24 '{"PublicIP":"10.204.51.65","BackendType":"host-gw"}'
+#######
+如果不写上面这条命令，则所有pod的网络ip 将有etcd随机分配，上面命令可以固定pod 2层网络段，方便管理.
+host-gw 模式node 必须在同一个二层，性能比vxlan好，也可以采用 vxlan + DirectRouting(这个版本要求flanneld 0.9以上）
+
+注意：
+1.etcd对磁盘要求比较高，默认磁盘同步时间超过100ms就会报警
+2.etcd心跳时间一般为成员间TTL 时间的的 0.5到1.5倍,此处设置成员之间TTL最大值 再乘以1.5
+3.集群的选举时间一般为成员之间TTL最大值的10倍,此处成员之间TTL最大值 再乘以10,选举时间必须大于心跳时间5倍，否则会报错，选举时间上限不能超过50s
+4.etcd 集群默认是v2版本
+5.其他参数保持默认
+6.etcd节点对服务器的时间同步有要求，一定要配置ntp时间同步
+官方文档
+https://etcd.io
+调优
+https://etcd.io/docs/v3.4.0/tuning/#time-parameters

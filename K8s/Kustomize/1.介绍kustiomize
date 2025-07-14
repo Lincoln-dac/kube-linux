@@ -1,0 +1,26 @@
+Kustomize 设计理念
+Kustomize 允许用户以一个应用描述文件 （YAML 文件）为基础（Base YAML），然后通过 Overlay 的方式生成最终部署应用所需的描述文件。两者都是由
+kustomization 文件表示。基础（Base）声明了共享的内容（资源和常见的资源配置），Overlay 则声明了差异。它的设计目的是给 kubernetes 的
+用户提供一种可以重复使用同一套配置的声明式应用管理，从而在配置工作中用户只需要管理和维护kubernetes的API对象，
+而不需要学习或安装其它的配置管理工具，也不需要通过复制粘贴来得到新的环境的配置。
+
+Kustomize 概念介绍
+kustomize 中工具的声明与规范是由名为 kustomization.yaml 的文件定义，确保这三个文件与 kustomization.yaml 位于同一目录下。
+示例如下：
+
+commonLabels:
+    app: hello
+    resources:
+    - deployment.yaml
+    - configMap.yaml
+    - service.yaml
+ kustomize 将会读取声明文件和 Kubernetes API 资源文件，将其组合然后将完整的资源进行标准化的输出。输出的文本可以被其他工具进一步处理(kustomize build)，或者直接通过 kubectl (kubectl apply -k .)
+ 
+ 应用于集群，两种方式均可，不过 kubectl 要求 kubernetes 1.14 之上的版本。如果需要使用 kustomize 需要安装 cli 命令行，安装方式简单https://github.com/kubernetes-sigs/kustomize/releases、自行下载二进制命令即可。kustomize 将会读取声明文件和 Kubernetes API 资源文件，将其组合然后将完整的资源进行标准化的输出。输出的文本可以被其他工具进一步处理(kustomize build)，或者直接通过 kubectl (kubectl apply -k .) 应用于集群，两种方式均可，不过 kubectl 要求 kubernetes 1.14 之上的版本。如果需要使用 kustomize 需要安装 cli 命令行，
+
+kustomize feature list
+![image](https://github.com/Lincoln-dac/kube-linux/blob/master/pic/kustomize.png)
+
+总结
+本文主要讲解通过使用 kustomize 就可以管理任意数量的 Kubernetes 定制配置。kustomize 的每个产物都是纯 YAML 的，这些文件可以存储到 SVN 或者 github，甚至结合 helm 进行管理，
+最后通过自动化工作流自动拉取配置，完成这个过程的执行
