@@ -6,7 +6,7 @@ spec:
   entryPoints:
     - web
   routes:
-  - match: Host(`consul-test.fcbox.com`) 
+  - match: Host(`consul-test.test.com`) 
     kind: Rule
     services:
     - name: consul-svc

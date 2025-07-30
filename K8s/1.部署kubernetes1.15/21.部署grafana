@@ -641,7 +641,7 @@ spec:
       nodeSelector: 
         network: esn
       containers:
-      - image: harbor.fcbox.com/common/grafana:6.4.1
+      - image: harbor.test.com/common/grafana:6.4.1
         name: grafana
         ports:
         - containerPort: 3000
