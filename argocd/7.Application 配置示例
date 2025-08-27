@@ -1,0 +1,34 @@
+1. 基本配置
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: guestbook
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    name: guestbook
+
+应用名称：guestbook
+命名空间：部署在 argocd 命名空间（ArgoCD 控制平面所在空间）
+Finalizer：确保删除应用时清理相关资源
+标签：用于标识应用 
+
+2. 项目归属
+
+spec:
+  project: default
+
+应用属于 default 项目（ArgoCD 的默认项目）
+
+3. 源代码配置（核心部分）
+source:
+  repoURL: https://github.com/argoproj/argocd-example-apps.git
+  targetRevision: HEAD
+  path: guestbook
+
+仓库地址：GitHub 上的示例应用仓库
+
+目标版本：HEAD（最新提交）
+
+路径：仓库中的 guestbook 目录
