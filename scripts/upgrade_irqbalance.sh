@@ -6,9 +6,15 @@ set -e
 echo "安装依赖包..."
 yum install -y autoconf libtool glib2-devel ncurses-devel
 
+# 检查安装是否成功
+if [ $? -ne 0 ]; then
+    echo "错误：依赖包安装失败！"
+    exit 1
+fi
+
 # 下载源码包（使用提供的内部地址）
 echo "下载 irqbalance 1.9 源码包..."
-wget -O /tmp/irqbalance-1.9.0.tar.gz http://yum-repo.fcbox.com/k8s/package/irqbalance-1.9.0.tar.gz
+wget -O /tmp/irqbalance-1.9.0.tar.gz http://yum-repo.test.com/k8s/package/irqbalance-1.9.0.tar.gz
 
 # 编译安装
 echo "编译安装 irqbalance..."
@@ -38,30 +44,11 @@ cp -f /usr/local/sbin/irqbalance /usr/sbin/
 
 # 验证版本
 echo "验证版本..."
-/usr/sbin/irqbalance --version
+/usr/sbin/irqbalance --version || true
 
 # 修改服务配置文件
 echo "修改 systemd 服务配置..."
-SERVICE_FILE="/usr/lib/systemd/system/irqbalance.service"
-
-# 备份原服务文件
-[ -f "$SERVICE_FILE" ] && cp "$SERVICE_FILE" "${SERVICE_FILE}.bak"
-
-# 写入新的服务配置
-cat > "$SERVICE_FILE" << 'EOF'
-[Unit]
-Description=irqbalance daemon
-After=syslog.target
-
-[Service]
-RuntimeDirectory=irqbalance
-RuntimeDirectoryMode=0755
-EnvironmentFile=/etc/sysconfig/irqbalance
-ExecStart=/usr/sbin/irqbalance --foreground $IRQBALANCE_ARGS
-
-[Install]
-WantedBy=multi-user.target
-EOF
+cd /usr/lib/systemd/system/ && wget -O irqbalance.service http://yum-repo.test.com/k8s/scripts/irqbalance.service
 
 # 重新加载 systemd 并启动服务
 echo "重启服务..."
