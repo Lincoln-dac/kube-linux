@@ -1,0 +1,8 @@
+提高 ETCD 的磁盘 IO 优先级
+ionice -c2 -n0 -p $(pgrep etcd)
+
+
+提高存储配额
+默认 ETCD 空间配额大小为 2G，超过 2G 将不再写入数据。通过给 ETCD 配置 --quota- backend-bytes 参数增大空间配额，最大支持 8G。
+
+分离 events 存储

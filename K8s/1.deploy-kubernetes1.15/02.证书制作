@@ -1,0 +1,259 @@
+1：配置TLS证书
+组件：           需要的证书
+ etcd           ca.pem kubernetes.pem kubernetes-key.pem
+ kube-apiserver ca.pem kubernetes.pem kubernetes-key.pem
+ kubelet        ca.pem ca-key.pem
+ kube-proxy     ca.pem kube-proxy.pem kube-proxy-key.pem
+ kubectl        ca.pem admin.pem admin-key.pem
+ kube-controller-manager kube-controller-manager-key.pem kube-controller-manager.pem
+ kube-scheduler kube-scheduler-key.pem kube-scheduler.pem
+ metrics-server front-proxy-ca.key front-proxy-client.key front-proxy-ca.crt front-proxy-client.crt
+
+2:安装证书生成工具
+wget  http://pkg.cfssl.org/R1.2/cfssl_linux-amd64
+wget  http://pkg.cfssl.org/R1.2/cfssljson_linux-amd64
+wget  http://pkg.cfssl.org/R1.2/cfssl-certinfo_linux-amd64
+chmod +x cfssl*
+mv cfssl-certinfo_linux-amd64 /usr/bin/cfssl-certinfo
+mv cfssljson_linux-amd64 /usr/bin/cfssljson
+mv cfssl_linux-amd64 /usr/bin/cfssl
+mkdir /root/ssl
+cd /root/ssl
+3:生成ca证书
+[root@k8s-master01 ssl]# cat ca-config.json 
+cat  >  ca-config.json << EOF
+{
+  "signing": {
+    "default": {
+      "expiry": "876000h"
+    },
+    "profiles": {
+      "kubernetes": {
+        "usages": [
+            "signing",
+            "key encipherment",
+            "server auth",
+            "client auth"
+        ],
+        "expiry": "876000h"
+      }
+    }
+  }
+}
+EOF
+cat  > ca-csr.json << EOF
+{
+  "CN": "kubernetes",
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "CN",
+      "ST": "Shenzhen",
+      "L": "Shenzhen",
+      "O": "k8s",
+      "OU": "System"
+    }
+  ],
+    "ca": {
+       "expiry": "876000h"
+    }
+}
+EOF
+执行
+cfssl gencert -initca ca-csr.json | cfssljson -bare ca -
+4:生成server证书
+cat > kubernetes-csr.json << EOF
+{
+    "CN": "kubernetes",
+    "hosts": [
+      "127.0.0.1",
+      "10.204.51.64",
+      "10.204.51.65",
+      "10.204.51.66",
+      "10.204.51.70",
+      "172.17.0.1",
+      "kubernetes",
+      "kubernetes.default",
+      "kubernetes.default.svc",
+      "kubernetes.default.svc.cluster",
+      "kubernetes.default.svc.cluster.local"
+    ],
+    "key": {
+        "algo": "rsa",
+        "size": 2048
+    },
+    "names": [
+        {
+            "C": "CN",
+            "ST": "Shenzhen",
+            "L": "Shenzhen",
+            "O": "k8s",
+            "OU": "System"
+        }
+    ]
+}
+EOF
+
+#####
+172.17.0.1为service 的第一个IP
+执行
+cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=kubernetes  kubernetes-csr.json | cfssljson -bare kubernetes  
+5:生成admin证书
+[root@k8s-master01 ssl]# cat admin-csr.json 
+cat > admin-csr.json << EOF
+{
+    "CN": "admin",
+    "hosts": [],
+    "key": {
+        "algo": "rsa",
+        "size": 2048
+    },
+    "names": [
+        {
+            "C": "CN",
+            "L": "Shenzhen",
+            "ST": "Shenzhen",
+            "O": "system:masters",
+            "OU": "System"
+        }
+    ]
+}
+EOF
+######
+执行
+cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=kubernetes  admin-csr.json  | cfssljson -bare admin
+6:生成kube-proxy证书
+[root@k8s-master01 ssl]# cat kube-proxy-csr.json 
+cat > kube-proxy-csr.json  << EOF
+    {
+        "CN": "system:kube-proxy",
+        "hosts": [],
+        "key": {
+            "algo": "rsa",
+            "size": 2048
+        },
+        "names": [
+            {
+                "C": "CN",
+                "L": "Shenzhen",
+                "ST": "Shenzhen",
+                "O": "k8s",
+                "OU": "System"
+            }
+        ]
+    }
+EOF
+######
+执行 
+cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=kubernetes  kube-proxy-csr.json  | cfssljson -bare kube-proxy
+
+7.配置kube-controller-manager证书
+
+cat > kube-controller-manager-csr.json <<EOF
+    {
+        "CN": "system:kube-controller-manager",
+        "hosts": [],
+        "key": {
+            "algo": "rsa",
+            "size": 2048
+        },
+        "names": [
+            {
+                "C": "CN",
+                "ST": "Shenzhen",
+                "L": "Shenzhen",
+                "O": "system:masters",
+                "OU": "System"
+           }
+        ]
+    }
+EOF
+
+cfssl gencert -ca=/app/kubernetes/ssl/ca.pem \
+-ca-key=/app/kubernetes/ssl/ca-key.pem \
+-config=/app/kubernetes/ssl/ca-config.json \
+-profile=kubernetes kube-controller-manager-csr.json | cfssljson -bare kube-controller-manager
+
+export KUBE_APISERVER="https://10.204.51.70:6443"
+kubectl config set-cluster kubernetes \
+--certificate-authority=/app/kubernetes/ssl/ca.pem \
+--embed-certs=true \
+--server=${KUBE_APISERVER} \
+--kubeconfig=kube-controller-manager.kubeconfig
+
+kubectl config set-credentials system:kube-controller-manager \
+--client-certificate=kube-controller-manager.pem \
+--client-key=kube-controller-manager-key.pem \
+--embed-certs=true \
+--kubeconfig=kube-controller-manager.kubeconfig
+
+kubectl config set-context system:kube-controller-manager \
+--cluster=kubernetes \
+--user=system:kube-controller-manager \
+--kubeconfig=kube-controller-manager.kubeconfig
+
+kubectl config use-context system:kube-controller-manager --kubeconfig=kube-controller-manager.kubeconfig
+
+
+
+8.配置kube-scheduler证书
+
+cat > kube-scheduler-csr.json <<EOF
+{
+"CN": "system:kube-scheduler",
+"hosts": [],     
+"key": {
+"algo": "rsa",
+"size": 2048
+},
+"names": [
+{
+"C": "CN",
+"ST": "Shenzhen",
+"L": "Shenzhen",
+"O": "system:masters",
+"OU": "System"
+}
+]
+}
+EOF
+
+cfssl gencert -ca=/app/kubernetes/ssl/ca.pem \
+-ca-key=/app/kubernetes/ssl/ca-key.pem \
+-config=/app/kubernetes/ssl/ca-config.json \
+-profile=kubernetes kube-scheduler-csr.json | cfssljson -bare kube-scheduler
+
+
+
+kubectl config set-cluster kubernetes \
+--certificate-authority=/app/kubernetes/ssl/ca.pem \
+--embed-certs=true \
+--server=${KUBE_APISERVER} \
+--kubeconfig=kube-scheduler.kubeconfig
+
+kubectl config set-credentials system:kube-scheduler \
+--client-certificate=kube-scheduler.pem \
+--client-key=kube-scheduler-key.pem \
+--embed-certs=true \
+--kubeconfig=kube-scheduler.kubeconfig
+
+kubectl config set-context system:kube-scheduler \
+--cluster=kubernetes \
+--user=system:kube-scheduler \
+--kubeconfig=kube-scheduler.kubeconfig
+
+kubectl config use-context system:kube-scheduler --kubeconfig=kube-scheduler.kubeconfig
+
+metrics-server
+#生成CA私钥及CA证书：
+openssl req -newkey rsa:4096 -nodes -sha256 -x509 -days 3650  -subj "/CN=front-proxy-ca"  -keyout front-proxy-ca.key  -out front-proxy-ca.crt
+openssl req -newkey rsa:4096 -nodes -sha256  -subj "/CN=front-proxy-client"  -keyout front-proxy-client.key  -out front-proxy-client.csr
+openssl x509 -req  -sha256 -days 3650   -CA front-proxy-ca.crt   -CAkey front-proxy-ca.key  -CAcreateserial   -in front-proxy-client.csr  -out front-proxy-client.crt
+
+ 坑1：注意生成的证书要每个服务器同步一下
+ 坑2：如果 etcd服务器上配置有多个IP ，要把对应的IP 都写到证书里去 service 网段的IP 一定要写入到host清单中
+ 坑3：证书时间写长点，不要挖坑埋自己
+ 坑4: kubernetes-csr.json IP 记得把master的 VIP 写进去，考虑到etcd和 master迁移 请多写几个IP

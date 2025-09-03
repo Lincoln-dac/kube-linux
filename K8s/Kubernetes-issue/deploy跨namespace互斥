@@ -1,0 +1,31 @@
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - docker-helloworld-01
+                - docker-helloworld-02
+            topologyKey: kubernetes.io/hostname
+            namespaces: 
+            - default
+            - monitoring  
+
+
+       affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - docker-helloworld-02
+                - docker-helloworld-01
+            topologyKey: kubernetes.io/hostname
+            namespaces:  
+            - default
+            - monitoring
+             

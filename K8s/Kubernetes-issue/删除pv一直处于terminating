@@ -1,0 +1,9 @@
+1、将所有的etcd中的key值取到一个keys.yam里面，便于查询
+ETCDCTL_API=3 etcdctl get "" --from-key > keys.yaml
+2、vim keys.yaml。找到pvc-05b1eb8f-0561-432d-8dff-7f1a6de27d95 目标pv
+找到以 /registry/ 开头 pvc-05b1eb8f-0561-432d-8dff-7f1a6de27d95 你目标结尾 这一串下面会用到
+3、删除记录
+ETCDCTL_API=3 etcdctl del /registry/pv/kube-system/pvc-05b1eb8f-0561-432d-8dff-7f1a6de27d95
+
+第二种 使用kubectl patch
+kubectl patch pv 你的pv名字 -p ‘{"metadata":{"finalizers":null}}‘
