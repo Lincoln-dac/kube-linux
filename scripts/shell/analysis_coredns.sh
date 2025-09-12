@@ -66,7 +66,7 @@ analyze_logs() {
 
     # 提取域名和响应时间数据
     echo "正在分析coredns日志..."
-    grep -v "cluster.local" "$LOG_FILE" | grep "A IN" | awk '{print $8, $NF}' > "$TEMP_FILE"
+    grep -v "esn.xl" "$LOG_FILE" | grep "A IN" | awk '{print $8, $NF}' > "$TEMP_FILE"
 
     # 检查是否提取到有效数据
     if [ ! -s "$TEMP_FILE" ]; then

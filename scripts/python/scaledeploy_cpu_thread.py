@@ -130,7 +130,7 @@ deployments = [
 
 
 try:
-    prom = PrometheusConnect(url="http://prometheus-dcnnw.fcbox.com/", disable_ssl=True)
+    prom = PrometheusConnect(url="http://prometheus-dcnnw.fctest.com/", disable_ssl=True)
 except Exception as e:
     print("error connecting to promethesu:", e)
     exit()
