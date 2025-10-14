@@ -1,0 +1,148 @@
+Haproxy配置文件（主备一样）
+# config needs haproxy-1.1.28 or haproxy-1.2.1
+global
+        log 127.0.0.1   local0
+        log 127.0.0.1   local1 notice
+        maxconn 65535
+        chroot /usr/local
+        uid 99
+        gid 99
+        daemon
+defaults
+        log     global
+        mode    http
+        option  httplog
+        option  dontlognull
+        retries 3
+defaults
+        log     global
+        mode    http
+        option  httplog
+        option  dontlognull
+        maxconn 2000
+        contimeout      5000
+        clitimeout      50000
+        srvtimeout      50000
+ 
+listen  web_proxy  0.0.0.0:80
+        mode http
+        stats uri /haproxy-stats
+        balance roundrobin
+        server  Apache1 192.168.1.101:80 check inter 2000 rise 2 fall 5
+        server  Apache2 192.168.1.102:80 check inter 2000 rise 2 fall 5
+        server  Apache3 192.168.1.103:80 check inter 2000 rise 2 fall 5
+Haproxy配置文件（主备一样）
+# config needs haproxy-1.1.28 or haproxy-1.2.1
+global
+        log 127.0.0.1   local0
+        log 127.0.0.1   local1 notice
+        maxconn 65535
+        chroot /usr/local
+        uid 99
+        gid 99
+        daemon
+defaults
+        log     global
+        mode    http
+        option  httplog
+        option  dontlognull
+        retries 3
+defaults
+        log     global
+        mode    http
+        option  httplog
+        option  dontlognull
+        maxconn 2000
+        contimeout      5000
+        clitimeout      50000
+        srvtimeout      50000
+ 
+listen  web_proxy  0.0.0.0:80
+        mode http
+        stats uri /haproxy-stats
+        balance roundrobin
+        server  Apache1 192.168.1.101:80 check inter 2000 rise 2 fall 5
+        server  Apache2 192.168.1.102:80 check inter 2000 rise 2 fall 5
+        server  Apache3 192.168.1.103:80 check inter 2000 rise 2 fall 5
+ 
+主keepalived 配置文件
+! Configuration File for keepalived
+global_defs
+{
+  router_id LVS_DEVEL
+}
+vrrp_script chk_haproxy
+{
+        script "/etc/keepalived/check_haproxy.sh"
+        interval 2
+        weight 2
+}
+vrrp_instance VI_1
+{
+    state MASTER
+    interface eth1
+    virtual_router_id 51
+    priority 100
+    advert_int 1
+    authentication
+ {
+        auth_type PASS
+        auth_pass 5555
+    }
+track_script {
+        chk_haproxy
+    }
+    virtual_ipaddress {
+        10.10.1.202
+    }
+track_script {
+      chk_http_port
+    }
+}
+备keepalived 配置文件
+! Configuration File for keepalived
+global_defs
+{
+  router_id LVS_DEVEL
+}
+vrrp_script chk_haproxy
+{
+        script "/etc/keepalived/check_haproxy.sh"
+        interval 2
+        weight 2
+}
+vrrp_instance VI_2
+{
+    state BACKUP
+    interface eth1
+    virtual_router_id 51
+    priority 99
+    advert_int 1
+    authentication
+ {
+        auth_type PASS
+        auth_pass 5555
+    }
+track_script {
+        chk_haproxy
+    }
+    virtual_ipaddress {
+        10.10.1.202
+    }
+track_script {
+      chk_http_port
+    }
+}
+ 
+脚本/etc/keepalived/check_haproxy.sh
+[root@Haproxy2 /]# cat /etc/keepalived/check_haproxy.sh
+#!/bin/bash
+A=`ps -C haproxy --no-header |wc -l`
+if [ $A -eq 0 ];then
+/usr/local/haproxy/sbin/haproxy -f /usr/local/haproxy/conf/haproxy.cfg
+sleep 3
+if [ `ps -C haproxy --no-header |wc -l` -eq 0 ];then
+/etc/init.d/keepalived stop
+fi
+fi
+

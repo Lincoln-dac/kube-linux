@@ -105,7 +105,15 @@ EOF
     sed -i 's/AllowGroups/#AllowGroups/g' /etc/ssh/sshd_config
     sed -i 's/PermitEmptyPasswords/#PermitEmptyPasswords/g' /etc/ssh/sshd_config
     systemctl restart sshd || handle_error "重启sshd服务失败"
-
+    
+    #升级irqbalance
+    systemctl stop irqbalance || handle_error "停止irqbalance服务失败"
+    cd /usr/sbin/ && wget -O irqbalance "${base_url}/k8s/package/irqbalance" || handle_error "下载irqbalance文件失败"
+    chmod +x /usr/sbin/irqbalance || handle_error "设置irqbalance文件可执行权限失败"
+    cd /usr/lib/systemd/system/ && wget -O irqbalance.service "${base_url}/k8s/config/irqbalance.service" || handle_error "下载irqbalance.service文件失败"
+    systemctl daemon-reload && systemctl start irqbalance.service || handle_error "重新加载并启动irqbalance服务失败"
+    systemctl enable irqbalance.service || handle_error "启用irqbalance服务失败"
+    
 }
 
 # 初始化目录
