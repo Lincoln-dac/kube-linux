@@ -11,119 +11,143 @@ import subprocess
 deployments = [
     {
         "name": "cabinet-base-server",
-        "replicas": "30"
+        "replicas": "30",
+        "namespace": "default"
     },
     {
         "name": "cabinet-config-server",
-        "replicas": "16"
+        "replicas": "16",
+        "namespace": "default"
     },
     {
         "name": "es-cabinet-stock-server",
-        "replicas": "30"
+        "replicas": "30",
+        "namespace": "default"
     },
     {
         "name": "es-send-order",
-        "replicas": "12"
+        "replicas": "12",
+        "namespace": "default"
     },
     {
         "name": "fcbox-boxservice-core",
-        "replicas": "40"
+        "replicas": "40",
+        "namespace": "default"
     },
     {
         "name": "fcbox-activity-applet-web",
-        "replicas": "18"
+        "replicas": "18",
+        "namespace": "default"
     },
     {
         "name": "es-marketing-benefit-server",
-        "replicas": "9"
+        "replicas": "9",
+        "namespace": "default"
     },
     {
         "name": "fcbox-boxservice-login-biz",
-        "replicas": "10"
+        "replicas": "10",
+        "namespace": "default"
     },
     {
         "name": "terminal-web",
-        "replicas": "12"
+        "replicas": "12",
+        "namespace": "default"
     },
     {
         "name": "es-post-applet-web",
-        "replicas": "24"
+        "replicas": "24",
+        "namespace": "default"
     },
     {
         "name": "fcbox-boxservice-sfnotify-web",
-        "replicas": "10"
+        "replicas": "10",
+        "namespace": "default"
     },
     {
         "name": "app-manager",
-        "replicas": "10"
+        "replicas": "10",
+        "namespace": "default"
     },
     {
         "name": "es-post-mobile-server",
-        "replicas": "24"
-    },
-    {
-        "name": "app-manager",
-        "replicas": "9"
+        "replicas": "24",
+        "namespace": "default"
     },
     {
         "name": "fcbox-activity-core",
-        "replicas": "24"
+        "replicas": "24",
+        "namespace": "default"
     },
     {
         "name": "es-base-service",
-        "replicas": "8"
+        "replicas": "8",
+        "namespace": "default"
     },
     {
         "name": "es-courier-biz",
-        "replicas": "9"
+        "replicas": "9",
+        "namespace": "default"
     },
     {
         "name": "es-post-data-server",
-        "replicas": "8"
+        "replicas": "8",
+        "namespace": "default"
     },	
     {
         "name": "es-post-queryservice",
-        "replicas": "12"
+        "replicas": "12",
+        "namespace": "default"
     },	
     {
         "name": "fcbox-esms-api-server",
-        "replicas": "8"
+        "replicas": "8",
+        "namespace": "default"
     },	
     {
         "name": "fcbox-esms-web",
-        "replicas": "8"
+        "replicas": "8",
+        "namespace": "default"
     },	
     {
         "name": "rent-server",
-        "replicas": "12"
+        "replicas": "12",
+        "namespace": "default"
     },	
     {
         "name": "es-pick-calculator-server",
-        "replicas": "9"
+        "replicas": "9",
+        "namespace": "default"
     },
     {
         "name": "es-pick-query-server",
-        "replicas": "9"
+        "replicas": "9",
+        "namespace": "default"
     },
     {
         "name": "es-pick-server",
-        "replicas": "16"
+        "replicas": "16",
+        "namespace": "default"
     },
     {
         "name": "fcbox-boxservice-custnotify-web",
-        "replicas": "21"
+        "replicas": "21",
+        "namespace": "default"
     },
     {		
         "name": "es-post-userservice-biz",
-        "replicas": "8"
+        "replicas": "8",
+        "namespace": "default"
     },
     {
         "name": "wechat-app-core",
-        "replicas": "12"
+        "replicas": "12",
+        "namespace": "default"
     },
     {
         "name": "fcbox-ordercenter-system",
-        "replicas": "12"
+        "replicas": "12",
+        "namespace": "default"
     }
 
 ]
@@ -132,19 +156,20 @@ deployments = [
 try:
     prom = PrometheusConnect(url="http://prometheus-dcnnw.fctest.com/", disable_ssl=True)
 except Exception as e:
-    print("error connecting to promethesu:", e)
+    print("error connecting to prometheus:", e)
     exit()
 
 for deployment in deployments :
-    replicas_query = 'kube_deployment_spec_replicas{deployment="%s"}' % (deployment['name'])
-    cpu_usage_rate_query = 'sum(irate(container_cpu_usage_seconds_total{namespace="default",container="%s"}[1m])) by (container,job,namespace, pod, pod_name,deployname) / (sum(container_spec_cpu_quota{namespace="default",container="%s"}/100000) by (container,job,namespace, pod, pod_name,deployname )) * 100 ' % (
-        deployment['name'], deployment['name'])
-    cpu_usage_rate_avg_query = 'avg (sum(irate(container_cpu_usage_seconds_total{namespace="default",container="%s"}[1m])) by (container,job,namespace, pod, pod_name,deployname) / (sum(container_spec_cpu_quota{namespace="default",container="%s"}/100000) by (container,job,namespace, pod, pod_name,deployname )) * 100 )' % (
-        deployment['name'], deployment['name'])
+    namespace = deployment.get('namespace', 'default')
+    replicas_query = 'kube_deployment_spec_replicas{deployment="%s",namespace="%s"}' % (deployment['name'], namespace)
+    cpu_usage_rate_query = 'sum(irate(container_cpu_usage_seconds_total{namespace="%s",container="%s"}[1m])) by (container,job,namespace, pod, pod_name,deployname) / (sum(container_spec_cpu_quota{namespace="%s",container="%s"}/100000) by (container,job,namespace, pod, pod_name,deployname )) * 100 ' % (
+        namespace, deployment['name'], namespace, deployment['name'])
+    cpu_usage_rate_avg_query = 'avg (sum(irate(container_cpu_usage_seconds_total{namespace="%s",container="%s"}[1m])) by (container,job,namespace, pod, pod_name,deployname) / (sum(container_spec_cpu_quota{namespace="%s",container="%s"}/100000) by (container,job,namespace, pod, pod_name,deployname )) * 100 )' % (
+        namespace, deployment['name'], namespace, deployment['name'])
     #print(prom.custom_query(replicas_query))
     replicas_query_result = prom.custom_query(replicas_query)[0]['value'][1]
     if replicas_query_result == deployment['replicas']:
-        print("ONLINE deploy %s replicas number is equal scale number,exit" % deployment['name'])
+        print("ONLINE deploy %s in namespace %s replicas number is equal scale number,exit" % (deployment['name'], namespace))
         continue
     else:
         cpu_usage_rate_result = prom.custom_query(cpu_usage_rate_query)
@@ -153,7 +178,7 @@ for deployment in deployments :
         #print(cpu_usage_avg_rate_result)
         #查询当前副本数数量与预期扩容的副本数量是否一致
         if cpu_usage_rate_result is None or len(cpu_usage_rate_result) == 0:
-            print("%s is none" % deployment['name'])
+            print("%s in namespace %s is none" % (deployment['name'], namespace))
             exit
         else:
             # cpu_usage_rate_result = cpu_usage_rate_result[0]['value'][1]
@@ -162,10 +187,10 @@ for deployment in deployments :
             #单个POD CPU 90%扩容
             if cpu_usage_rate > 90:
                 subprocess.run(
-                '/usr/bin/kubectl  -n default scale deployment %s --replicas=%s' % (deployment['name'], deployment['replicas']))
-                print("%s scale success" % deployment['name'])
+                '/usr/bin/kubectl  -n %s scale deployment %s --replicas=%s' % (namespace, deployment['name'], deployment['replicas']))
+                print("%s in namespace %s scale success" % (deployment['name'], namespace))
             else:
-                print("cpu max usage %s%%  %s not need scale"  % (cpu_usage_rate,deployment['name'] ))
+                print("cpu max usage %s%%  %s in namespace %s not need scale"  % (cpu_usage_rate, deployment['name'], namespace))
         if cpu_usage_avg_rate_result is None or len(cpu_usage_avg_rate_result) == 0:
             print("%s is none" % deployment['name'])
             exit
@@ -175,16 +200,17 @@ for deployment in deployments :
              if float(cpu_usage_avg_rate_result) > 80:
                 subprocess.run(
                 '/usr/bin/kubectl  -n default scale deployment %s --replicas=%s' % (deployment['name'], deployment['replicas']))
-                print("%s scale success" % deployment['name'])
+                print("%s in namespace %s scale success" % (deployment['name'], namespace))
              else:
-                 print("cpu avg usage %s%%  %s not need scale" % (cpu_usage_avg_rate_result, deployment['name']))
+                 print("cpu avg usage %s%%  %s in namespace %s not need scale" % (cpu_usage_avg_rate_result, deployment['name'], namespace))
 
 for deployment in deployments:
+    namespace = deployment.get('namespace', 'default')
     # 查询dubbo线程池的使用率
-    dubbo_thread_query = 'dubbo_thread_pool_active_count{app="%s",job="DUBBO",namespace="default"}/dubbo_thread_pool_max_size{app="%s",job="DUBBO",namespace="default"}*100' % (
-        deployment['name'], deployment['name'])
+    dubbo_thread_query = 'dubbo_thread_pool_active_count{app="%s",job="DUBBO",namespace="%s"}/dubbo_thread_pool_max_size{app="%s",job="DUBBO",namespace="%s"}*100' % (
+        deployment['name'], namespace, deployment['name'], namespace)
     dubbo_thread_result = prom.custom_query(dubbo_thread_query)
-    replicas_query = 'kube_deployment_spec_replicas{deployment="%s"}' % (deployment['name'])
+    replicas_query = 'kube_deployment_spec_replicas{deployment="%s",namespace="%s"}' % (deployment['name'], namespace)
     replicas_query_result = prom.custom_query(replicas_query)[0]['value'][1]
     replicas_num = deployment['replicas']
     # 查询当前副本数数量与预期扩容的副本数量是否一致
@@ -196,28 +222,28 @@ for deployment in deployments:
         dubbo_thread_usage = dubbo_thread_result[0]['value'][1]
         if float(dubbo_thread_usage) > 80:
             subprocess.run(
-                '/usr/bin/kubectl  -n default scale deployment %s --replicas=%s' % (
-                    deployment['name'], deployment['replicas']))
+                '/usr/bin/kubectl  -n %s scale deployment %s --replicas=%s' % (
+                    namespace, deployment['name'], deployment['replicas']))
             print("%s scale success" % deployment['name'])
         else:
-            print("DUBBO thread usage for %s is %s%% not need scale" % (deployment['name'], dubbo_thread_usage))
+            print("DUBBO thread usage for %s in namespace %s is %s%% not need scale" % (deployment['name'], namespace, dubbo_thread_usage))
     else:
-        print("Query dubbo_thread result is empty for %s" % deployment['name'])
+        print("Query dubbo_thread result is empty for %s in namespace %s" % (deployment['name'], namespace))
     # 查询tomcat1线程池的使用率
-    tomcat_thread_query = 'tomcat_threads_current_threads{app="%s",job="DUBBO",namespace="default"}/tomcat_threads_config_max_threads{app="%s",job="DUBBO",namespace="default"}*100' % (
-    deployment['name'], deployment['name'])
+    tomcat_thread_query = 'tomcat_threads_current_threads{app="%s",job="DUBBO",namespace="%s"}/tomcat_threads_config_max_threads{app="%s",job="DUBBO",namespace="%s"}*100' % (
+    deployment['name'], namespace, deployment['name'], namespace)
     tomcat_thread_result = prom.custom_query(tomcat_thread_query)
     if tomcat_thread_result is None or len(tomcat_thread_result) == 0:
-        tomcat_thread_query = 'tomcat_threads_current{app="%s",job="DUBBO",namespace="default"}/tomcat_threads_config_max{app="%s",job="DUBBO",namespace="default"}*100' % (
-        deployment['name'], deployment['name'])
+        tomcat_thread_query = 'tomcat_threads_current{app="%s",job="DUBBO",namespace="%s"}/tomcat_threads_config_max{app="%s",job="DUBBO",namespace="%s"}*100' % (
+        deployment['name'], namespace, deployment['name'], namespace)
         tomcat_thread_result = prom.custom_query(tomcat_thread_query)
     if tomcat_thread_result and len(tomcat_thread_result) > 0:
         # 如果使用率超过80%，则进行扩容
         tomcat_thread_usage = tomcat_thread_result[0]['value'][1]
         if float(tomcat_thread_usage) > 80:
             subprocess.run(
-                '/usr/bin/kubectl  -n default scale deployment %s --replicas=%s' % (
-                    deployment['name'], deployment['replicas']))
+                '/usr/bin/kubectl  -n %s scale deployment %s --replicas=%s' % (
+                    namespace, deployment['name'], deployment['replicas']))
             print("%s scale success" % deployment['name'])
         else:
             print("Tomcat thread usage for %s is %s%% not need scale" % (deployment['name'], tomcat_thread_usage))
