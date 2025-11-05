@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: node-ip-list
+  namespace: kube-system
+data:
+  node_ips.txt: |
+    10.204.51.64 
+    10.204.51.65
+    10.204.51.66
+    10.204.51.67
+    10.204.51.68

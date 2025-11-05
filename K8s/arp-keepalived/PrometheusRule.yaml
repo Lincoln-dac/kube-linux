@@ -1,0 +1,55 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: arp-keepalive-alerts
+  namespace: kube-system
+  labels:
+    app: arp-keepalive
+    # 这个标签必须匹配您的 Prometheus 实例的 ruleSelector
+    release: prometheus-operator  # 请根据实际情况修改
+spec:
+  groups:
+  - name: arp-keepalive
+    rules:
+    # 告警1: ARP通信持续失败
+    - alert: ARPKeepaliveFailure
+      expr: arp_keepalive_status_current == 1
+      for: 2m  # 持续2分钟失败才告警
+      labels:
+        severity: warning
+        component: network
+      annotations:
+        summary: "ARP通信失败 - {{ $labels.target_ip }}"
+        description: |
+          节点 {{ $labels.target_ip }} 的ARP通信已持续失败2分钟。
+          实例: {{ $labels.instance }}
+          命名空间: {{ $labels.namespace }}
+          当前状态: 失败
+
+    # 告警2: 监控系统异常
+    - alert: ARPKeepaliveMonitorDown
+      expr: arp_keepalive_up == 0
+      for: 3m  # 持续3分钟异常才告警
+      labels:
+        severity: critical
+        component: monitoring
+      annotations:
+        summary: "ARP监控系统异常 - {{ $labels.instance }}"
+        description: |
+          ARP保活监控系统已异常超过3分钟。
+          实例: {{ $labels.instance }}
+          命名空间: {{ $labels.namespace }}
+          Pod: {{ $labels.pod }}
+
+    # 告警3: 多个节点同时出现ARP失败
+    - alert: ARPKeepaliveMultipleFailures
+      expr: sum(arp_keepalive_status_current == 1) by (instance) > 2
+      for: 1m
+      labels:
+        severity: critical
+        component: network
+      annotations:
+        summary: "多个节点ARP通信失败 - {{ $labels.instance }}"
+        description: |
+          节点 {{ $labels.instance }} 检测到多个目标ARP通信失败。
+          失败节点数量: {{ $value }}

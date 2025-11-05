@@ -1,0 +1,33 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: arp-keepalive-monitor
+  namespace: kube-system  # 建议将 ServiceMonitor 与 Prometheus 实例放在同一命名空间（如 'monitoring'）
+spec:
+  selector:
+    matchLabels:
+      app: arp-keepalive  # 这个标签需要匹配你的 Service 的标签
+  namespaceSelector:
+    matchNames:
+      - kube-system  # 这个指定了你的 Service 所在的命名空间
+  endpoints:
+  - port: metrics  # 这个名称需要和你的 Service 中端口定义的 'name' 字段一致
+    path: /metrics
+    interval: 30s
+    targetPort: 18080  # 这里指定 DaemonSet Pod 内暴露 metrics 的实际端口
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: arp-keepalive-metrics
+  namespace: kube-system
+  labels:
+    app: arp-keepalive  # 这个标签会被ServiceMonitor选择
+spec:
+  selector:
+    app: arp-keepalive  # 选择DaemonSet的Pod
+  ports:
+  - name: metrics
+    port: 18080
+    targetPort: 18080
+  type: ClusterIP

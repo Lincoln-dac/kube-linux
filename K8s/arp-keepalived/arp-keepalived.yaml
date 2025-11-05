@@ -1,0 +1,268 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: arp-keepalive
+  namespace: kube-system
+  labels:
+    app: arp-keepalive
+spec:
+  selector:
+    matchLabels:
+      app: arp-keepalive
+  template:
+    metadata:
+      labels:
+        app: arp-keepalive
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "18080"
+        prometheus.io/path: "/metrics"
+    spec:
+      hostNetwork: true
+      tolerations:
+        - operator: Exists
+      volumes:
+      - name: config-volume
+        configMap:
+          name: node-ip-list
+      - name: shared-state
+        emptyDir: {}
+      - name: localtime
+        hostPath:
+          path: /etc/localtime 
+      containers:
+      - name: arp-keepalive
+        env: 
+          - name: MY_POD_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP
+          - name: ARP_INTERFACE
+            value: "eth0"
+        image: 10.204.209.253/common/arp-keepalived:1.1
+        command: ["/bin/sh"]
+        args:
+          - "-c"
+          - |
+            # 状态文件路径
+            STATE_FILE="/shared/arp_state.json"
+
+            log() {
+              echo "$(date '+%Y-%m-%d %H:%M:%S') - $*"
+            }
+
+            # 探测单个节点的ARP状态并直接写入状态文件
+            probe_and_update_node() {
+              local target_ip=$1
+              local status=$2
+              
+              # 读取当前状态文件
+              local current_state
+              if [ -f "$STATE_FILE" ] && [ -s "$STATE_FILE" ]; then
+                current_state=$(cat "$STATE_FILE")
+                # 确保以逗号分隔，构成有效的JSON对象
+                if [ "${current_state: -1}" = "}" ]; then
+                  # 去掉最后的 }，准备添加新字段
+                  current_state="${current_state%?}"
+                  if [ ${#current_state} -gt 2 ]; then  # 如果不是空对象 {}
+                    current_state="$current_state,"
+                  fi
+                fi
+              else
+                current_state="{"
+              fi
+              
+              # 添加新节点的状态
+              local new_state="${current_state}\"$target_ip\": \"$status\"}"
+              echo "$new_state" > "$STATE_FILE"
+            }
+            
+            # 获取本节点IP
+            if [ -z "$MY_POD_IP" ]; then
+              MY_POD_IP=$(hostname -i 2>/dev/null || echo "unknown")
+            fi
+            log "本节点IP: $MY_POD_IP"
+            
+            # 添加随机延迟 (0-5秒)
+            RANDOM_DELAY=$((RANDOM % 5))
+            log "等待随机延迟: $RANDOM_DELAY 秒"
+            sleep $RANDOM_DELAY
+
+            while true; do
+              # 每轮探测开始前清空状态文件
+              echo "{}" > "$STATE_FILE"
+              log "清空状态文件，开始新一轮探测"
+              
+              # 从ConfigMap读取所有节点IP并排除本节点IP
+              NODE_IPS=$(grep -v '^#' /etc/config/node_ips.txt | grep -v '^$' | grep -v "$MY_POD_IP")
+
+              # 随机打乱IP列表顺序
+              SHUFFLED_IPS=$(echo "$NODE_IPS" | shuf)
+
+              NODE_COUNT=$(echo "$SHUFFLED_IPS" | wc -l)
+              log "开始ARP保活循环，将处理 $NODE_COUNT 个节点"
+              
+              # 串行探测所有节点
+              for TARGET_IP in $SHUFFLED_IPS; do
+                # 为每个ARP请求添加微小随机延迟 (0-2秒)
+                REQUEST_DELAY=$((RANDOM % 3))
+                sleep $REQUEST_DELAY
+                
+                log "向节点 $TARGET_IP 发送ARP请求 (延迟 ${REQUEST_DELAY} 秒)"
+                
+                # 探测节点并确定状态
+                if arping -c 3 -I $ARP_INTERFACE -w 2 $TARGET_IP >/dev/null 2>&1; then
+                  log "成功: ARPing $TARGET_IP"
+                  probe_and_update_node "$TARGET_IP" "success"
+                else
+                  # arping失败时尝试ping
+                  if ping -c 1 -W 2 $TARGET_IP >/dev/null 2>&1; then
+                    log "arping失败但ping成功: $TARGET_IP"
+                    probe_and_update_node "$TARGET_IP" "failure"
+                  else
+                    log "失败: ARPing和ping均失败 $TARGET_IP"
+                    probe_and_update_node "$TARGET_IP" "failure"
+                  fi
+                fi
+              done
+              
+              # 验证最终状态文件的JSON格式
+              if [ -f "$STATE_FILE" ] && [ -s "$STATE_FILE" ]; then
+                if python -m json.tool "$STATE_FILE" >/dev/null 2>&1; then
+                  log "状态文件格式正确: $(cat "$STATE_FILE")"
+                else
+                  log "错误: 状态文件JSON格式无效，重新初始化为空对象"
+                  echo "{}" > "$STATE_FILE"
+                fi
+              else
+                log "警告: 状态文件为空"
+                echo "{}" > "$STATE_FILE"
+              fi
+              
+              log "完成一轮ARP保活，等待30秒..."
+              sleep 120
+            done
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/config
+        - name: localtime
+          mountPath: /etc/localtime
+        - name: shared-state
+          mountPath: /shared
+        resources:
+          requests:
+            memory: "16Mi"
+            cpu: "10m"
+          limits:
+            memory: "100Mi"
+            cpu: "100m"
+        securityContext:
+          capabilities:
+            add:
+              - NET_RAW
+      - name: arp-monitor
+        image: 10.204.209.253/common/python:3.12.9
+        command: ["/bin/sh"]
+        args:
+          - "-c"
+          - |
+            # 安装Python依赖
+            pip install prometheus-client
+            
+            # 创建监控脚本
+            cat > arp_monitor.py << 'EOF'
+            #!/usr/bin/env python3
+            import time
+            import json
+            import os
+            from http.server import HTTPServer, BaseHTTPRequestHandler
+
+            STATE_FILE = "/shared/arp_state.json"
+
+            class MetricsHandler(BaseHTTPRequestHandler):
+                def do_GET(self):
+                    if self.path == '/metrics':
+                        self.generate_metrics()
+                    else:
+                        self.send_response(404)
+                        self.end_headers()
+
+                def generate_metrics(self):
+                    # 读取状态文件
+                    state_data = {}
+                    try:
+                        if os.path.exists(STATE_FILE) and os.path.getsize(STATE_FILE) > 0:
+                            with open(STATE_FILE, 'r') as f:
+                                content = f.read().strip()
+                                if content:
+                                    state_data = json.loads(content)
+                    except Exception as e:
+                        print(f"读取状态文件失败: {e}")
+                        state_data = {}
+                    
+                    # 生成Prometheus指标
+                    output_lines = []
+                    
+                    # 指标1: arp_keepalive_status_current
+                    output_lines.append("# HELP arp_keepalive_status_current Current ARP status (0=success, 1=failure)")
+                    output_lines.append("# TYPE arp_keepalive_status_current gauge")
+                    
+                    for target_ip, status in state_data.items():
+                        status_value = 0 if status == "success" else 1
+                        output_lines.append(f'arp_keepalive_status_current{{target_ip="{target_ip}"}} {status_value}')
+                    
+                    # 指标2: arp_keepalive_up
+                    output_lines.append("# HELP arp_keepalive_up ARP keepalive monitoring status")
+                    output_lines.append("# TYPE arp_keepalive_up gauge")
+                    output_lines.append("arp_keepalive_up 1")
+                    
+                    output = "\n".join(output_lines)
+                    
+                    self.send_response(200)
+                    self.send_header('Content-Type', 'text/plain')
+                    self.end_headers()
+                    self.wfile.write(output.encode())
+
+                def log_message(self, format, *args):
+                    # 禁用默认日志输出
+                    pass
+
+            def start_server():
+                server = HTTPServer(('0.0.0.0', 18080), MetricsHandler)
+                print("启动指标服务器在端口 18080")
+                server.serve_forever()
+
+            if __name__ == '__main__':
+                start_server()
+            EOF
+            
+            # 启动监控
+            python arp_monitor.py
+        volumeMounts:
+        - name: shared-state
+          mountPath: /shared
+        ports:
+        - containerPort: 18080
+          name: metrics
+        resources:
+          requests:
+            memory: "32Mi"
+            cpu: "10m"
+          limits:
+            memory: "100Mi"
+            cpu: "100m"
+        livenessProbe:
+          tcpSocket:
+            port: 18080
+          initialDelaySeconds: 60
+          periodSeconds: 15
+          failureThreshold: 3
+          timeoutSeconds: 5
+         readinessProbe:
+          tcpSocket:
+            port: 18080
+          initialDelaySeconds: 60
+          periodSeconds: 15
+          failureThreshold: 3
+          timeoutSeconds: 5         
+
