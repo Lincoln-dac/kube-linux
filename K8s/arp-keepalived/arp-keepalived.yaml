@@ -115,13 +115,21 @@ spec:
                   log "成功: ARPing $TARGET_IP"
                   probe_and_update_node "$TARGET_IP" "success"
                 else
-                  # arping失败时尝试ping
-                  if ping -c 1 -W 2 $TARGET_IP >/dev/null 2>&1; then
-                    log "arping失败但ping成功: $TARGET_IP"
-                    probe_and_update_node "$TARGET_IP" "failure"
+                  # arping失败时尝试主动修复
+                  log "arping失败时尝试主动修复 $TARGET_IP"
+                  if arping -c 3 -I $ARP_INTERFACE -w 2 $TARGET_IP >/dev/null 2>&1; then
+                    log "主动修复成功: ARPing $TARGET_IP"
+                    probe_and_update_node "$TARGET_IP" "success"
                   else
-                    log "失败: ARPing和ping均失败 $TARGET_IP"
-                    probe_and_update_node "$TARGET_IP" "failure"
+                    log "主动修复失败: ARPing $TARGET_IP"
+                    # 若主动修复失败，再尝试ping
+                    if ping -c 1 -W 2 $TARGET_IP >/dev/null 2>&1; then
+                      log "arping失败但ping成功: $TARGET_IP"
+                      probe_and_update_node "$TARGET_IP" "success"
+                    else
+                      log "主动修复失败且ping失败: $TARGET_IP"
+                      probe_and_update_node "$TARGET_IP" "failure"
+                    fi
                   fi
                 fi
               done
