@@ -38,15 +38,15 @@ spec:
               fieldRef:
                 fieldPath: status.podIP
           - name: ARP_INTERFACE
-            value: "eth0"
-        image: 10.204.209.253/common/arp-keepalived:1.1
+            value: "bond0"
+        image: harbor.fcbox.com/common/arp-keepalived:1.0
         command: ["/bin/sh"]
         args:
           - "-c"
           - |
             # 状态文件路径
             STATE_FILE="/shared/arp_state.json"
-
+            TMP_FILE="/shared/arp_tmp_state.json"
             log() {
               echo "$(date '+%Y-%m-%d %H:%M:%S') - $*"
             }
@@ -83,8 +83,8 @@ spec:
             fi
             log "本节点IP: $MY_POD_IP"
             
-            # 添加随机延迟 (0-5秒)
-            RANDOM_DELAY=$((RANDOM % 5))
+            # 添加随机延迟 (0-2秒)
+            RANDOM_DELAY=$((RANDOM % 2))
             log "等待随机延迟: $RANDOM_DELAY 秒"
             sleep $RANDOM_DELAY
 
@@ -92,7 +92,6 @@ spec:
               # 每轮探测开始前清空状态文件
               echo "{}" > "$STATE_FILE"
               log "清空状态文件，开始新一轮探测"
-              
               # 从ConfigMap读取所有节点IP并排除本节点IP
               NODE_IPS=$(grep -v '^#' /etc/config/node_ips.txt | grep -v '^$' | grep -v "$MY_POD_IP")
 
@@ -105,13 +104,13 @@ spec:
               # 串行探测所有节点
               for TARGET_IP in $SHUFFLED_IPS; do
                 # 为每个ARP请求添加微小随机延迟 (0-2秒)
-                REQUEST_DELAY=$((RANDOM % 3))
+                REQUEST_DELAY=$((RANDOM % 2))
                 sleep $REQUEST_DELAY
                 
                 log "向节点 $TARGET_IP 发送ARP请求 (延迟 ${REQUEST_DELAY} 秒)"
                 
                 # 探测节点并确定状态
-                if arping -c 3 -I $ARP_INTERFACE -w 2 $TARGET_IP >/dev/null 2>&1; then
+                if arping -c 2 -I $ARP_INTERFACE -w 2 $TARGET_IP >/dev/null 2>&1; then
                   log "成功: ARPing $TARGET_IP"
                   probe_and_update_node "$TARGET_IP" "success"
                 else
@@ -121,17 +120,16 @@ spec:
                     log "主动修复成功: ARPing $TARGET_IP"
                     probe_and_update_node "$TARGET_IP" "success"
                   else
-                    log "主动修复失败: ARPing $TARGET_IP"
-                    # 若主动修复失败，再尝试ping
+                    log "主动修复失败: ARPing $TARGET_IP 尝试ping "
                     if ping -c 1 -W 2 $TARGET_IP >/dev/null 2>&1; then
                       log "arping失败但ping成功: $TARGET_IP"
                       probe_and_update_node "$TARGET_IP" "success"
                     else
-                      log "主动修复失败且ping失败: $TARGET_IP"
+                      log "失败: ARPing和ping均失败 $TARGET_IP"
                       probe_and_update_node "$TARGET_IP" "failure"
                     fi
                   fi
-                fi
+                fi               
               done
               
               # 验证最终状态文件的JSON格式
@@ -146,9 +144,10 @@ spec:
                 log "警告: 状态文件为空"
                 echo "{}" > "$STATE_FILE"
               fi
-              
+              mv "$STATE_FILE" "$TMP_FILE"
+              #log "覆盖状态文件，开始新一轮探测"
               log "完成一轮ARP保活，等待30秒..."
-              sleep 120
+              sleep 60
             done
         volumeMounts:
         - name: config-volume
@@ -159,23 +158,23 @@ spec:
           mountPath: /shared
         resources:
           requests:
-            memory: "16Mi"
-            cpu: "10m"
+            memory: "50Mi"
+            cpu: "50m"
           limits:
-            memory: "100Mi"
-            cpu: "100m"
+            memory: "200Mi"
+            cpu: "200m"
         securityContext:
           capabilities:
             add:
               - NET_RAW
       - name: arp-monitor
-        image: 10.204.209.253/common/python:3.12.9
+        image: harbor.fcbox.com/common/python:3.12.9.sp1
         command: ["/bin/sh"]
         args:
           - "-c"
           - |
             # 安装Python依赖
-            pip install prometheus-client
+            #pip install prometheus-client
             
             # 创建监控脚本
             cat > arp_monitor.py << 'EOF'
@@ -185,8 +184,8 @@ spec:
             import os
             from http.server import HTTPServer, BaseHTTPRequestHandler
 
-            STATE_FILE = "/shared/arp_state.json"
-
+            #STATE_FILE = "/shared/arp_state.json"
+            TMP_FILE="/shared/arp_tmp_state.json" 
             class MetricsHandler(BaseHTTPRequestHandler):
                 def do_GET(self):
                     if self.path == '/metrics':
@@ -199,8 +198,8 @@ spec:
                     # 读取状态文件
                     state_data = {}
                     try:
-                        if os.path.exists(STATE_FILE) and os.path.getsize(STATE_FILE) > 0:
-                            with open(STATE_FILE, 'r') as f:
+                        if os.path.exists(TMP_FILE) and os.path.getsize(TMP_FILE) > 0:
+                            with open(TMP_FILE, 'r') as f:
                                 content = f.read().strip()
                                 if content:
                                     state_data = json.loads(content)
@@ -254,11 +253,11 @@ spec:
           name: metrics
         resources:
           requests:
-            memory: "32Mi"
-            cpu: "10m"
+            memory: "50Mi"
+            cpu: "50m"
           limits:
-            memory: "100Mi"
-            cpu: "100m"
+            memory: "200Mi"
+            cpu: "200m"
         livenessProbe:
           tcpSocket:
             port: 18080
@@ -266,11 +265,10 @@ spec:
           periodSeconds: 15
           failureThreshold: 3
           timeoutSeconds: 5
-         readinessProbe:
+        readinessProbe:
           tcpSocket:
             port: 18080
-          initialDelaySeconds: 60
+          initialDelaySeconds: 30
           periodSeconds: 15
           failureThreshold: 3
-          timeoutSeconds: 5         
-
+          timeoutSeconds: 5
