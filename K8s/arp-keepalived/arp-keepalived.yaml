@@ -39,7 +39,7 @@ spec:
                 fieldPath: status.podIP
           - name: ARP_INTERFACE
             value: "bond0"
-        image: harbor.fcbox.com/common/arp-keepalived:1.0
+        image: harbor.test.com/common/arp-keepalived:1.0
         command: ["/bin/sh"]
         args:
           - "-c"
@@ -168,7 +168,7 @@ spec:
             add:
               - NET_RAW
       - name: arp-monitor
-        image: harbor.fcbox.com/common/python:3.12.9.sp1
+        image: harbor.test.com/common/python:3.12.9.sp1
         command: ["/bin/sh"]
         args:
           - "-c"
