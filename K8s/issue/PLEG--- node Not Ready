@@ -1,0 +1,12 @@
+pleg not healthy，一般有以下几种可能：
+
+容器运行时无响应或响应超时，如 docker进程响应超时（比较常见）
+该节点上容器数量过多，导致 relist 的过程无法在 3 分钟内完成
+relist 出现了死锁，该 bug 已在 Kubernetes 1.14 中修复。
+网络
+
+• 登入到work节点清除不用的容器残留
+docker system prune
+这里清理掉一些残留的容器后，节点状态就恢复正常了，并不需要重启docker和kubelet 
+如果不行的话就执行：
+service docker restart && service kubelet restart
