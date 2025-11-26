@@ -1,4 +1,4 @@
-此工程主要解决K8S集群中使用flanneld 的host-gw模式下，再大集群规模下，Node节点可能学习到不到其他Node节点的MAC地址的问题。
+此工程主要解决K8S集群中使用flanneld 的host-gw模式下，在大集群规模下，Node节点可能学习到不到其他Node节点的MAC地址的问题。
 
 功能说明
 
@@ -10,6 +10,6 @@
 
 4.需要在所有节点上运行，建议使用daemonset部署。（使用18080端口）
 
-5.镜像需要安装jq工具，用于解析node-ip-list-cm 中的IP列表。
+5.镜像需要安装jq工具，用于解析node-ip-list-cm 中的IP列表，python镜像需要安装prometheus-client 模块。
 
-参考文档https://mp.weixin.qq.com/s/HnqOH0WJKbQXWcZuZaR7qg
+https://mp.weixin.qq.com/s/HnqOH0WJKbQXWcZuZaR7qg
