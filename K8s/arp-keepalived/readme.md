@@ -8,7 +8,7 @@
 
 3.arp-keepalived 会定时探测node-ip-list-cm 中的IP是否可达，若不可达，则尝试主动修复，若修复失败，则会触发告警。
 
-4.需要在所有节点上运行，建议使用daemonset部署。（使用18080端口）
+4.需要在所有节点上运行，使用daemonset部署。（使用18080端口）
 
 5.镜像需要安装jq工具，用于解析node-ip-list-cm 中的IP列表，python镜像需要安装prometheus-client 模块。
 
