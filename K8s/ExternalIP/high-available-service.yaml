@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: high-available-service
+spec:
+  selector:
+    app: docker-01
+  type: ClusterIP 
+  externalIPs:
+    - 10.204.51.63
+  ports:
+  - name: http
+    port: 28080        # 关键1：Service的入口端口，即外部访问的端口
+    targetPort: 8080 # 关键2：Pod实际监听的端口
+    protocol: TCP
