@@ -1,0 +1,75 @@
+主配置文件
+
+! Configuration File for keepalived
+global_defs { 
+        router_id LVS_DEVEL
+	script_user root
+	enable_script_security
+        vrrp_garp_master_refresh 30
+        vrrp_garp_master_refresh_repeat 5
+}   
+vrrp_script check_apiserver {
+    script "/etc/keepalived/ss.sh"
+    interval 3
+    weight 2
+}
+
+vrrp_instance VI_1 {
+    state MASTER
+    interface eth0
+    virtual_router_id 30
+    priority 100
+    advert_int 2
+    authentication {
+        auth_type PASS
+        auth_pass 1111
+    }
+    track_script {
+     check_apiserver
+    }
+    virtual_ipaddress {
+        10.204.51.63/24 dev kube-ipvs0
+    }
+}
+
+
+备配置文件
+global_defs { 
+    router_id LVS_DEVEL
+    script_user root
+    enable_script_security
+    vrrp_garp_master_refresh 30
+    vrrp_garp_master_refresh_repeat 5
+}   
+vrrp_script check_apiserver {
+    script "/etc/keepalived/ss.sh"
+    interval 3
+    weight 2
+}
+vrrp_instance VI_1 {
+    state BACKUP
+    interface eth0
+    virtual_router_id 30
+    priority 99 
+    advert_int 2
+    authentication {
+        auth_type PASS
+        auth_pass 1111
+    }
+    track_script {
+        check_apiserver
+    }
+    virtual_ipaddress {
+        10.204.51.63/24 dev kube-ipvs0
+    }
+}
+
+关注点 
+虚拟ip监听在 kube-ipvs0 接口上
+
+注意：
+1. 主备节点的 virtual_router_id 必须相同
+2. 主备节点的 priority 必须不同，主节点的 priority 必须大于备节点
+3. 主备节点的 advert_int 必须相同
+4. 主备节点的 auth_type 和 auth_pass 必须相同
+5. 主备节点的 virtual_ipaddress 必须相同
