@@ -1,0 +1,28 @@
+1./usr/lib/systemd/system/minio.service
+[Unit]
+Description=MinIO
+After=network.target
+
+[Service]
+User=mwopr
+Group=mwopr
+EnvironmentFile=-/app/minio/config/minio
+ExecStart=/app/minio/bin/minio --config-dir /app/minio/config/ server  --address 0.0.0.0:19000 --console-address 0.0.0.0:19001 \
+http://10.204.51.64:19000/app/minio/data1 \
+http://10.204.51.64:19000/app/minio/data2 \
+http://10.204.51.65:19000/app/minio/data1 \
+http://10.204.51.65:19000/app/minio/data2 \
+http://10.204.51.66:19000/app/minio/data1 \
+http://10.204.51.66:19000/app/minio/data2
+Restart=always
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target
+
+
+2.配置文件
+/app/minio/config/minio
+MINIO_ACCESS_KEY=minio
+MINIO_SECRET_KEY=minio123
+MINIO_PROMETHEUS_AUTH_TYPE=public

@@ -1,0 +1,53 @@
+upstream minio_api {
+    least_conn;
+    server 10.204.51.64:19000;
+    server 10.204.51.65:19000;
+    server 10.204.51.66:19000;
+}
+
+upstream minio_console {
+    least_conn;
+    server 10.204.51.64:19001;
+    server 10.204.51.65:19001;
+    server 10.204.51.66:19001;
+}
+
+server{
+    listen       19000;
+    server_name  192.168.51.51;
+
+    ignore_invalid_headers off;
+    client_max_body_size 0;
+    proxy_buffering off;
+
+    location / {
+    proxy_set_header   X-Forwarded-Proto $scheme;
+    proxy_set_header   Host              $http_host;
+    proxy_set_header   X-Real-IP         $remote_addr;
+    proxy_connect_timeout 300;
+    proxy_http_version 1.1;
+    chunked_transfer_encoding off;
+    proxy_ignore_client_abort on;
+    proxy_pass http://minio_api;
+    }
+}
+
+server{
+    listen       19001;
+    server_name  10.204.51.51 ;
+
+    ignore_invalid_headers off;
+    client_max_body_size 0;
+    proxy_buffering off;
+
+    location / {
+    proxy_set_header   X-Forwarded-Proto $scheme;
+    proxy_set_header   Host              $http_host;
+    proxy_set_header   X-Real-IP         $remote_addr;
+    proxy_connect_timeout 300;
+    proxy_http_version 1.1;
+    chunked_transfer_encoding off;
+    proxy_ignore_client_abort on;
+    proxy_pass http://minio_console;
+    }
+}

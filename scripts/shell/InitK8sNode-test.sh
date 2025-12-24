@@ -134,10 +134,10 @@ InitFlanneld() {
 InitDocker() {
     echo "初始化Docker"
     cd /root/ || handle_error "切换到 /root 目录失败"
-    #wget -O  containerd.io-1.6.33-3.1.el7.x86_64.rpm "${base_url}/k8s/package/containerd.io-1.6.33-3.1.el7.x86_64.rpm" || handle_error "下载containerd.io-1.6.33-3.1.el7.x86_64.rpm文件失败"
-    #wget -O  docker-ce-18.03.0.ce-1.el7.centos.x86_64.rpm "${base_url}/k8s/package/docker-ce-18.03.0.ce-1.el7.centos.x86_64.rpm" || handle_error "下载docker-ce-18.03.0.ce-1.el7.centos.x86_64.rpm文件失败"
-    #rpm -ivh containerd.io-1.6.33-3.1.el7.x86_64.rpm || handle_error "安装containerd.io-1.6.33-3.1.el7.x86_64.rpm失败"
-    #rpm -ivh docker-ce-18.03.0.ce-1.el7.centos.x86_64.rpm || handle_error "安装docker-ce-18.03.0.ce-1.el7.centos.x86_64.rpm失败"
+    wget -O  containerd.io-1.6.33-3.1.el7.x86_64.rpm "${base_url}/k8s/package/containerd.io-1.6.33-3.1.el7.x86_64.rpm" || handle_error "下载containerd.io-1.6.33-3.1.el7.x86_64.rpm文件失败"
+    wget -O  docker-ce-18.03.0.ce-1.el7.centos.x86_64.rpm "${base_url}/k8s/package/docker-ce-18.03.0.ce-1.el7.centos.x86_64.rpm" || handle_error "下载docker-ce-18.03.0.ce-1.el7.centos.x86_64.rpm文件失败"
+    rpm -ivh containerd.io-1.6.33-3.1.el7.x86_64.rpm || handle_error "安装containerd.io-1.6.33-3.1.el7.x86_64.rpm失败"
+    rpm -ivh docker-ce-18.03.0.ce-1.el7.centos.x86_64.rpm || handle_error "安装docker-ce-18.03.0.ce-1.el7.centos.x86_64.rpm失败"
 
     cd /etc/docker || handle_error "切换到 /etc/docker 目录失败"
     wget -O daemon.json  "${base_url}/k8s/config/daemon.json" || handle_error "下载daemon.json文件失败"

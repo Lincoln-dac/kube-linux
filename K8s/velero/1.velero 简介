@@ -1,0 +1,14 @@
+一、velero 简介
+Velero 是vmware开源的一个云原生的灾难恢复和迁移工具，它本身也是开源的,采用Go语言编写，可以安全的备份、恢复和迁移Kubernetes集群资源数据；
+Velero 是西班牙语意思是帆船，非常符合Kubernetes社区的命名风格，Velero的开发公司Heptio，已被VMware收购。Velero 支持标准的K8S集群，
+既可以是私有云平台也可以是公有云，除了灾备之外它还能做资源移转，支持把容器应用从一个集群迁移到另一个集群。
+Velero 的工作方式就是把kubernetes中的数据备份到对象存储以实现高可用和持久化，默认的备份保存时间为720小时，并在需要的时候进行下载和恢复。
+
+github: https://github.com/vmware-tanzu/velero
+官网：https://velero.io/
+
+![image](https://github.com/Lincoln-dac/kube-linux/blob/master/pic/velero1.png)
+
+
+
+![image](https://github.com/Lincoln-dac/kube-linux/blob/master/pic/velero2.png)
