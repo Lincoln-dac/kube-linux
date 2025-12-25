@@ -1,0 +1,21 @@
+# 每周维护任务
+#!/bin/bash
+# weekly-maintenance.sh
+
+echo "1. 检查备份状态"
+velero backup get --sort-by backupMetadata.creationTimestamp
+
+echo "2. 清理过期备份"
+velero backup delete --older-than 720h --keep 10
+
+echo "3. 验证存储位置"
+velero backup-location describe default --verify
+
+echo "4. 检查调度执行"
+velero schedule get -o wide
+
+echo "5. 查看资源使用情况"
+kubectl top pod -n velero
+
+echo "6. 检查错误日志"
+kubectl logs deployment/velero -n velero --tail=100 | grep -i error

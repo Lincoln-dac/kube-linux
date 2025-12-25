@@ -1,0 +1,12 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: velero
+  namespace: velero
+spec:
+  selector:
+    matchLabels:
+      component: velero
+  endpoints:
+  - port: monitoring
+    interval: 30s
