@@ -1,0 +1,14 @@
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: daily-full-backup
+  namespace: velero
+spec:
+  schedule: "*/15 * * * *"
+  template:
+    ttl: 720h # 保留 30 天备份，可改
+    includedNamespaces:
+    - "*"      # 备份全部 namespace
+    snapshotVolumes: false
+    storageLocation: bls   # 使用 BSL “default”
+

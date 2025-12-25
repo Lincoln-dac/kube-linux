@@ -1,0 +1,100 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: velero
+  namespace: velero
+  labels:
+    component: velero
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      deploy: velero
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  template:
+    metadata:
+      labels:
+        component: velero
+        deploy: velero
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8085"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: velero
+      restartPolicy: Always
+      containers:
+      - name: velero
+        image: 10.204.209.253/common/velero:v1.4.2
+        imagePullPolicy: IfNotPresent
+        command:
+          - /velero
+        args:
+          - server
+          - --features=
+        env:
+        - name: VELERO_SCRATCH_DIR
+          value: /scratch
+        - name: VELERO_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: LD_LIBRARY_PATH
+          value: /plugins
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: /credentials/cloud
+        - name: AWS_SHARED_CREDENTIALS_FILE
+          value: /credentials/cloud
+        - name: AZURE_CREDENTIALS_FILE
+          value: /credentials/cloud
+        - name: ALIBABA_CLOUD_CREDENTIALS_FILE
+          value: /credentials/cloud
+        ports:
+        - containerPort: 8085
+          name: metrics
+        resources:
+          requests:
+            cpu: 0.1
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
+        volumeMounts:
+        - mountPath: /plugins
+          name: plugins
+        - mountPath: /scratch
+          name: scratch
+        - mountPath: /credentials
+          name: cloud-credentials
+        - mountPath: /etc/localtime
+          name: localtime
+      initContainers:
+      - name: velero-plugin-for-aws
+        image: 10.204.209.253/common/velero-plugin-for-aws:v1.0.0
+        imagePullPolicy: IfNotPresent
+        resources:
+          requests:
+            cpu: 0.1
+            memory: 100Mi
+          limits:
+            cpu: 1
+            memory: 500Mi
+        volumeMounts:
+        - mountPath: /target
+          name: plugins
+      volumes:
+      - name: plugins
+        emptyDir: {}
+      - name: scratch
+        emptyDir: {}
+      - name: cloud-credentials
+        secret:
+          secretName: cloud-credentials
+          defaultMode: 420
+      - name: localtime
+        hostPath:
+          path: /etc/localtime
