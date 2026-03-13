@@ -38,7 +38,7 @@ spec:
               fieldRef:
                 fieldPath: status.podIP
           - name: ARP_INTERFACE
-            value: "bond0"
+            value: "eth0"
         image: harbor.test.com/common/arp-keepalived:1.0
         command: ["/bin/sh"]
         args:
@@ -146,7 +146,7 @@ spec:
               fi
               mv "$STATE_FILE" "$TMP_FILE"
               #log "覆盖状态文件，开始新一轮探测"
-              log "完成一轮ARP保活，等待30秒..."
+              log "完成一轮ARP保活，等待60秒..."
               sleep 60
             done
         volumeMounts:
@@ -184,7 +184,6 @@ spec:
             import os
             from http.server import HTTPServer, BaseHTTPRequestHandler
 
-            #STATE_FILE = "/shared/arp_state.json"
             TMP_FILE="/shared/arp_tmp_state.json" 
             class MetricsHandler(BaseHTTPRequestHandler):
                 def do_GET(self):
