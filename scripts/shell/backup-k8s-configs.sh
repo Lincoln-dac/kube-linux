@@ -44,7 +44,7 @@ for NS in "${NS_ARRAY[@]}"; do
         echo "    无Deployments资源"
     else
         for DEPLOY in $DEPLOYS; do
-            if $KUBECTL get deploy $DEPLOY -n $NS -o yaml --export > "$BACKUP/$NS/deployments/$DEPLOY.yaml" 2>&1; then
+            if $KUBECTL get deploy $DEPLOY -n $NS -o yaml > "$BACKUP/$NS/deployments/$DEPLOY.yaml" 2>&1; then
                 if [[ -s "$BACKUP/$NS/deployments/$DEPLOY.yaml" ]]; then
                     echo "    ✓ $DEPLOY"
                 else
@@ -65,7 +65,7 @@ for NS in "${NS_ARRAY[@]}"; do
         echo "    无Services资源"
     else
         for SVC in $SVCS; do
-            if $KUBECTL get svc $SVC -n $NS -o yaml --export > "$BACKUP/$NS/services/$SVC.yaml" 2>&1; then
+            if $KUBECTL get svc $SVC -n $NS -o yaml > "$BACKUP/$NS/services/$SVC.yaml" 2>&1; then
                 if [[ -s "$BACKUP/$NS/services/$SVC.yaml" ]]; then
                     echo "    ✓ $SVC"
                 else
@@ -86,7 +86,7 @@ for NS in "${NS_ARRAY[@]}"; do
         echo "    无Ingress资源"
     else
         for ING in $INGS; do
-            if $KUBECTL get ingress $ING -n $NS -o yaml --export > "$BACKUP/$NS/ingress/$ING.yaml" 2>&1; then
+            if $KUBECTL get ingress $ING -n $NS -o yaml > "$BACKUP/$NS/ingress/$ING.yaml" 2>&1; then
                 if [[ -s "$BACKUP/$NS/ingress/$ING.yaml" ]]; then
                     echo "    ✓ $ING"
                 else
@@ -107,7 +107,7 @@ for NS in "${NS_ARRAY[@]}"; do
         echo "    无IngressRoute资源"
     else
         for IR in $IRS; do
-            if $KUBECTL get ingressroute $IR -n $NS -o yaml --export > "$BACKUP/$NS/ingressroute/$IR.yaml" 2>&1; then
+            if $KUBECTL get ingressroute $IR -n $NS -o yaml > "$BACKUP/$NS/ingressroute/$IR.yaml" 2>&1; then
                 if [[ -s "$BACKUP/$NS/ingressroute/$IR.yaml" ]]; then
                     echo "    ✓ $IR"
                 else
