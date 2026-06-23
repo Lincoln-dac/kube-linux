@@ -1,0 +1,25 @@
+五、实战调试场景
+场景 1：排查 Pod 启动失败
+bash
+# 1. 查看所有 NotReady 状态的 Pod
+crictl pods --state NotReady
+
+# 2. 获取该 Pod 中容器的 ID
+crictl ps -a --name <pod-name>
+
+# 3. 查看容器日志
+crictl logs <container-id>
+
+# 4. 查看容器详细状态
+crictl inspect <container-id>
+场景 2：清理资源
+bash
+# 清理所有已退出的容器
+crictl rm $(crictl ps -a -q --state Exited)
+
+# 清理未使用的镜像
+crictl rmi --prune
+场景 3：定位特定 Pod 的容器
+bash
+# 通过 Pod 名称查找容器
+crictl ps --name my-pod

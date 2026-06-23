@@ -1,0 +1,10 @@
+一、crictl 是什么？
+crictl 是 Kubernetes 官方提供的命令行工具，用于与符合 CRI（Container Runtime Interface） 标准的容器运行时（如 containerd、CRI-O）进行交互。
+
+与 Docker 命令的核心区别
+维度	docker	crictl
+交互对象	Docker Daemon	CRI 兼容运行时（containerd/CRI-O）
+定位	完整的容器管理工具（构建、网络、存储、编排等）	Kubernetes 节点的调试和诊断工具
+Pod 概念	无原生 Pod 概念	原生支持 Pod 操作（crictl pods）
+使用场景	开发环境和单机容器管理	Kubernetes 集群中容器运行时的调试和故障排查
+一句话总结：docker 是"全能选手"，crictl 是"K8s 专用调试工具"。

@@ -1,0 +1,20 @@
+2. 配置端点
+crictl 需要知道容器运行时的 socket 地址，有三种配置方式：
+
+方式一：配置文件 /etc/crictl.yaml（推荐）
+
+yaml
+runtime-endpoint: unix:///var/run/containerd/containerd.sock
+image-endpoint: unix:///var/run/containerd/containerd.sock
+timeout: 10
+debug: false
+方式二：环境变量
+
+bash
+export CONTAINER_RUNTIME_ENDPOINT=unix:///var/run/containerd/containerd.sock
+export IMAGE_SERVICE_ENDPOINT=unix:///var/run/containerd/containerd.sock
+方式三：命令行参数
+
+bash
+crictl --runtime-endpoint unix:///var/run/containerd/containerd.sock pods
+如果不设置端点，crictl 会尝试连接已知端点列表，可能影响性能。

@@ -1,0 +1,26 @@
+六、高级技巧
+1. 镜像仓库认证
+在 /etc/crictl.yaml 中配置认证信息：
+
+yaml
+runtime-endpoint: unix:///run/containerd/containerd.sock
+auth:
+  registry.example.com:
+    username: "myuser"
+    password: "mypass"
+或使用 Base64 编码：
+
+yaml
+auth: "dXNlcm5hbWU6cGFzc3dvcmQ="  # base64 编码的 username:password
+2. 输出格式
+使用 -o yaml 或 -o json 便于脚本解析：
+
+bash
+crictl pods -o json | jq '.items[].metadata.name'
+3. 快捷操作
+bash
+# 获取所有容器 ID（静默模式）
+crictl ps -a -q
+
+# 获取特定名称容器的 ID
+crictl ps -a --name nginx -q

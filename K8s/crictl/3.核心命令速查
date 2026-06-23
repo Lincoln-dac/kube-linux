@@ -1,0 +1,38 @@
+三、核心命令速查
+📦 Pod 管理
+命令	说明	示例
+crictl pods	列出所有 Pod	crictl pods
+crictl pods --name <name>	按名称过滤	crictl pods --name nginx-xxx
+crictl pods --label <key>=<value>	按标签过滤	crictl pods --label run=nginx
+crictl pods --state Ready/NotReady	按状态过滤	crictl pods --state NotReady
+crictl inspectp <pod-id>	查看 Pod 详细信息	crictl inspectp 4dccb216c4adb
+crictl stopp <pod-id>	停止 Pod	crictl stopp 4dccb216c4adb
+crictl rmp <pod-id>	删除 Pod	crictl rmp 4dccb216c4adb
+📦 容器管理
+命令	说明	示例
+crictl ps	列出运行中的容器	crictl ps
+crictl ps -a	列出所有容器（含已停止）	crictl ps -a
+crictl ps -o json	JSON 格式输出	crictl ps -o json
+crictl inspect <container-id>	查看容器详细信息	crictl inspect abc123
+crictl logs <container-id>	查看容器日志	crictl logs abc123
+crictl logs -f <container-id>	实时跟踪日志	crictl logs -f abc123
+crictl logs --tail 50 <container-id>	查看最后 50 行	crictl logs --tail 50 abc123
+crictl exec -it <container-id> -- <cmd>	在容器中执行命令	crictl exec -it abc123 -- sh
+crictl stop <container-id>	停止容器	crictl stop abc123
+crictl rm <container-id>	删除容器	crictl rm abc123
+📦 镜像管理
+命令	说明	示例
+crictl images	列出所有镜像	crictl images
+crictl images -o json	JSON 格式输出	crictl images -o json
+crictl pull <image>:<tag>	拉取镜像	crictl pull nginx:alpine
+crictl inspecti <image>	查看镜像详细信息	crictl inspecti nginx:alpine
+crictl rmi <image-id>	删除镜像	crictl rmi abc123
+crictl rmi --prune	删除未使用的镜像	crictl rmi --prune
+📦 其他实用命令
+命令	说明
+crictl version	显示 crictl 和运行时版本
+crictl info	显示运行时详细信息
+crictl stats	列出所有容器资源使用统计
+crictl stats <container-id>	查看指定容器资源统计
+crictl statsp <pod-id>	查看 Pod 资源统计
+crictl config	获取/设置配置选项
