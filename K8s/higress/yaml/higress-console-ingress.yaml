@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: higress-console-ingress
+  namespace: higress-system
+spec:
+  ingressClassName: higress
+  tls:
+  - hosts:
+    - higress-consle.test.com
+    secretName: fc-tls
+  rules:
+  - host: higress-consle.test.com
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: higress-console
+            port:
+              number: 8080

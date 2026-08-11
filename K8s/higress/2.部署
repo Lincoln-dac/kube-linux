@@ -1,0 +1,18 @@
+helm repo add higress.io https://higress.io/helm-charts
+
+helm install higress higress.io/higress -n higress-system   /
+--set global.o11y.enabled=true    /
+--set global.enableGatewayAPI=true     /
+--set higress-core.gateway.replicas=1     /
+--set higress-core.gateway.httpPort=80     /
+--set higress-core.gateway.httpsPort=443     /
+--set higress-core.gateway.kind=Deployment    / 
+--set higress-core.controller.replicas=1     /
+--set higress-core.gateway.hostNetwork=true     /
+--set higress-core.gateway.nodeSelector.network=higress  /
+--set higress-console.service.type=ClusterIP   /
+--set higress-console.o11y.enabled=true  /
+--set higress-core.gateway.service.type=ClusterIP
+
+
+https://higress.cn/docs/latest/ops/deploy-by-helm/
