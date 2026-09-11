@@ -1,0 +1,5 @@
+1.新建普通用户useradd -m -s /bin/bash robet
+2.新建目录k8s
+mkdir /home/robet/K8s
+3.下载kstack
+curl -sS https://kstack.sh/install | bash

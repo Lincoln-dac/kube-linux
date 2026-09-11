@@ -1,0 +1,20 @@
+第一步：安装 Node.js v22.22.2
+1.安装node 22
+# 下载二进制包
+wget https://nodejs.org/download/release/v22.22.2/node-v22.22.2-linux-x64.tar.xz
+tar -xJf node-v22.22.2-linux-x64.tar.xz -C /usr/local --strip-components=1
+
+2.验证 Node.js 安装
+node -v   # 应输出 v22.22.2
+npm -v    # 查看 npm 版本（通常随 Node.js 一起安装）
+
+第二步：安装 Claude Code v2.1.104
+前提：Node.js 已成功安装（版本 ≥ 18），且 npm 命令可用。
+npm install -g @anthropic-ai/claude-code@2.1.104
+
+安装后验证
+检查 Claude Code 是否安装成功以及版本是否正确：
+claude --version
+
+第三步： 配置大模型
+这里忽略

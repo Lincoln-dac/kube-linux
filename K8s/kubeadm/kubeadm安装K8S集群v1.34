@@ -1,0 +1,511 @@
+kubeadm安装K8S集群v1.34
+
+1.部署规划与基本配置
+名称	IP地址	操作系统	角色	备注	
+10.204.51.112	10.204.51.112	Rocky Linux 10 6.12.0 kernel	control-plane	vip 10.204.51.120	
+k8s-lab-51-106 	10.204.51.106	Rocky Linux 10 6.12.0 kernel	gateway	vip 10.204.51.140	
+k8s-lab-51-107	10.204.51.107	Rocky Linux 10 6.12.0 kernel	gateway		
+k8s-lab-51-111	10.204.51.111	Rocky Linux 10 6.12.0 kernel	control-plane		
+k8s-lab-51-113	10.204.51.113	Rocky Linux 10 6.12.0 kernel	control-plane		
+
+
+配置信息	备注
+系统版本	Rocky Linux 10 
+Containerd	v2.2.5
+Pod网段	172.16.0.0/16
+Service网段	10.96.0.0/16
+
+
+a.安装基础依赖包
+yum install wget jq psmisc vim net-tools telnet yum-utils device-mapper-persistent-data lvm2 git rsyslog nfs-utils -y
+
+b.关闭防火墙，虚拟内存
+systemctl disable --now firewalld 
+systemctl disable --now dnsmasq
+setenforce 0
+sed -i 's#SELINUX=enforcing#SELINUX=disabled#g' /etc/selinux/config
+systemctl enable --now rsyslog
+
+swapoff -a && sysctl -w vm.swappiness=0
+sed -ri '/^[^#]*swap/s@^@#@' /etc/fstab
+
+dnf install epel-release -y
+dnf config-manager --set-enabled epel
+
+c.修改limit
+vim /etc/security/limits.conf
+# 末尾添加如下内容
+* soft nofile 65536
+* hard nofile 131072
+* soft nproc 65535
+* hard nproc 655350
+* soft memlock unlimited
+* hard memlock unlimited
+
+d.配置IPVS模块
+yum install ipvsadm ipset sysstat conntrack libseccomp -y
+vim /etc/modules-load.d/ipvs.conf 
+# 加入以下内容
+ip_vs
+ip_vs_lc
+ip_vs_wlc
+ip_vs_rr
+ip_vs_wrr
+ip_vs_lblc
+ip_vs_lblcr
+ip_vs_dh
+ip_vs_sh
+ip_vs_fo
+ip_vs_nq
+ip_vs_sed
+ip_vs_ftp
+ip_vs_sh
+nf_conntrack
+ip_tables
+ip_set
+xt_set
+ipt_set
+ipt_rpfilter
+ipt_REJECT
+ipip
+
+---
+systemctl enable --now systemd-modules-load.service
+---
+reboot
+---
+lsmod | grep --color=auto -e ip_vs -e nf_conntrack
+
+e.安装containerd 
+yum install wget jq psmisc vim net-tools telnet yum-utils device-mapper-persistent-data lvm2 git -y
+yum-config-manager --add-repo https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+yum install docker-ce-29.6.1 docker-ce-cli-29.6.1  containerd.io-2.2.5 -y
+
+docker 可以选装（建议安装）
+cat <<EOF | sudo tee /etc/modules-load.d/containerd.conf
+overlay
+br_netfilter
+EOF
+
+----
+
+modprobe -- overlay
+modprobe -- br_netfilter
+
+f.同步内核参数
+cat  /etc/sysctl.conf 
+vm.swappiness=10
+vm.panic_on_oom=0
+vm.overcommit_memory=1
+vm.max_map_count=655360
+user.max_user_namespaces=15000 
+net.ipv4.tcp_tw_reuse = 1
+net.ipv4.tcp_syncookies = 0
+net.ipv4.tcp_synack_retries = 2
+net.ipv4.tcp_retries2 = 5
+net.ipv4.tcp_max_tw_buckets = 5000
+net.ipv4.tcp_max_syn_backlog = 10240
+net.ipv4.tcp_keepalive_time = 600
+net.ipv4.tcp_keepalive_probes = 10
+net.ipv4.tcp_keepalive_intvl = 30
+net.ipv4.tcp_fin_timeout = 30
+net.ipv4.neigh.default.gc_thresh3 = 40960
+net.ipv4.neigh.default.gc_thresh2 = 20480
+net.ipv4.neigh.default.gc_thresh1 = 5120
+net.ipv4.neigh.default.gc_stale_time = 120
+net.ipv4.ip_local_port_range = 10000 65000
+net.ipv4.ip_forward = 1
+net.ipv4.conf.all.rp_filter = 0
+net.ipv4.conf.all.arp_ignore = 0
+net.ipv4.conf.all.arp_announce = 2
+net.netfilter.nf_conntrack_buckets=655360
+net.netfilter.nf_conntrack_max=10485760
+net.netfilter.nf_conntrack_tcp_timeout_established=300
+net.netfilter.nf_conntrack_timestamp=1
+net.netfilter.nf_conntrack_acct=1
+net.netfilter.nf_conntrack_tcp_be_liberal=1
+net.netfilter.nf_conntrack_tcp_loose=1
+net.netfilter.nf_conntrack_tcp_timeout_time_wait=30
+net.bridge.bridge-nf-call-iptables  = 1
+net.bridge.bridge-nf-call-ip6tables = 1
+net.core.wmem_max = 262144
+net.core.wmem_default = 262144
+net.core.somaxconn = 10240
+net.core.rmem_max = 1048576
+net.core.rmem_default = 1048576
+kernel.sysrq = 1
+kernel.pid_max = 131072
+fs.nr_open = 527069630
+fs.inotify.max_user_watches=89100
+fs.file-max = 65535600
+----
+
+sysctl -p
+
+
+g.配置containerd
+mkdir -p /etc/containerd
+containerd config default | tee /etc/containerd/config.toml
+
+ed -i 's#SystemdCgroup = false#SystemdCgroup = true#g' /etc/containerd/config.toml
+sed -i 's#k8s.gcr.io/pause#registry.cn-hangzhou.aliyuncs.com/google_containers/pause#g'  /etc/containerd/config.toml
+sed -i 's#registry.gcr.io/pause#registry.cn-hangzhou.aliyuncs.com/google_containers/pause#g'  /etc/containerd/config.toml
+sed -i 's#registry.k8s.io/pause#registry.cn-hangzhou.aliyuncs.com/google_containers/pause#g'  /etc/containerd/config.toml
+systemctl daemon-reload
+systemctl enable --now containerd
+
+cat > /etc/crictl.yaml <<EOF
+runtime-endpoint: unix:///run/containerd/containerd.sock
+image-endpoint: unix:///run/containerd/containerd.sock
+timeout: 10
+debug: false
+EOF
+
+h.配置私有仓库
+
+mkdir -p /etc/containerd/certs.d/10.204.209.253
+vim /etc/containerd/certs.d/10.204.209.253/hosts.toml
+
+server = "http://10.204.209.253"
+[host."http://10.204.209.253"]
+  capabilities = ["pull", "resolve", "push"]   # 根据需要保留
+  skip_verify = true                           # 如果使用 HTTP，可忽略 TLS 验证
+  # 如果仓库需要认证，添加 auth 块
+  [host."http://10.204.209.253".auth]
+    username = "admin"
+    password = "Admin@1qa"
+
+将/etc/containerd/certs.d 下目录复制到其他所有节点
+systemctl restart containerd
+
+i.配置k8s源
+
+cat <<EOF | tee /etc/yum.repos.d/kubernetes.repo
+[kubernetes]
+name=Kubernetes
+baseurl=https://mirrors.aliyun.com/kubernetes-new/core/stable/v1.34/rpm/
+enabled=1
+gpgcheck=1
+gpgkey=https://mirrors.aliyun.com/kubernetes-new/core/stable/v1.34/rpm/repodata/repomd.xml.key
+EOF
+
+j.安装kubeadm 
+yum install -y kubeadm-1.34.9-0 kubelet-1.34.9-0 kubectl-1.34.9-0
+yum install kubeadm-1.34* kubelet-1.34* kubectl-1.34* -y( 这个命令，会安装最新的1.34的小版本，但不影响）
+systemctl daemon-reload
+systemctl enable --now kubelet
+
+
+k.配置时间同步
+# 安装epel仓库源
+dnf install epel-release -y
+dnf config-manager --set-enabled epel
+#  安装 chrony
+dnf install -y chrony
+# 启动并启用 chronyd 服务
+systemctl enable --now chronyd
+# 检查 chronyd 状态
+systemctl status chronyd
+# 检查时间同步状态
+chronyc sources
+# 查看系统时间
+timedatectl status
+
+
+2.部署Master
+master 节点
+10.204.51.111
+10.204.51.112
+10.204.51.113
+注意：先在10.204.51.112 绑定master VIP 10.204.51.120 ,后续master启动成功，将vip转换到keepalived 高可用vip
+ip addr add 10.204.51.120/24 dev eth0
+
+a.配置kubeadm-config
+10.204.51.112
+vim kubeadm-config.yaml
+apiVersion: kubeadm.k8s.io/v1beta3
+bootstrapTokens:
+- groups:
+  - system:bootstrappers:kubeadm:default-node-token
+  token: 7t2weq.bjbawausm0jaxury
+  ttl: 24h0m0s
+  usages:
+  - signing
+  - authentication
+kind: InitConfiguration
+localAPIEndpoint:
+  advertiseAddress: 10.204.51.112
+  bindPort: 6443
+nodeRegistration:
+ criSocket: unix:///var/run/containerd/containerd.sock
+  name: 10.204.51.111
+  taints:
+  - effect: NoSchedule
+    key: node-role.kubernetes.io/control-plane
+---
+apiServer:
+  certSANs:
+  - 10.204.51.120
+  - 10.204.51.111
+  - 10.204.51.112
+  - 10.204.51.113
+# 如果搭建的不是高可用集群，把此处改为master的IP
+  timeoutForControlPlane: 4m0s
+apiVersion: kubeadm.k8s.io/v1beta3
+certificatesDir: /etc/kubernetes/pki
+clusterName: kubernetes
+controlPlaneEndpoint: 10.204.51.120:6443 # 如果搭建的不是高可用集群，把此处IP改为master的IP，端口改成6443
+controllerManager: {}
+etcd:
+  local:
+    dataDir: /var/lib/etcd
+imageRepository: registry.cn-hangzhou.aliyuncs.com/google_containers
+kind: ClusterConfiguration
+kubernetesVersion: v1.34.0 # 更改此处的版本号和kubeadm version一致
+networking:
+  dnsDomain: cluster.local
+  podSubnet: 172.16.0.0/16 # 注意此处的网段，不要与service和节点网段冲突
+  serviceSubnet: 10.96.0.0/16 # 注意此处的网段，不要与pod和节点网段冲突
+scheduler: {}
+
+c.配置kubectl
+cat <<EOF >> /root/.bashrc
+export KUBECONFIG=/etc/kubernetes/admin.conf
+EOF
+source /root/.bashrc
+
+kubectl get no
+
+
+d.配置其他master节点
+10.204.51.113   10.204.51.111执行
+
+scp root@10.204.51.112:/root/new.yaml /root/
+kubeadm config images pull --config /root/new.yaml 
+
+
+kubeadm join 10.204.51.120:6443 --token 7t2weq.bjbawausm0jaxury \
+--discovery-token-ca-cert-hash sha256:170fc9b9db11348cac1423788b26306c515b47d0486924ec75c2c85d26f7a67b \
+--control-plane --certificate-key ce3514b08985a5735ea3c1c3f33671bc1c374c1e8519ea8730b966598fbf91b9
+
+e.Token过期处理
+注意：以下步骤是上述init命令产生的Token过期了才需要执行以下步骤，如果没有过期不需要执行，直接join即可。
+
+查看token
+kubeadm token list 
+无显示侧没有有效token
+
+Token过期后生成新的token：
+
+kubeadm token create --print-join-command
+Master需要生成--certificate-key：
+
+kubeadm init phase upload-certs  --upload-certs
+
+f.配置keepalived
+
+将10.204.51.120转移到keepalived vip
+ip addr del 10.204.51.120 dev eth0
+10.204.51.112
+
+yum install -y keepalived
+cat /etc/keepalived/keepalived.conf 
+global_defs { 
+        router_id LVS_DEVEL
+	script_user root
+	enable_script_security
+        vrrp_garp_master_refresh 30
+        vrrp_garp_master_refresh_repeat 5
+}   
+vrrp_script check_apiserver {
+    script "/etc/keepalived/ss.sh"
+    interval 3
+    weight 2
+}
+
+vrrp_instance VI_1 {
+    state MASTER
+    interface eth0
+    virtual_router_id 120
+    priority 100
+    advert_int 2
+    authentication {
+        auth_type PASS
+        auth_pass 1111
+    }
+    track_script {
+      check_apiserver
+    }
+    virtual_ipaddress {
+      10.204.51.120/24 dev eth0
+    }
+}
+
+cat /etc/keepalived/ss.sh
+#!/bin/bash
+if ss -lnt | grep -q ":6443 "; then
+   exit 0
+else
+   exit 1
+fi
+#        
+systemctl start keepalived && systemctl enable keepalived
+
+10.204.51.113
+
+yum install -y keepalived
+cat /etc/keepalived/keepalived.conf 
+global_defs { 
+    router_id LVS_DEVEL
+    script_user root
+    enable_script_security
+    vrrp_garp_master_refresh 30
+    vrrp_garp_master_refresh_repeat 5
+}   
+vrrp_script check_apiserver {
+    script "/etc/keepalived/ss.sh"
+    interval 3
+    weight 2
+}
+vrrp_instance VI_1 {
+    state BACKUP
+    interface eth0
+    virtual_router_id 120
+    priority 99
+    advert_int 2
+    authentication {
+        auth_type PASS
+        auth_pass 1111
+    }
+    track_script {
+      check_apiserver
+    }
+    virtual_ipaddress {
+      10.204.51.120/24 dev eth0
+    }
+}
+
+cat /etc/keepalived/ss.sh
+#!/bin/bash
+if ss -lnt | grep -q ":6443 "; then
+   exit 0
+else
+   exit 1
+fi
+#        
+
+systemctl start keepalived && systemctl enable keepalived
+
+10.204.51.111也是master,可以通过keepalived+nginx实现3个master负载高可用，这里省略
+
+
+3.部署Node
+kubeadm join 10.204.51.120:6443 --token 7t2weq.bjbawausm0jaxury \
+--discovery-token-ca-cert-hash sha256:170fc9b9db11348cac1423788b26306c515b47d0486924ec75c2c85d26f7a67b  --node-name 10.204.51.111
+
+kubectl get no
+
+4.部署calico
+
+a.禁止NetworkManager
+
+cat >>/etc/NetworkManager/conf.d/calico.conf<<EOF
+[keyfile]
+unmanaged-devices=interface-name:cali*;interface-name:tunl*;interface-name:vxlan.calico;interface-name:vxlan-v6.calico;interface-name:wireguard.cali;interface-name:wg-v6.cali
+EOF
+systemctl daemon-reload
+systemctl restart NetworkManager
+
+b.安装calico
+
+10.204.51.112执行
+cd /root/k8s-installation
+git checkout manual-installation-v1.34.x && cd calico/
+
+修改Pod网段：
+POD_SUBNET=`cat /etc/kubernetes/manifests/kube-controller-manager.yaml | grep cluster-cidr= | awk -F= '{print $NF}'`
+sed -i "s#POD_CIDR#${POD_SUBNET}#g" calico.yaml
+kubectl apply -f calico.yaml
+
+kubectl get pod -n kube-system
+
+
+c.查看calico模式
+kubectl get ippools default-ipv4-ippool -o yaml
+apiVersion: crd.projectcalico.org/v1
+kind: IPPool
+metadata:
+  annotations:
+    projectcalico.org/metadata: '{"creationTimestamp":"2026-07-09T02:58:05Z"}'
+  creationTimestamp: "2026-07-09T02:58:05Z"
+  generation: 1
+  name: default-ipv4-ippool
+  resourceVersion: "11101"
+  uid: 137e6205-89ce-4cfa-b972-793824848dd1
+spec:
+  allowedUses:
+  - Workload
+  - Tunnel
+  assignmentMode: Automatic
+  blockSize: 26
+  cidr: 172.16.0.0/16
+  ipipMode: Always
+  natOutgoing: true
+  nodeSelector: all()
+  vxlanMode: Never
+
+当前 Calico 使用的网络模式是 IPIP 模式（Always）。
+1.跨节点通信：当 Pod 与不同节点上的 Pod 通信时，流量会被 IPIP 隧道封装（在原始 IP 包外再套一层节点 IP 的包头）。这屏蔽了底层物理网络的拓扑限制，只要节点之间网络互通，Pod 就能跨网段通信。
+2.同节点通信：处于同一节点上的 Pod 互相通信时，会直接通过本地的路由或网桥转发，不会经过 IPIP 封装，性能不受影响。
+3.对外访问：natOutgoing: true 表示 Pod 访问集群外部的网络（如访问公网）时，源 IP 会被伪装成宿主机的 IP。
+
+d.calico 4种模式
+Calico 是一种功能全面、高性能的 Kubernetes 容器网络接口（CNI）插件，它不仅提供高效的网络连接，还支持细粒度的安全策略控制。为了适应不同的网络环境和需求，Calico 提供了多种工作模式。以下为您详细介绍 Calico 的 4 种核心模式：
+1. BGP 模式（纯路由模式 / Underlay）
+BGP（边界网关协议）模式是 Calico 最基本、也是默认的工作模式。在这种模式下，Calico 利用标准的 Linux 网络技术和 BGP 协议，直接在主机节点之间交换路由信息，实现 Pod 网络间的互通。
+●特点：无需对数据包进行任何额外封装（无 Overlay 开销），性能极高；通过 BGP 协议自动学习和分发路由。
+●适用场景：适用于底层网络支持 BGP 路由，且集群节点处于同一二层网络或希望获得最佳网络性能的生产环境。
+●部署建议：BGP 模式分为“全互联（Node-to-Node Mesh）”和“路由反射（Route Reflector, RR）”。当集群节点数量超过 100 台时，官方不建议使用全互联模式，而应使用 RR 模式以减少 BGP 连接数。
+
+2. IPIP 模式（IP in IP 封装模式）
+IPIP 模式是一种覆盖网络（Overlay）模式。它使用 IP-in-IP 封装技术，在原本的 IP 数据包外再封装一层 IP 头部，通过底层网络传输数据。
+●特点：Calico 会为每个 Node 节点创建一个 tunl0 虚拟网络接口作为隧道出入口，用于封装和解封装数据报文。相比 VXLAN，IPIP 模式的开销更小、更轻量化，但安全性稍弱。
+●适用场景：适用于 Kubernetes 集群跨多个子网部署，或者底层物理网络不支持 BGP 路由的环境。
+
+3. VXLAN 模式（虚拟扩展局域网模式）
+VXLAN 同样是一种覆盖网络（Overlay）模式。与 IPIP 类似，它也涉及对数据包的封装，但采用的是不同的协议栈（通过 UDP 封装），旨在提供更大的扩展性和灵活性。
+●特点：Calico 会为每个节点创建一个 vxlan.calico 接口作为隧道出入口。VXLAN 模式能够构建覆盖网络以有效隔离不同租户或应用程序的网络流量。
+●适用场景：适用于分布在多个子网的集群，或者需要构建覆盖网络以实现更强网络隔离的场景。
+
+4. Cross-Subnet IPIP 模式（跨子网 IPIP 模式）
+这是 IPIP 模式的一种变体优化方案。在这种模式下，Calico 仅在流量跨越不同子网时才进行 IPIP 封装，而对于同一子网内的流量，则直接通过路由进行转发，不进行任何封装。
+●特点：完美结合了 BGP 直连模式和 IPIP 模式的优点。在保证跨子网通信顺畅的同时，最大程度地减少了同子网内通信的封装开销，保持了较高的性能。
+●适用场景：非常适合那些既需要处理跨子网通信，又希望尽可能减少网络封装开销的混合网络环境。
+总结：在选择 Calico 的网络模式时，如果您的集群规模较大且底层网络支持 BGP，BGP 模式能提供最佳性能；如果集群跨子网或底层网络受限，IPIP 和 VXLAN 是可靠的覆盖网络方案；而 Cross-Subnet IPIP 则是兼顾性能与跨网段通信的折中优选。
+
+e.calico模式对比
+
+
+| 模式 | 封装方式 | 性能 | 跨子网支持 | 网络隔离 | 适用场景 | 部署复杂度 |
+| --- | --- | --- | --- | --- | --- | --- |
+| BGP 模式 | 无封装（纯路由） | 极高 | 需底层支持 BGP | 基于 NetworkPolicy | 底层网络支持 BGP、同二层网络、追求最佳性能的生产环境 | 中（大规模需 RR） |
+| IPIP 模式 | IP-in-IP 封装 | 较高（封装开销小） | 支持 | 基于 NetworkPolicy | 集群跨多个子网部署、底层网络不支持 BGP | 低 |
+| VXLAN 模式 | UDP 封装 | 中等 | 支持 | 较强（可隔离租户/应用） | 多子网集群、需要构建覆盖网络实现强隔离 | 低 |
+| Cross-Subnet IPIP 模式 | 跨子网时 IPIP 封装，同子网直连 | 高（折中方案） | 支持 | 基于 NetworkPolicy | 既需跨子网通信、又希望减少同子网封装开销的混合环境 | 低 |
+
+f.NetworkPolicy
+Calico 的这 4 种模式（BGP、IPIP、VXLAN、Cross-Subnet）都完全支持 NetworkPolicy。
+Calico 的网络策略功能与其底层的数据转发模式是解耦的。无论底层采用哪种网络模式，Calico 的网络策略引擎都能正常工作。以下是关于 Calico 网络策略的几点核心说明：
+1. 策略与网络模式解耦
+Calico 的网络策略控制流量是通过在节点上应用规则（如 iptables 或 eBPF）来实现的，这与数据包在节点间是通过纯 BGP 路由还是通过 IPIP/VXLAN 隧道传输无关。因此，4 种模式均支持完整的策略功能。
+2. 比 Kubernetes 原生策略更丰富
+Calico 的网络策略是 Kubernetes NetworkPolicy 的超集。除了支持原生的 L3/L4 策略外，Calico 还提供了更丰富的功能，包括：
+●策略排序/优先级：可以精确控制策略的匹配顺序。
+●拒绝规则（Deny Rules）：Kubernetes 原生策略只能“允许”，而 Calico 可以显式“拒绝”。
+●更灵活的匹配规则：支持基于端口范围、ICMP 属性、ServiceAccount 等进行匹配。
+3. 支持全局策略（GlobalNetworkPolicy）
+Kubernetes 原生的 NetworkPolicy 是命名空间级别的资源。而 Calico 提供了 GlobalNetworkPolicy，这是一种非命名空间资源，可以应用于独立于命名空间的任何类型端点（Pod、VM、主机接口）。这对于构建集群级别的零信任安全模型（例如全局默认拒绝策略）非常有用。
+4. 支持多种端点类型
+虽然 Kubernetes 网络策略仅适用于 Pod，但 Calico 网络策略可以应用于多种类型的端点，包括 Kubernetes Pod、虚拟机（VM）以及主机接口（Host Endpoints），从而提供统一的安全策略模型。
+总结：您可以放心地在任何 Calico 网络模式下使用 NetworkPolicy。如果您有跨子网或跨二层网络的需求，选择 IPIP 或 VXLAN 模式并不会牺牲网络策略的能力。
+
