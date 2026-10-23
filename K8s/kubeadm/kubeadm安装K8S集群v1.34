@@ -509,3 +509,78 @@ Kubernetes 原生的 NetworkPolicy 是命名空间级别的资源。而 Calico �
 虽然 Kubernetes 网络策略仅适用于 Pod，但 Calico 网络策略可以应用于多种类型的端点，包括 Kubernetes Pod、虚拟机（VM）以及主机接口（Host Endpoints），从而提供统一的安全策略模型。
 总结：您可以放心地在任何 Calico 网络模式下使用 NetworkPolicy。如果您有跨子网或跨二层网络的需求，选择 IPIP 或 VXLAN 模式并不会牺牲网络策略的能力。
 
+5.配置kube-proxy
+将Kube-proxy改为ipvs模式，因为在初始化集群的时候注释了ipvs配置，所以需要自行修改一下：
+10.204.51.112
+kubectl edit cm kube-proxy -n kube-system
+
+    mode: "ipvs"
+
+
+kubectl rollout restart daemonset kube-proxy -n kube-system
+验证Kube-Proxy模式
+curl 127.0.0.1:10249/proxyMode
+
+6.部署Metrics
+安装metrics server
+cd /root/k8s-installation/metric-server
+vim components.yaml
+
+添加--kubelet-insecure-tls参数
+spec:
+  template:
+    spec:
+      containers:
+      - args:
+        - --cert-dir=/tmp
+        - --secure-port=10250
+        - --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname
+        - --kubelet-use-node-status-port
+        - --metric-resolution=15s
+        - --kubelet-insecure-tls  # 添加此行
+kubectl  create -f components.yaml 
+kubectl get po -n kube-system -l k8s-app=metrics-server
+kubectl top node
+
+7.部署nfs-provisioner
+a. 部署 nfs server
+nfs server IP 10.204.51.111
+dnf update -y
+dnf install nfs-utils -y
+dnf install rpcbind -y
+dnf install nfs-utils -y (所有node节点需要安装）
+systemctl enable nfs-server
+systemctl start nfs-server
+systemctl enable rpcbind
+systemctl start rpcbind
+
+mkdir /nfs-storage && chmod 777 /nfs-storage 
+vi /etc/exports
+/nfs-storage/  *(rw,sync,no_root_squash)
+
+exportfs -a
+exportfs -v
+showmount -e 10.204.51.111
+
+b.下载文件
+wget https://github.com/kubernetes-sigs/nfs-subdir-external-provisioner/archive/refs/tags/nfs-subdir-external-provisioner-4.0.18.tar.gz
+ tar zxvf nfs-subdir-external-provisioner-4.0.18.tar.gz  
+cd nfs-subdir-external-provisioner-nfs-subdir-external-provisioner-4.0.18/charts/nfs-subdir-external-provisioner/
+vim values.yaml
+
+nfs:
+  server: 10.204.51.111
+  path: /nfs-storage
+  mountOptions:
+  volumeName: nfs-subdir-external-provisioner-root
+  # Reclaim policy for the main nfs volume
+  reclaimPolicy: Retain
+
+c.安装部署
+helm install nfs-provisioner ./ --namespace kube-system   --set storageClass.provisionerName=nfs-provisioner
+kubectl get sc
+NAME                   PROVISIONER       RECLAIMPOLICY   VOLUMEBINDINGMODE   ALLOWVOLUMEEXPANSION   AGE
+nfs-client (default)   nfs-provisioner   Delete          Immediate           true                   27h
+
+
+d.测试验证
